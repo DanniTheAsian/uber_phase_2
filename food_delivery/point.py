@@ -18,15 +18,15 @@ class Point:
         """Docstring"""
         return Point(self.x + other.x, self.y + other.y)
     
-    def __sub__(self, other: "Point") -> "Point":
-        """Docstring"""
-        return Point(self.x - other.x, self.y - other.y)
-    
     def __iadd__(self, other: "Point") -> "Point":
         """Docstring"""
         self.x += other.x
         self.y += other.y
         return self
+
+    def __sub__(self, other: "Point") -> "Point":
+        """Docstring"""
+        return Point(self.x - other.x, self.y - other.y)
     
     def __isub__(self, other: "Point") -> "Point":
         """Docstring"""
@@ -34,12 +34,10 @@ class Point:
         self.y -= other.y
         return self
     
-    def __mul__(self, other: "Point") -> "Point":
+    def __mul__(self, scalar: int | float) -> "Point":
         """Docstring"""
-        return Point(self.x * other.x, self.y * other.y)
+        return Point(self.x * scalar, self.y * scalar)
     
-    def __rmul__(self, other: "Point") -> "Point":
-        """Docstring"""
-        self.x *= other.x
-        self.y *= other.y
-        return self.__mul__(other)
+    def __rmul__(self, scalar: int | float) -> "Point":
+        """docstring"""
+        return self.__mul__(scalar)
