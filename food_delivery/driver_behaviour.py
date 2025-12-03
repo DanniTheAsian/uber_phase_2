@@ -1,6 +1,8 @@
 from abc import ABC, abstractmethod
-class DriverBehavior(ABC):
+
+
+class DriverBehaviour(ABC):
 
     @abstractmethod
-    def decide(self, driver: Driver, offer: Offer, time: int) -> Bool:
+    def decide(self, driver: "Driver", offer: "Offer", time: int) -> bool:
         pass  

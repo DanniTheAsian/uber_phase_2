@@ -1,12 +1,13 @@
-from fooddelivery import DrivverBehaviour
-class EarningMaxBehavior(DriverBehaviour):
+from food_delivery.driver_behaviour import DriverBehaviour
+
+class EarningMaxBehaviour(DriverBehaviour):
     def __init__(self, min_ratio):
         self.min_ratio = min_ratio
 
     def decide(
         self,
-        driver: Driver,
-        offer: Offer,
+        driver: "Driver",
+        offer: "Offer",
         time: int
     ) -> bool:
 
