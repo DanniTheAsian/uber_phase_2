@@ -4,12 +4,7 @@ class EarningMaxBehaviour(DriverBehaviour):
     def __init__(self, min_ratio):
         self.min_ratio = min_ratio
 
-    def decide(
-        self,
-        driver: "Driver",
-        offer: "Offer",
-        time: int
-    ) -> bool:
+    def decide(self, driver: "Driver", offer: "Offer", time: int) -> bool:
 
         travel_time = offer.estimated_travel_time
         
