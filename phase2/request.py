@@ -1,4 +1,5 @@
 """Docstring"""
+from phase2.point import Point
 
 class Request:
     """Docstring"""
