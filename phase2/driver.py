@@ -40,11 +40,22 @@ class Driver:
 
     def step(self, dt: float) -> None:
         """ docstring """
-        pass
+        
+        # 1. Where should driver go? To its goal position whether it is a dropoff or pickup
+        # 2. How far is the current position to goal destination? calculate the distance
+        # 3. How quick can the driver get to the goal? with his/her speed per time
+        # 4. How close the driver be to reach the its goal?  
+        # - if distance is less than or equal to its reach, then the driver has arrived to its goal
+        # 5. Otherwise, if the driver have not reached its goal destination (yet.)
+
+        # direction calculation: (goal.x minus position.x, goal.y minus position.y)
+        # distance calculation: euklidan distance sqrt(dx^2 + dy^2)
+        # movement calculation: position += (dx, dy) * (speed * dt / distance)
+        
 
     def complete_pickup(self, time: int) -> None:
         """ docstring """
-        pass
+        
 
     def complete_dropoff(self, time:int) -> None:
         """ docstring """
