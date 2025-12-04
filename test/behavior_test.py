@@ -1,7 +1,7 @@
 import unittest
-from food_delivery.greedy_distance_behaviour import GreedyDistanceBehaviour
-from food_delivery.earning_max_behaviour import EarningMaxBehaviour
-from food_delivery.lazy_behaviour import LazyBehaviour
+from phase2.greedy_distance_behaviour import GreedyDistanceBehaviour
+from phase2.earning_max_behaviour import EarningMaxBehaviour
+from phase2.lazy_behaviour import LazyBehaviour
 from .mock.mock_objects import MockDriver, MockRequest, MockOffer, MockPoint
 
 

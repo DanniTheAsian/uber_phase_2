@@ -1,5 +1,5 @@
 import unittest
-from food_delivery.point import Point
+from phase2.point import Point
 
 class testPoint(unittest.TestCase):
 
