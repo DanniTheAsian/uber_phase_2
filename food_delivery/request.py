@@ -1,5 +1,5 @@
 """Docstring"""
-from fooddelivery import Point
+
 
 
 class Request:
