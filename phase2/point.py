@@ -9,7 +9,16 @@ class Point:
         self.y = y
     
     def distance_to(self, other: "Point") -> float:
-        """Docstring"""
+        """Docstring
+        >>> self.x = 0
+        >>> self.y = 0
+        >>> other.x = 3
+        >>> other.y = 4
+        >>> point1 = Point(self.x, self.y)
+        >>> point2 = Point(other.x, other.y)
+        >>> point1.distance_to(point2)
+        5.0
+        """
         dx = self.x - other.x
         dy = self.y - other.y
         return sqrt(dx**2 + dy**2)
