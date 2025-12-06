@@ -6,8 +6,9 @@ from .mock.mock_objects import MockDriver, MockRequest, MockOffer, MockPoint
 
 
 class TestBehaviours(unittest.TestCase):
-
+    """Unit tests for all driver behaviour strategies."""
     def test_greedy_accept(self):
+        """GreedyDistanceBehaviour should accept when pickup distance is below max_distance."""
         print("\nRunning test_greedy_accept...")
         driver = MockDriver(1, 0, 0)
         req = MockRequest(1, pickup=MockPoint(3, 4))
@@ -23,6 +24,7 @@ class TestBehaviours(unittest.TestCase):
             raise
 
     def test_greedy_reject(self):
+        """GreedyDistanceBehaviour should reject when pickup distance is above max_distance."""
         print("\nRunning test_greedy_reject...")
         driver = MockDriver(1, 0, 0)
         req = MockRequest(1, pickup=MockPoint(10, 0))
@@ -38,6 +40,7 @@ class TestBehaviours(unittest.TestCase):
             raise
 
     def test_earnings_accept(self):
+        """EarningMaxBehaviour should accept when reward/time ratio meets the threshold."""
         print("\nRunning test_earnings_accept...")
         driver = MockDriver()
         req = MockRequest(1)
@@ -53,6 +56,7 @@ class TestBehaviours(unittest.TestCase):
             raise
 
     def test_earnings_reject(self):
+        """EarningMaxBehaviour should reject when reward/time ratio is below the threshold."""
         print("\nRunning test_earnings_reject...")
         driver = MockDriver()
         req = MockRequest(1)
@@ -68,6 +72,7 @@ class TestBehaviours(unittest.TestCase):
             raise
 
     def test_lazy_accept(self):
+        """LazyBehaviour should accept when request wait_time is greater than or equal to max_idle."""
         print("\nRunning test_lazy_accept...")
         driver = MockDriver()
         req = MockRequest(1, wait_time=10)
@@ -83,6 +88,7 @@ class TestBehaviours(unittest.TestCase):
             raise
 
     def test_lazy_reject(self):
+        """LazyBehaviour should reject when request wait_time is below max_idle."""
         print("\nRunning test_lazy_reject...")
         driver = MockDriver()
         req = MockRequest(1, wait_time=2)

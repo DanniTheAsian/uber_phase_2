@@ -1,8 +1,56 @@
 from phase2.behaviour.driver_behaviour import DriverBehaviour
 
 class LazyBehaviour(DriverBehaviour):
+    """
+    A behaviour where the driver only accepts a request if it has been
+    waiting long enough. The driver is "lazy" and prefers not to take
+    new requests unless they have already waited for a certain amount
+    of time.
+    """
     def __init__(self, max_idle)-> None:
+        """
+        Initialize the behaviour with a required minimum wait time.
+
+        Arguments:
+            max_idle (int): The minimum wait_time a request must have
+                            before the driver accepts it.
+
+        Example:
+            >>> b = LazyBehaviour(10)
+            >>> b.max_idle
+            10
+        """
         self.max_idle = max_idle
 
     def decide(self, driver: "Driver", offer: "Offer", time: int) -> bool:
+        """
+        Decide whether the driver accepts the offer.
+
+        The driver accepts the request only if the request's wait_time
+        is equal to or greater than the configured threshold.
+
+        Arguments:
+            driver (Driver): The driver making the decision.
+            offer (Offer): Contains the request with its wait_time.
+            time (int): Current simulation time (not used here).
+
+        Returns:
+            bool: True if request.wait_time >= max_idle, otherwise False.
+
+        Example:
+            >>> class MockRequest:
+            ...     def __init__(self, wait): self.wait_time = wait
+            >>> class MockOffer:
+            ...     def __init__(self, req): self.request = req
+
+            >>> b = LazyBehaviour(5)
+
+            # Request waited long enough → accept
+            >>> b.decide(None, MockOffer(MockRequest(7)), time=0)
+            True
+
+            # Request waited too little → reject
+            >>> b.decide(None, MockOffer(MockRequest(3)), time=0)
+            False
+        """
         return offer.request.wait_time >= self.max_idle
