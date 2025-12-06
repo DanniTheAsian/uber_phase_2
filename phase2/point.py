@@ -1,43 +1,163 @@
-"""Docstring"""
+"""
+A 2D point class with basic math operations
+
+Modules:
+- Math
+
+"""
 from math import sqrt
 
 class Point:
-    """Docstring"""
+    """
+    A point in 2D space
+    
+    Attributes:
+    x (float): x-value
+    y (float): y-value
+    """
     def __init__(self, x:float, y:float) -> None:
-        """Docstring"""
+        """
+        Initialize a Point
+        
+        Arguments:
+            x (float): x-coordinate
+            y (float): y-coordinate
+
+        Return:
+            None
+
+        Example:
+            >>> p = Point(2,3)
+            >>> p.x, p.y
+            (2, 3)
+        """
         self.x = x
         self.y = y
     
     def distance_to(self, other: "Point") -> float:
-        """Docstring"""
+        """
+        Finds the Euclidean distance to another point.
+        
+        Arguments:
+            other (Point): The other point.
+
+        return:
+            float: Distance between two points.
+
+        Example:
+            >>> p1 = Point(0, 0)
+            >>> p2 = Point(3, 4)
+            >>> p1.distance_to(p2)
+            5.0
+        """
         dx = self.x - other.x
         dy = self.y - other.y
         return sqrt(dx**2 + dy**2)
     
     def __add__(self, other: "Point") -> "Point":
-        """Docstring"""
+        """
+        Add two points together (x + x, y + y) and returns a new point
+        
+        Arguments:
+            other (Point): The point to add.
+        
+        Returns:
+            Point: A new point with the summed coordinates
+
+        Example:
+            >>> p = Point(1, 2) + Point(3, 4)
+            >>> (p.x, p.y)
+            (4, 6)
+        """
         return Point(self.x + other.x, self.y + other.y)
     
     def __iadd__(self, other: "Point") -> "Point":
-        """Docstring"""
+        """
+        Add another point to this point (in-place)
+        
+        Arguments:
+            other (Point): the point to add
+
+        return:
+            Point: Modified Point
+
+        Example:
+            >>> p = Point(1, 1)
+            >>> p += Point(2, 3)
+            >>> (p.x, p.y)
+            (3, 4)
+        """
         self.x += other.x
         self.y += other.y
         return self
 
     def __sub__(self, other: "Point") -> "Point":
-        """Docstring"""
+        """
+        Subtract another point and return a new point.
+
+        Arguments:
+            other (Point): The point to subtract.
+
+        Returns:
+            Point: A new point containing the difference.
+
+        Example:
+            >>> p = Point(5, 5) - Point(2, 3)
+            >>> (p.x, p.y)
+            (3, 2)
+        """
         return Point(self.x - other.x, self.y - other.y)
     
     def __isub__(self, other: "Point") -> "Point":
-        """Docstring"""
+        """
+        Subtract another point from this one (in-place).
+
+        Arguments:
+            other (Point): The point to subtract.
+
+        Returns:
+            Point: The modified point.
+
+        Example:
+            >>> p = Point(5, 5)
+            >>> p -= Point(2, 3)
+            >>> (p.x, p.y)
+            (3, 2)
+        """
         self.x -= other.x
         self.y -= other.y
         return self
     
     def __mul__(self, scalar: int | float) -> "Point":
-        """Docstring"""
+        """
+        Multiply this point by a scalar and return a new point.
+
+        Arguments:
+            scalar (int | float): The number to multiply with.
+
+        Returns:
+            Point: A new scaled point.
+
+        Example:
+            >>> p = Point(2, 3) * 2
+            >>> (p.x, p.y)
+            (4, 6)
+        """
         return Point(self.x * scalar, self.y * scalar)
     
     def __rmul__(self, scalar: int | float) -> "Point":
-        """docstring"""
+        """
+        Allow scalar * point multiplication.
+
+        Arguments:
+            scalar (int | float): The number to multiply with.
+
+        Returns:
+            Point: A new scaled point.
+
+        Example:
+            >>> p = 2 * Point(2, 3)
+            >>> (p.x, p.y)
+            (4, 6)
+        """
         return self.__mul__(scalar)
