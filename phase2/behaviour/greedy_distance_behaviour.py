@@ -1,4 +1,4 @@
-from phase2.driver_behaviour import DriverBehaviour
+from phase2.behaviour.driver_behaviour import DriverBehaviour
 
 class GreedyDistanceBehaviour(DriverBehaviour):
     def __init__(self, max_distance: float):
