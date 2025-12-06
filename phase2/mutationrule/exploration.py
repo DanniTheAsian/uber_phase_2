@@ -1,18 +1,63 @@
+import random
 from phase2.mutationrule.mutationrule import MutationRule
 from phase2.behaviour.greedy_distance_behaviour import GreedyDistanceBehaviour
 from phase2.behaviour.lazy_behaviour import LazyBehaviour
-import random
 
 class ExplorationMutationRule(MutationRule):
+    """
+    A mutation rule where a driver occasionally switches behaviour.
+    The probability increases slightly as the simulation time grows,
+    encouraging more exploration later in the simulation.
+    """
 
-    def __init__(self, probability):
+    def __init__(self, probability: float):
+        """
+        Initialize the rule with a base mutation probability.
+
+        Arguments:
+            probability (float): Base probability between 0 and 1.
+
+        Example:
+            >>> rule = ExplorationMutationRule(0.1)
+            >>> rule.probability
+            0.1
+        """
         self.probability = probability
 
-    def maybe_mutate(self, driver, time:int) -> None:
-        if random.random() < self.probability:
+    def maybe_mutate(self, driver: "Driver", time: int) -> None:
+        """
+        Mutate the driver's behaviour based on an exploration probability.
+        The probability slowly increases with time:
+
+            effective_probability = min(1.0, probability * (1 + time * 0.001))
+
+        If the driver currently uses LazyBehaviour, it becomes
+        GreedyDistanceBehaviour. Otherwise, it becomes LazyBehaviour.
+
+        Arguments:
+            driver (Driver): The driver that may mutate.
+            time (int): Current simulation time.
+
+        Returns:
+            None
+
+        Example:
+            >>> class MockDriver:
+            ... def __init__(self, b): self.behaviour = b
+            >>> d = MockDriver(LazyBehaviour(max_idle=5))
+            >>> rule = ExplorationMutationRule(1.0)  # always mutate
+            >>> rule.maybe_mutate(d, time=0)
+            >>> isinstance(d.behaviour, GreedyDistanceBehaviour)
+            True
+        """
+
+        effective_probality = self.probability * (1 + time * 0.001)
+        effective_probality = min(1.0, effective_probality)
+
+        if random.random() < effective_probality:
 
             if isinstance(driver.behaviour, LazyBehaviour):
                 driver.behaviour = GreedyDistanceBehaviour(max_distance=10)
+
             else:
-                driver.behaviour = LazyBehaviour
-            
+                driver.behaviour = LazyBehaviour(max_idle=5)
