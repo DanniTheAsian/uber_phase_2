@@ -1,12 +1,12 @@
 """ docstring """
 
-from driver_behaviour import DriverBehavior
+from driver_behaviour import DriverBehaviour
 from point import Point
 from request import Request
 
 class Driver:
     """ docstring """
-    def __init__(self, id: int, position: Point, speed: float, behaviour: DriverBehaviour, status: str = "IDLE", current_request: Request | None, history: list) -> None:
+    def __init__(self, id: int, position: Point, speed: float, behaviour: DriverBehaviour, status: str = "IDLE", current_request: Request | None = None, history: list | None = None) -> None:
         """ docstring """
         self.id = id
         self.position = position
