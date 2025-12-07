@@ -40,15 +40,6 @@ class ExplorationMutationRule(MutationRule):
 
         Returns:
             None
-
-        Example:
-            >>> class MockDriver:
-            ... def __init__(self, b): self.behaviour = b
-            >>> d = MockDriver(LazyBehaviour(max_idle=5))
-            >>> rule = ExplorationMutationRule(1.0)  # always mutate
-            >>> rule.maybe_mutate(d, time=0)
-            >>> isinstance(d.behaviour, GreedyDistanceBehaviour)
-            True
         """
 
         effective_probality = self.probability * (1 + time * 0.001)
