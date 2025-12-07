@@ -1,4 +1,4 @@
-from food_delivery.driver_behaviour import DriverBehaviour
+from phase2.driver_behaviour import DriverBehaviour
 
 class LazyBehaviour(DriverBehaviour):
     def __init__(self, max_idle)-> None:
