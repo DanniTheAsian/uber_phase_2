@@ -67,3 +67,27 @@ class TestGlobalGreedyPolicy(unittest.TestCase):
         except AssertionError:
             print("test_multiple_matches: FAILED")
             raise
+
+        
+    def test_equal_distance_tie_breaking(self):
+        """
+        When two drivers are equally close to a request, the policy should
+        consistently pick the driver that appears first in the driver list.
+        """
+        drivers = [
+            MockDriver(id=1, x=0, y=0),
+            MockDriver(id=2, x=0, y=0),
+        ]
+
+        requests = [
+            MockRequest(id=1, pickup=MockPoint(10, 0)),
+        ]
+
+        policy = GlobalGreedyPolicy()
+        matches = policy.assign(drivers, requests, time=0)
+
+        self.assertEqual(len(matches), 1)
+        driver, request = matches[0]
+
+        self.assertEqual(driver.id, 1)
+        self.assertEqual(request.id, 1)
