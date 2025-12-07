@@ -22,7 +22,6 @@ class TestPerformanceBasedMutation(unittest.TestCase):
          historical trip entries. The rule requires sufficient data to
          calculate an average.
     """
-    """
     def test_mutation_occurs(self):
         """
         Mutation should occur when avg served < threshold.
