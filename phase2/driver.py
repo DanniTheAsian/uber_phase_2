@@ -115,6 +115,7 @@ class Driver:
 
             Args:
                 time (int): The current simulation time tick.
+                
             Returns:
                 None
         """
@@ -125,10 +126,10 @@ class Driver:
         
     def complete_dropoff(self, time:int) -> None:
         """ The driver completes the dropoff process, 
-            updates its status to IDLE, 
             marks the request as delivered,
-            and records the trip in history.
-            
+            records the trip in history,
+            clears the current request,
+            and updates its status to IDLE
             Args:
                 time (int): The current simulation time tick when dropoff is completed.
             
