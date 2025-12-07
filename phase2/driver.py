@@ -65,9 +65,14 @@ class Driver:
             self.current_request.mark_delivered(time)
 
             # log in history list
-            # needs to be appended
-
-            # resetting driver state
+            self.history.append({ 
+                "driver_id": self.id
+                "request_id": self.current_request.id,
+                "completion_time": self.time,
+                "earnings": "reward" # change this
+                "total_distance": "distance" # change this
+            })
+                   
             self.current_request = None
             self.status = "IDLE"
 
