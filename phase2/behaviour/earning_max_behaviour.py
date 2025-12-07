@@ -47,13 +47,10 @@ class EarningMaxBehaviour(DriverBehaviour):
         """
         travel_time = offer.estimated_travel_time
         
-        if travel_time > 0:
-            ratio = offer.estimated_reward / travel_time
-        else:
-            ratio =  int('inf')
 
-        effective_threshold = self.min_ratio * (1 + time * 0.0005)
-        return ratio >= effective_threshold
+
+        ratio = offer.estimated_reward /travel_time
+        return ratio >= self.min_ratio
 
 
      
