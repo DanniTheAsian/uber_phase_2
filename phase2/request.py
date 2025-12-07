@@ -1,13 +1,13 @@
 """Docstring"""
-from phase2.point import Point
+from point import Point
 
 class Request:
     """Docstring"""
 
-    def __init__(self, 
-                 id: int, 
-                 pickup: "Point", 
-                 dropoff: "Point", 
+    def __init__(self,
+                 id: int,
+                 pickup: Point,
+                 dropoff: Point,
                  creation_time: int) -> None:
         self.id = id
         self.pickup = pickup
