@@ -8,10 +8,10 @@ from point import Point
 from request import Request
 
 class Driver:
-    """ 
+    """
     An autonomous driver agent in the system 
     where each driver can move on the map,
-    accept or rejetct requests based on their behaviour policy,
+    accept or reject requests based on their behaviour policy,
     and maintain a history of completed trips for statistics.
     """
     def __init__(self, id: int, position: Point, speed: float, behaviour: DriverBehaviour, status: str = "IDLE", current_request: Request | None = None, history: list | None = None) -> None:
@@ -43,7 +43,7 @@ class Driver:
             self.history = history
     
     def assign_request(self, request: Request) -> None:
-        """ Assign a delivery request to this driver.
+        """ Assign a delivery request to the driver.
         
         Stores the driver's current position for distance calculation,
         updates the driver's status to TO_PICKUP, and marks the request
@@ -146,7 +146,7 @@ class Driver:
 
             total_distance = distance_to_pickup + distance_from_pickup_to_dropoff
 
-            # REMEMBER TO CHANGE THIS to the reward system
+            # TODO: REMEMBER TO CHANGE THIS to the reward system
             earnings = total_distance * 2.5
 
             self.history.append({
