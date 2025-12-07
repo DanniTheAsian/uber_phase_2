@@ -5,8 +5,16 @@ from test.mock.mock_objects import MockDriver, MockRequest, MockPoint
 
 
 class TestGlobalGreedyPolicy(unittest.TestCase):
-
+    """
+    Tests the GlobalGreedyPolicy by verifying that drivers are matched to the
+    closest available requests according to the global greedy algorithm.
+    Includes tests for both a single-driver scenario and multi-driver scenarios,
+    ensuring that matches follow correct distance ordering and no objects are reused.
+    """
     def test_single_match(self):
+        """
+        Tests that a single driver is matched with the closest request.
+        """
         print("\nRunning test_single_match...")
         drivers = [
             MockDriver(id=1, x=0, y=0),
@@ -31,6 +39,10 @@ class TestGlobalGreedyPolicy(unittest.TestCase):
 
 
     def test_multiple_matches(self):
+        """
+        Tests that multiple drivers are matched with their nearest requests
+        according to the global greedy ordering.
+        """
         print("\nRunning test_multiple_matches...")
         drivers = [
             MockDriver(id=1, x=0, y=0),

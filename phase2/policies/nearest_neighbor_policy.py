@@ -1,6 +1,32 @@
 from phase2.policies.dispatch_policy import DispatchPolicy
 
 class NearestNeighborPolicy(DispatchPolicy):
+    """
+    Assigns drivers to requests using a nearest-neighbor greedy strategy.
+
+    This policy repeatedly selects the closest (driver, request) pair by scanning
+    all idle drivers and all waiting requests, identifying the pair with the
+    smallest distance between the driver’s current position and the request’s
+    pickup location. Once the closest pair is found, both the driver and the
+    request are removed from consideration to avoid multiple assignments.
+
+    The process continues until either no idle drivers or no waiting requests
+    remain.
+
+    Arguments:
+    drivers : list[Driver]
+        The list of available drivers at the current simulation step.
+    requests : list[Request]
+        The list of active requests waiting to be assigned.
+    time : int
+        The current simulation time. This policy does not use the time
+        parameter, but it is included to satisfy the DispatchPolicy interface.
+
+    Return:
+    list[tuple[Driver, Request]]
+        A list of (driver, request) pairs selected by the nearest-neighbor
+        matching process
+    """
     def assign(self, drivers: list["Driver"], requests: list["Request"], time: int) -> list[tuple["Driver", "Request"]]:
         matches = []
     
