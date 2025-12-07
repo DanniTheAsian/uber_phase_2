@@ -56,9 +56,9 @@ class Driver:
             self.position = destination
         else:
             ratio = movement / distance
-            direction = destination - self.position # aka. direction = destination.__sub__(self.position)
-            travel = direction * ratio # aka. travel = direction.__mul__(ratio)
-            self.position += travel # aka. self.position.__iadd__(travel)
+            direction = destination - self.position
+            travel = direction * ratio
+            self.position += travel
 
     def complete_pickup(self, time: int) -> None:
         """ docstring """
