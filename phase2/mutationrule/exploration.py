@@ -42,7 +42,7 @@ class ExplorationMutationRule(MutationRule):
             None
         """
 
-        effective_probality = self.probability * (1 + time * 0.001)
+        effective_probality = self.probability * (1 + time * 0.0005)
         effective_probality = min(1.0, effective_probality)
 
         if random.random() < effective_probality:
