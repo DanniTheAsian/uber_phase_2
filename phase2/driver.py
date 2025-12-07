@@ -22,6 +22,7 @@ class Driver:
     
     def assign_request(self, request: Request) -> None:
         """ docstring """
+        self.position_at_assignment = self.position
         self.current_request = request
         self.status = "TO_PICKUP"
 
@@ -75,7 +76,6 @@ class Driver:
             # REMEMBER TO CHANAGE THIS to the reward system
             earnings = total_distance * 2.5
 
-            # log in history list
             self.history.append({ 
                 "driver_id": self.id,
                 "request_id": self.current_request.id,
