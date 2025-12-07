@@ -40,18 +40,22 @@ class Driver:
 
     def step(self, dt: float) -> None:
         """ docstring """
-        
-        # 1. Where should driver go? To its goal destination whether it is a dropoff or pickup
-        # 2. How far is the current position to goal destination? calculate the distance
-        # 3. How quick can the driver get to the goal? with his/her speed per time
-        # 4. How close should the driver be to reach the its goal?  
-        # - if distance is less than or equal to its reach, then the driver has arrived to its goal
-        # - Otherwise, the driver have not reached its goal destination (yet.)
 
-        # direction calculation: (goal.x minus position.x, goal.y minus position.y)
-        # distance calculation: euklidan distance sqrt(dx^2 + dy^2)
-        # movement calculation: position += (dx, dy) * (speed * dt / distance)
+        destination = self.target_point()
+
+        if destination is None:
+            return
         
+        distance = self.position.distance_to(destination)
+        movement = self.speed * dt
+
+        if distance <= movement:
+            self.position = destination
+        else:
+            ratio = movement / distance
+            direction = destination - self.position
+            travel = direction * ratio
+            self.position += travel
 
     def complete_pickup(self, time: int) -> None:
         """ docstring """
@@ -64,17 +68,21 @@ class Driver:
         if self.current_request and self.status == "TO_DROPOFF":
             self.current_request.mark_delivered(time)
 
+            pickup_position = self.current_request.pickup
+            dropoff_position = self.current_request.dropoff
+            total_distance = pickup_position.distance_to(dropoff_position)
+
+            # REMEMBER TO CHANAGE THIS to the reward system
+            earnings = total_distance * 2.5
+
             # log in history list
             self.history.append({ 
-                "driver_id": self.id
+                "driver_id": self.id,
                 "request_id": self.current_request.id,
-                "completion_time": self.time,
-                "earnings": "reward" # change this
-                "total_distance": "distance" # change this
+                "completion_time": time,
+                "earnings": earnings,
+                "total_distance": total_distance
             })
                    
             self.current_request = None
             self.status = "IDLE"
-
-
-
