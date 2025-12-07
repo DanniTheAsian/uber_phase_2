@@ -1,13 +1,13 @@
 """Docstring"""
-from phase2.point import Point
+from point import Point
 
 class Request:
     """Docstring"""
 
-    def __init__(self, 
-                 id: int, 
-                 pickup: "Point", 
-                 dropoff: "Point", 
+    def __init__(self,
+                 id: int,
+                 pickup: Point,
+                 dropoff: Point,
                  creation_time: int) -> None:
         self.id = id
         self.pickup = pickup
@@ -23,18 +23,22 @@ class Request:
         return self.status in ["WAITING", "ASSIGNED", "PICKED", "DELIVERED", "EXPIRED"]
     
     def mark_assigned(self, driver_id: int) -> None:
+        """Docstring"""
         self.status = "ASSIGNED"
         self.assigned_driver_id = driver_id
 
     def mark_picked(self, t: int) -> None:
+        """Docstring"""
         self.status = "PICKED"
         self.wait_time = t - self.creation_time
 
     def mark_delivered(self, t: int) -> None:
+        """Docstring"""
         self.status = "DELIVERED"
         self.wait_time = t - self.creation_time
 
     def mark_expired(self, t: int) -> None:
+        """Docstring"""
         self.status = "EXPIRED"
         self.wait_time = t - self.creation_time
 
