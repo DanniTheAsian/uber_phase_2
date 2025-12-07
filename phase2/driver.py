@@ -14,6 +14,7 @@ class Driver:
         self.behavior = behaviour
         self.status = status
         self.current_request = current_request
+        self.position_at_assignment: Point | None = None
 
         if not history:
             self.history = []
@@ -25,6 +26,7 @@ class Driver:
         self.position_at_assignment = self.position
         self.current_request = request
         self.status = "TO_PICKUP"
+        request.mark_assigned(self.id)
 
     def target_point(self) -> Point | None:
         """ docstring """
@@ -66,12 +68,16 @@ class Driver:
         
     def complete_dropoff(self, time:int) -> None:
         """ docstring """
-        if self.current_request and self.status == "TO_DROPOFF":
+        if self.current_request and self.status == "TO_DROPOFF" and self.position_at_assignment is not None:
             self.current_request.mark_delivered(time)
 
             pickup_position = self.current_request.pickup
             dropoff_position = self.current_request.dropoff
-            total_distance = pickup_position.distance_to(dropoff_position)
+
+            distance_to_pickup = self.position_at_assignment.distance_to(pickup_position)
+            distance_from_pickup_to_dropoff = pickup_position.distance_to(dropoff_position)
+
+            total_distance = distance_to_pickup + distance_from_pickup_to_dropoff
 
             # REMEMBER TO CHANAGE THIS to the reward system
             earnings = total_distance * 2.5
