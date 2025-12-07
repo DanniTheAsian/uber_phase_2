@@ -37,26 +37,6 @@ class GreedyDistanceBehaviour(DriverBehaviour):
 
         Returns:
             bool: True if pickup distance is below max_distance.
-
-        Example:
-            >>> class MockPoint:
-            ...     def __init__(self, x, y): self.x, self.y = x, y
-            ...     def distance_to(self, other):
-            ...         return ((self.x - other.x)**2 + (self.y - other.y)**2)**0.5
-            >>> class MockRequest:
-            ...     def __init__(self, p): self.pickup = p
-            >>> class MockOffer:
-            ...     def __init__(self, req): self.request = req
-            >>> class MockDriver:
-            ...     def __init__(self, pos): self.position = pos
-
-            >>> behaviour = GreedyDistanceBehaviour(5.0)
-            >>> driver = MockDriver(MockPoint(0, 0))
-            >>> offer = MockOffer(MockRequest(MockPoint(3, 4)))  # distance = 5
-
-            # distance == 5, max_distance == 5 → False (strictly less)
-            >>> behaviour.decide(driver, offer, time=0)
-            False
         """
         pickup_point = offer.request.pickup
         distance = driver.position.distance_to(pickup_point)

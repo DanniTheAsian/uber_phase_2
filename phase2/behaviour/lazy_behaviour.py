@@ -36,21 +36,5 @@ class LazyBehaviour(DriverBehaviour):
 
         Returns:
             bool: True if request.wait_time >= max_idle, otherwise False.
-
-        Example:
-            >>> class MockRequest:
-            ...     def __init__(self, wait): self.wait_time = wait
-            >>> class MockOffer:
-            ...     def __init__(self, req): self.request = req
-
-            >>> b = LazyBehaviour(5)
-
-            # Request waited long enough → accept
-            >>> b.decide(None, MockOffer(MockRequest(7)), time=0)
-            True
-
-            # Request waited too little → reject
-            >>> b.decide(None, MockOffer(MockRequest(3)), time=0)
-            False
         """
         return offer.request.wait_time >= self.max_idle

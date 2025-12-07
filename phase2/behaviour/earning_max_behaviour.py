@@ -44,15 +44,6 @@ class EarningMaxBehaviour(DriverBehaviour):
 
         Returns:
             bool: True if the offer is accepted.
-
-        Example:
-            >>> class MockOffer:
-            ...     def __init__(self, reward, t):
-            ...         self.estimated_reward = reward
-            ...         self.estimated_travel_time = t
-            >>> b = EarningMaxBehaviour(2.0)
-            >>> b.decide(None, MockOffer(10, 5), time=0)
-            True
         """
         travel_time = offer.estimated_travel_time
         
