@@ -3,7 +3,7 @@ This module contains the Driver class which represents
 an autonomous driver agent in the simulation system.
 """
 
-from phase2.behaviour.driver_behaviour import DriverBehaviour
+from .behaviour.driver_behaviour import DriverBehaviour
 from .point import Point
 from .request import Request
 
