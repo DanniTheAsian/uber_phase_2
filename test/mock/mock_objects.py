@@ -10,10 +10,12 @@ class MockPoint:
 
 
 class MockDriver:
-    def __init__(self, id=1, x=0, y=0, speed=1.0):
+    def __init__(self, id=1, x=0, y=0, speed=1.0, behaviour= None,history= None):
         self.id = id
         self.position = MockPoint(x, y)
         self.speed = speed
+        self.behaviour = behaviour
+        self.history = history
 
 
 class MockRequest:
