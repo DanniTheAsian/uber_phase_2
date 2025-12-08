@@ -88,25 +88,27 @@ def main(backend: Optional[Dict[str, Callable[..., Any]]] = None) -> None:
 
 if __name__ == "__main__":
     try:
-      #  from phase1 import io_mod, sim_mod  # type: ignore
-      #  _backend = {
-      #      "load_drivers": io_mod.load_drivers,
-      #      "load_requests": io_mod.load_requests,
-      #      "generate_drivers": io_mod.generate_drivers,
-      #      "generate_requests": io_mod.generate_requests,
-      #      "init_state": sim_mod.init_state,
-      #      "simulate_step": sim_mod.simulate_step
-    # }
-        from adapter.adapter import SimulationAdapter
-        Adapter = SimulationAdapter
 
+#        from phase1 import io_mod, sim_mod  # type: ignore
+#        _backend = {
+#            "load_drivers": io_mod.load_drivers,
+#            "load_requests": io_mod.load_requests,
+#            "generate_drivers": io_mod.generate_drivers,
+#           "generate_requests": io_mod.generate_requests,
+#            "init_state": sim_mod.init_state,
+#            "simulate_step": sim_mod.simulate_step
+#        }
+        
+        from adapter import phase1
         _backend = {
-            "init_simulation": Adapter.init_simulation,
-            "step_simulation": Adapter.step_simulation,
-            "get_plot_data": Adapter.get_plot_data
+            "load_drivers": phase1.load_drivers,
+            "load_requests": phase1.load_requests,
+            "generate_drivers": phase1.generate_drivers,
+            "generate_requests": phase1.generate_requests,
+            "init_state": phase1.init_state,
+            "simulate_step": phase1.simulate_step
         }
-
-
+        
     except Exception:
         _backend = None
 
