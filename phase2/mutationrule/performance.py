@@ -1,5 +1,6 @@
-from phase2.mutationrule.mutationrule import MutationRule
-from phase2.behaviour.greedy_distance_behaviour import GreedyDistanceBehaviour
+from .mutationrule import MutationRule
+from ..behaviour.greedy_distance_behaviour import GreedyDistanceBehaviour
+from ..driver import Driver
 
 class PerformanceBasedMutation(MutationRule):
     """
@@ -32,7 +33,7 @@ class PerformanceBasedMutation(MutationRule):
         self.threshold = threshold
         self.N = N
 
-    def maybe_mutate(self, driver: "Driver", time: int) -> None:
+    def maybe_mutate(self, driver: Driver, time: int) -> None:
         """
         Evaluate whether the driver should mutate based on recent performance.
 
