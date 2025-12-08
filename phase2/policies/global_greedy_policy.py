@@ -1,6 +1,6 @@
-from phase2.policies.dispatch_policy import DispatchPolicy
-from phase2.driver import Driver
-from phase2.request import Request
+from .dispatch_policy import DispatchPolicy
+from ..driver import Driver
+from ..request import Request
 
 class GlobalGreedyPolicy(DispatchPolicy):
 
