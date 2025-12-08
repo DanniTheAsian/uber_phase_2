@@ -1,6 +1,6 @@
 import random
-from phase2.request import Request
-from phase2.point import Point
+from .request import Request
+from .point import Point
 
 class requestGenerator:
     """
