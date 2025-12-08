@@ -1,6 +1,6 @@
-from phase2.policies.dispatch_policy import DispatchPolicy
-from phase2.driver import Driver
-from phase2.request import Request
+from .dispatch_policy import DispatchPolicy
+from ..driver import Driver
+from ..request import Request
 
 class NearestNeighborPolicy(DispatchPolicy):
     """
@@ -29,7 +29,7 @@ class NearestNeighborPolicy(DispatchPolicy):
         A list of (driver, request) pairs selected by the nearest-neighbor
         matching process
     """
-    def assign(self, drivers: list["Driver"], requests: list["Request"], time: int) -> list[tuple["Driver", "Request"]]:
+    def assign(self, drivers: list[Driver], requests: list[Request], time: int) -> list[tuple[Driver, Request]]:
         matches = []
     
         idle_drivers = drivers[:]
