@@ -1,7 +1,8 @@
 import random
-from phase2.mutationrule.mutationrule import MutationRule
-from phase2.behaviour.greedy_distance_behaviour import GreedyDistanceBehaviour
-from phase2.behaviour.lazy_behaviour import LazyBehaviour
+from .mutationrule import MutationRule
+from ..behaviour.greedy_distance_behaviour import GreedyDistanceBehaviour
+from ..behaviour.lazy_behaviour import LazyBehaviour
+from ..driver import Driver
 
 class ExplorationMutationRule(MutationRule):
     """
