@@ -3,8 +3,8 @@ This module defines the offer class which represents
 a suggested assignment between a driver and a request
 """
 
-from phase2.driver import Driver
-from phase2.request import Request
+from .driver import Driver
+from .request import Request
 
 class Offer:
     """
