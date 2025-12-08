@@ -1,4 +1,6 @@
-from phase2.behaviour.driver_behaviour import DriverBehaviour
+from .driver_behaviour import DriverBehaviour
+from ..driver import Driver
+from ..offer import Offer
 
 class EarningMaxBehaviour(DriverBehaviour):
     """
@@ -25,7 +27,7 @@ class EarningMaxBehaviour(DriverBehaviour):
         """
         self.min_ratio = min_ratio
 
-    def decide(self, driver: "Driver", offer: "Offer", time: int) -> bool:
+    def decide(self, driver: Driver, offer: Offer, time: int) -> bool:
         """
         Decide whether the driver accepts the offer.
 
