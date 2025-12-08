@@ -130,6 +130,7 @@ class Driver:
             records the trip in history,
             clears the current request,
             and updates its status to IDLE
+
             Args:
                 time (int): The current simulation time tick when dropoff is completed.
             
@@ -157,6 +158,6 @@ class Driver:
                 "earnings": earnings,
                 "total_distance": total_distance
             })
-                            
+                         
             self.current_request = None
             self.status = "IDLE"
