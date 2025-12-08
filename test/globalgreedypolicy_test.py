@@ -5,8 +5,16 @@ from phase2.policies.global_greedy_policy import GlobalGreedyPolicy
 
 
 class TestGlobalGreedyPolicy(unittest.TestCase):
-
+    """
+    Tests the GlobalGreedyPolicy by verifying that drivers are matched to the
+    closest available requests according to the global greedy algorithm.
+    Includes tests for both a single-driver scenario and multi-driver scenarios,
+    ensuring that matches follow correct distance ordering and no objects are reused.
+    """
     def test_single_match(self):
+        """
+        Tests that a single driver is matched with the closest request.
+        """
         print("\nRunning test_single_match...")
         drivers = [
             MockDriver(id=1, x=0, y=0),
@@ -31,6 +39,10 @@ class TestGlobalGreedyPolicy(unittest.TestCase):
 
 
     def test_multiple_matches(self):
+        """
+        Tests that multiple drivers are matched with their nearest requests
+        according to the global greedy ordering.
+        """
         print("\nRunning test_multiple_matches...")
         drivers = [
             MockDriver(id=1, x=0, y=0),
@@ -55,3 +67,27 @@ class TestGlobalGreedyPolicy(unittest.TestCase):
         except AssertionError:
             print("test_multiple_matches: FAILED")
             raise
+
+        
+    def test_equal_distance_tie_breaking(self):
+        """
+        When two drivers are equally close to a request, the policy should
+        consistently pick the driver that appears first in the driver list.
+        """
+        drivers = [
+            MockDriver(id=1, x=0, y=0),
+            MockDriver(id=2, x=0, y=0),
+        ]
+
+        requests = [
+            MockRequest(id=1, pickup=MockPoint(10, 0)),
+        ]
+
+        policy = GlobalGreedyPolicy()
+        matches = policy.assign(drivers, requests, time=0)
+
+        self.assertEqual(len(matches), 1)
+        driver, request = matches[0]
+
+        self.assertEqual(driver.id, 1)
+        self.assertEqual(request.id, 1)
