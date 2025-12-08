@@ -18,7 +18,7 @@ class TestExplorationMutationRule(unittest.TestCase):
     """
 
     @patch("random.random", return_value=0.0)
-    def test_mutation_occurs_lazy_to_greedy(self, mock_random):
+    def test_mutation_occurs_lazy_to_greedy(self, _mock_random):
         """
         If the driver is LazyBehaviour and probability is triggered,
         behaviour should mutate into GreedyDistanceBehaviour.
@@ -32,7 +32,7 @@ class TestExplorationMutationRule(unittest.TestCase):
 
 
     @patch("random.random", return_value=0.0)
-    def test_mutation_occurs_greedy_to_lazy(self, mock_random):
+    def test_mutation_occurs_greedy_to_lazy(self, _mock_random):
         """
         If the driver is GreedyBehaviour and probability is triggered,
         behaviour should mutate into LazyBehaviour.
@@ -46,7 +46,7 @@ class TestExplorationMutationRule(unittest.TestCase):
 
 
     @patch("random.random", return_value=1.0)
-    def test_no_mutation_when_probability_not_met(self, mock_random):
+    def test_no_mutation_when_probability_not_met(self, _mock_random):
         """
         No mutation should occur if random.random() >= effective probability.
         Behaviour must remain unchanged.

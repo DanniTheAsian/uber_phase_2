@@ -26,9 +26,7 @@ class TestRequestGenerator(unittest.TestCase):
         self.assertEqual(gen.next_id, 2)  # id increment test
 
 
-    @patch("random.random", return_value=0.9)  # always >= rate
-
-
+    @patch("random.random", return_value=0.9)
     def test_no_request_generated(self, _mock_random):
         """
         Test that no request is generated when random.random() >= rate.
@@ -40,15 +38,11 @@ class TestRequestGenerator(unittest.TestCase):
         self.assertEqual(gen.next_id, 1)  # unchanged
 
 
-    @patch("random.random", return_value=0.1)  # should trigger generation
+    @patch("random.random", return_value=0.1)
     @patch("random.uniform", return_value=3.14)
-
-
     def test_rush_hour_uses_doubled_rate(self, _mock_uniform, _mock_random):
         """
         During rush hour (200–300), effective_rate = rate * 2.
-        We cannot directly test the probability, but we can ensure that the method
-        still generates requests and behaves consistently.
         """
         gen = requestGenerator(rate=0.3, width=50, height=50)
         result = gen.maybe_generate(time=250)  # inside rush hour window
