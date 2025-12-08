@@ -50,7 +50,7 @@ class EarningMaxBehaviour(DriverBehaviour):
         travel_time = offer.estimated_travel_time
         
 
-
+        # TODO: Der skal være en if-statement hvis nu offer.estimated_rewared er None
         ratio = offer.estimated_reward /travel_time
         return ratio >= self.min_ratio
 

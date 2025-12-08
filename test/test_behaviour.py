@@ -17,7 +17,7 @@ class TestBehaviours(unittest.TestCase):
         behaviour = GreedyDistanceBehaviour(max_distance=6)
 
         try:
-            self.assertTrue(behaviour.decide(driver, offer, time=0))
+            self.assertTrue(behaviour.decide("MockDriver", "MockOffer", time=0))
             print("test_greedy_accept: SUCCESSFUL")
         except AssertionError:
             print("test_greedy_accept: FAILED")
