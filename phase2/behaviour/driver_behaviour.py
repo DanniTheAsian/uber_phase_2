@@ -9,9 +9,7 @@ their own decision logic.
 
 from abc import ABC, abstractmethod
 from ..driver import Driver
-
-
-
+from ..offer import Offer
 
 class DriverBehaviour(ABC):
     """
@@ -22,7 +20,7 @@ class DriverBehaviour(ABC):
     whether the driver accepts or rejects a given offer.
     """
     @abstractmethod
-    def decide(self, driver: "Driver", offer: "Offer", time: int) -> bool:
+    def decide(self, driver: Driver, offer: Offer, time: int) -> bool:
         """
         Decide whether the driver accepts the offer.
 
