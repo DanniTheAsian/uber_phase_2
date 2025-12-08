@@ -3,9 +3,9 @@ This module contains the Driver class which represents
 an autonomous driver agent in the simulation system.
 """
 
-from driver_behaviour import DriverBehaviour
-from point import Point
-from request import Request
+from phase2.behaviour.driver_behaviour import DriverBehaviour
+from .point import Point
+from .request import Request
 
 class Driver:
     """
@@ -130,7 +130,6 @@ class Driver:
             records the trip in history,
             clears the current request,
             and updates its status to IDLE
-
             Args:
                 time (int): The current simulation time tick when dropoff is completed.
             
@@ -158,6 +157,6 @@ class Driver:
                 "earnings": earnings,
                 "total_distance": total_distance
             })
-                         
+                            
             self.current_request = None
             self.status = "IDLE"
