@@ -1,48 +1,45 @@
 from phase2.delivery_simulation import DeliverySimulation
 
 class SimulationAdapter:
-    """ Adapter class that connects the GUI with the DeliverySimulation backend."""
+    """Adapter class that connects the GUI with the DeliverySimulation backend."""
 
     def __init__(self):
         self.sim = None
 
-    def init_simulation(
-        self,
-        num_drivers: int,
-        width: int,
-        height: int,
-        rate: float,
-        dispatch_policy,
-        mutation_rule,
-        timeout: int,
-    ) -> None:
+    def init_state(self, drivers, requests, timeout, req_rate, width, height):
+        """Phase1 backend calls this."""
         self.sim = DeliverySimulation(
-            num_drivers=num_drivers,
+            num_drivers=len(drivers),
             width=width,
             height=height,
-            rate=rate,
-            dispatch_policy=dispatch_policy,
-            mutation_rule=mutation_rule,
+            rate=req_rate,
+            dispatch_policy=None,
+            mutation_rule=None,
             timeout=timeout,
         )
 
-    
-    def step_simulation(self) -> tuple[int, dict]:
+        return {"t": 0}
+
+    def simulate_step(self, state):
+        """Phase1 backend calls this."""
         if self.sim is None:
-            raise RuntimeError('simulation is not initialized')
+            raise RuntimeError("Simulation not initialized")
 
         self.sim.tick()
 
         snapshot = self.sim.get_snapshot()
-        current_time = self.sim.time
-        statistics = snapshot['statistics']
 
-        return current_time, statistics
+        # update Phase1 state dict
+        state["t"] = self.sim.time
 
-    def get_plot_data(self) -> dict:
+        metrics = snapshot["statistics"]
+
+        return state, metrics
+
+    def get_plot_data(self):
         if self.sim is None:
-            raise RuntimeError('simulation is not initialized')
-        
+            raise RuntimeError("Simulation not initialized")
+
         snapshot = self.sim.get_snapshot()
 
         return {
