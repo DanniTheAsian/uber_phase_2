@@ -1,4 +1,6 @@
-from phase2.behaviour.driver_behaviour import DriverBehaviour
+from .driver_behaviour import DriverBehaviour
+from ..driver import Driver
+from ..offer import Offer
 
 class GreedyDistanceBehaviour(DriverBehaviour):
     """
@@ -22,7 +24,7 @@ class GreedyDistanceBehaviour(DriverBehaviour):
         """
         self.max_distance = max_distance
 
-    def decide(self, driver: "Driver", offer: "Offer", time: int) -> bool:
+    def decide(self, driver: Driver, offer: Offer, time: int) -> bool:
         """
                 Decide whether the driver accepts the offer.
 

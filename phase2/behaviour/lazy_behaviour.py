@@ -1,4 +1,6 @@
-from phase2.behaviour.driver_behaviour import DriverBehaviour
+from .driver_behaviour import DriverBehaviour
+from ..driver import Driver
+from ..offer import Offer
 
 class LazyBehaviour(DriverBehaviour):
     """
