@@ -7,6 +7,8 @@ such as performance-based mutation or random exploration.
 """
 
 from abc import ABC, abstractmethod
+from ..driver import Driver
+
 class MutationRule(ABC):
     """
     Abstract base class for all mutation rule types.
@@ -16,7 +18,7 @@ class MutationRule(ABC):
     the simulation.
     """
     @abstractmethod
-    def maybe_mutate(self, driver: "Driver", time: int) -> None:
+    def maybe_mutate(self, driver: Driver, time: int) -> None:
         """
         Decide whether the driver should mutate to another behaviour.
 
