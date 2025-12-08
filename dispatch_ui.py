@@ -88,15 +88,25 @@ def main(backend: Optional[Dict[str, Callable[..., Any]]] = None) -> None:
 
 if __name__ == "__main__":
     try:
-        from phase1 import io_mod, sim_mod  # type: ignore
+      #  from phase1 import io_mod, sim_mod  # type: ignore
+      #  _backend = {
+      #      "load_drivers": io_mod.load_drivers,
+      #      "load_requests": io_mod.load_requests,
+      #      "generate_drivers": io_mod.generate_drivers,
+      #      "generate_requests": io_mod.generate_requests,
+      #      "init_state": sim_mod.init_state,
+      #      "simulate_step": sim_mod.simulate_step
+    # }
+        from adapter.adapter import SimulationAdapter
+        Adapter = SimulationAdapter
+
         _backend = {
-            "load_drivers": io_mod.load_drivers,
-            "load_requests": io_mod.load_requests,
-            "generate_drivers": io_mod.generate_drivers,
-            "generate_requests": io_mod.generate_requests,
-            "init_state": sim_mod.init_state,
-            "simulate_step": sim_mod.simulate_step
+            "init_simulation": Adapter.init_simulation,
+            "step_simulation": Adapter.step_simulation,
+            "get_plot_data": Adapter.get_plot_data
         }
+
+
     except Exception:
         _backend = None
 

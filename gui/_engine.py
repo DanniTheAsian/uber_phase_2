@@ -208,7 +208,6 @@ def make_default_backend() -> BackendFns:
 
     The returned mapping exposes the procedural functions expected by this UI,
     allowing students to run the app without writing a custom backend.
-    """
     from phase1 import io_mod
     from phase1 import sim_mod
 
@@ -220,7 +219,17 @@ def make_default_backend() -> BackendFns:
         init_state=sim_mod.init_state,
         simulate_step=sim_mod.simulate_step,
     )
+    """
+    import adapter.phase1
 
+    return BackendFns(
+        load_drivers=adapter.phase1.load_drivers,
+        load_requests=adapter.phase1.load_requests,
+        generate_drivers=adapter.phase1.generate_drivers,
+        generate_requests=adapter.phase1.generate_requests,
+        init_state=adapter.phase1.init_state,
+        simulate_step=adapter.phase.simulate_step, 
+    )
 
 # ---------------------------------------------------------------------------
 # Helper functions for direction inference and vector math

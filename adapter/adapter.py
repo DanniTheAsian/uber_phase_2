@@ -39,7 +39,7 @@ class SimulationAdapter:
 
         return current_time, statistics
 
-    def get_ploy_data(self) -> dict:
+    def get_plot_data(self) -> dict:
         if self.sim is None:
             raise RuntimeError('simulation is not initialized')
         
