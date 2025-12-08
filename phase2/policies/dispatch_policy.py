@@ -1,6 +1,6 @@
 from abc import ABC,abstractmethod
-from phase2.driver import Driver
-from phase2.request import Request
+from ..driver import Driver
+from ..request import Request
 
 
 class DispatchPolicy(ABC):
@@ -15,7 +15,7 @@ class DispatchPolicy(ABC):
     Subclasses must implement the `assign` method.
     """
     @abstractmethod
-    def assign(self, drivers: list["Driver"], requests: list["Request"], time: int) -> list[tuple["Driver", "Request"]]:
+    def assign(self, drivers: list[Driver], requests: list[Request], time: int) -> list[tuple[Driver, Request]]:
                 """
         Return proposed (driver, request) assignments for this tick.
 
