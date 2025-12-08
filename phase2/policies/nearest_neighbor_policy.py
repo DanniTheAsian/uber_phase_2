@@ -1,4 +1,6 @@
 from phase2.policies.dispatch_policy import DispatchPolicy
+from phase2.driver import Driver
+from phase2.request import Request
 
 class NearestNeighborPolicy(DispatchPolicy):
     """
