@@ -1,4 +1,7 @@
 from abc import ABC,abstractmethod
+from phase2.driver import Driver
+from phase2.request import Request
+
 
 class DispatchPolicy(ABC):
     """
