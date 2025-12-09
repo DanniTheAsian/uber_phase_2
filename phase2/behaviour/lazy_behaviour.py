@@ -1,6 +1,5 @@
 from .driver_behaviour import DriverBehaviour
-from ..driver import Driver
-from ..offer import Offer
+
 
 class LazyBehaviour(DriverBehaviour):
     """
@@ -24,7 +23,7 @@ class LazyBehaviour(DriverBehaviour):
         """
         self.max_idle = max_idle
 
-    def decide(self, driver: "Driver", offer: "Offer", time: int) -> bool:
+    def decide(self, driver: 'Driver', offer: 'Offer', time: int) -> bool:
         """
         Decide whether the driver accepts the offer.
 
@@ -39,4 +38,5 @@ class LazyBehaviour(DriverBehaviour):
         Returns:
             bool: True if request.wait_time >= max_idle, otherwise False.
         """
+        
         return offer.request.wait_time >= self.max_idle
