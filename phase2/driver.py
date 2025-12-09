@@ -24,6 +24,7 @@ class Driver:
             behaviour (DriverBehaviour): Decision Policy for accepting or rejecting requests.
             status (str, optional): Initial status of the driver. Defaults to "IDLE".
             current_request (Request | None, optional): Current assigned request. Defaults to None.
+            assigned_reward (float, optional): Reward associated with the assigned request. Defaults to 0.0.
             history (list | None, optional): List of completed trips for statistics. Defaults to None which initializes an empty list.
          
         Returns:
@@ -36,13 +37,14 @@ class Driver:
         self.status = status
         self.current_request = current_request
         self.position_at_assignment: Point | None = None
+        self.assigned_reward: float = 0.0
 
         if not history:
             self.history = []
         else:
             self.history = history
     
-    def assign_request(self, request: Request) -> None:
+    def assign_request(self, request: Request, reward: float) -> None:
         """ Assign a delivery request to the driver.
         
         Stores the driver's current position for distance calculation,
@@ -57,6 +59,7 @@ class Driver:
         """
         self.position_at_assignment = self.position
         self.current_request = request
+        self.assigned_reward = reward
         self.status = "TO_PICKUP"
         request.mark_assigned(self.id)
 
@@ -129,6 +132,7 @@ class Driver:
             marks the request as delivered,
             records the trip in history,
             clears the current request,
+            and its position when the request was received,
             and updates its status to IDLE
             Args:
                 time (int): The current simulation time tick when dropoff is completed.
@@ -147,9 +151,8 @@ class Driver:
 
             total_distance = distance_to_pickup + distance_from_pickup_to_dropoff
 
-            # TODO: REMEMBER TO CHANGE THIS to the reward system
-            earnings = total_distance * 2.5
-
+            earnings = self.assigned_reward
+            
             self.history.append({
                 "driver_id": self.id,
                 "request_id": self.current_request.id,
@@ -160,3 +163,4 @@ class Driver:
                             
             self.current_request = None
             self.status = "IDLE"
+            self.position_at_assignment = None
