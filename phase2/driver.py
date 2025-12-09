@@ -3,9 +3,9 @@ This module contains the Driver class which represents
 an autonomous driver agent in the simulation system.
 """
 
-from driver_behaviour import DriverBehaviour
-from point import Point
-from request import Request
+from .behaviour.driver_behaviour import DriverBehaviour
+from .point import Point
+from .request import Request
 
 class Driver:
     """

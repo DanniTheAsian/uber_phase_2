@@ -3,7 +3,7 @@ This module contains the Request class which represents
 a single customer order in the delivery simulation.
 """
 
-from point import Point
+from .point import Point
 
 
 class Request:
