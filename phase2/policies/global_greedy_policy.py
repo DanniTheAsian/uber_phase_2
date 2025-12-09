@@ -35,7 +35,7 @@ class GlobalGreedyPolicy(DispatchPolicy):
                 distance = driver.position.distance_to(request.pickup)
                 combos.append((distance, driver, request))
 
-        combos.sort()
+        combos.sort(key=lambda combo: (combo[0], getattr(combo[1], "id", 0), getattr(combo[2], "id", 0)))
 
         used_drivers = set()
         used_requests = set()

@@ -7,6 +7,8 @@ from .behaviour.driver_behaviour import DriverBehaviour
 from .point import Point
 from .request import Request
 
+ARRIVAL_EPSILON = 1e-3
+
 class Driver:
     """
     An autonomous driver agent in the system 
@@ -14,11 +16,11 @@ class Driver:
     accept or reject requests based on their behaviour policy,
     and maintain a history of completed trips for statistics.
     """
-    def __init__(self, id: int, position: Point, speed: float, behaviour: DriverBehaviour | None = None, status: str = "IDLE", current_request: Request | None = None, history: list | None = None) -> None:
+    def __init__(self, driver_id: int, position: Point, speed: float, behaviour: DriverBehaviour | None = None, status: str = "IDLE", current_request: Request | None = None, history: list | None = None) -> None:
         """ Initialize Driver instance
 
         Args:
-            id (int): Unique identifier for the driver
+            driver_id (int): Unique identifier for the driver
             position (Point): Starting position on the map.
             speed (float): Movement speed in units per simulation tick.
             behaviour (DriverBehaviour): Decision Policy for accepting or rejecting requests.
@@ -30,7 +32,7 @@ class Driver:
         Returns:
             None
         """
-        self.id = id
+        self.id = driver_id
         self.position = position
         self.speed = speed
         self.behaviour = behaviour
@@ -44,7 +46,7 @@ class Driver:
         else:
             self.history = history
     
-    def assign_request(self, request: Request, reward: float) -> None:
+    def assign_request(self, request: Request, assignment_meta: float | None = None, reward: float | None = None) -> None:
         """ Assign a delivery request to the driver.
         
         Stores the driver's current position for distance calculation,
@@ -59,9 +61,28 @@ class Driver:
         """
         self.position_at_assignment = self.position
         self.current_request = request
-        self.assigned_reward = reward
+        if reward is None and isinstance(assignment_meta, (int, float)):
+            # Compatibility: older call sites pass current simulation time as the second argument.
+            self.assigned_reward = 0.0
+        else:
+            self.assigned_reward = reward if reward is not None else 0.0
         self.status = "TO_PICKUP"
         request.mark_assigned(self.id)
+
+    def _is_at_target(self, target: Point | None) -> bool:
+        if target is None or self.position is None:
+            return False
+        return self.position.distance_to(target) <= ARRIVAL_EPSILON
+
+    def at_pickup(self) -> bool:
+        if not self.current_request or self.status != "TO_PICKUP":
+            return False
+        return self._is_at_target(self.current_request.pickup)
+
+    def at_dropoff(self) -> bool:
+        if not self.current_request or self.status != "TO_DROPOFF":
+            return False
+        return self._is_at_target(self.current_request.dropoff)
 
     def target_point(self) -> Point | None:
         """ Get the driver's current target destination.
