@@ -1,17 +1,8 @@
 from .adapter import SimulationAdapter
-<<<<<<< Updated upstream
 from phase2.driver import Driver
 from phase2.request import Request
 from phase2.point import Point
 from phase2.behaviour.driver_behaviour import DriverBehaviour
-=======
-from ..phase2.driver import Driver
-from ..phase2.request import Request
-from ..phase2.point import Point
-from ..phase2.behaviour.greedy_distance_behaviour import GreedyDistanceBehaviour
-from ..phase2.behaviour.earning_max_behaviour import EarningMaxBehaviour
-from ..phase2.behaviour.lazy_behaviour import LazyBehaviour
->>>>>>> Stashed changes
 import random
 
 
