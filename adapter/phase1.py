@@ -27,6 +27,15 @@ def generate_drivers(n, width, height):
         drivers.append(Driver(i, Point(x,y), speed, behaviour=None))
     return drivers
 
+def driver_to_dict(self,d):
+    return {
+        "id": d.id,
+        "x": d.position.x,
+        "y": d.position.y,
+        "status": d.status,
+        "target_id": d.current_request.id if d.current_request else None
+    }
+
 def generate_requests(start_t, out_list, rate, width, height):
     pass
 

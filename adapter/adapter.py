@@ -1,4 +1,8 @@
+# adapter/adapter.py
+
+from phase2.request_generator import RequestGenerator
 from phase2.delivery_simulation import DeliverySimulation
+
 
 class SimulationAdapter:
     """Adapter class that connects the GUI with the DeliverySimulation backend."""
@@ -8,16 +12,27 @@ class SimulationAdapter:
 
     def init_state(self, drivers, requests, timeout, req_rate, width, height):
         """Phase1 backend calls this."""
-        self.sim = DeliverySimulation(
-            num_drivers=len(drivers),
-            width=width,
-            height=height,
+        print("INIT_STATE CALLED")  # <-- diagnostic
+
+        request_gen = RequestGenerator(
             rate=req_rate,
-            dispatch_policy=None,
-            mutation_rule=None,
+            width=width,
+            height=height
+        )
+
+        dispatch_policy = None
+        mutation_rule = None
+
+        self.sim = DeliverySimulation(
+            drivers=drivers,
+            requests=requests,
+            dispatch_policy=dispatch_policy,
+            request_generator=request_gen,
+            mutation_rule=mutation_rule,
             timeout=timeout,
         )
 
+        print("SIM CREATED:", self.sim)  # <-- diagnostic
         return {"t": 0}
 
     def simulate_step(self, state):
@@ -26,14 +41,10 @@ class SimulationAdapter:
             raise RuntimeError("Simulation not initialized")
 
         self.sim.tick()
-
         snapshot = self.sim.get_snapshot()
 
-        # update Phase1 state dict
         state["t"] = self.sim.time
-
         metrics = snapshot["statistics"]
-
         return state, metrics
 
     def get_plot_data(self):
