@@ -150,9 +150,8 @@ class Driver:
             distance_from_pickup_to_dropoff = pickup_position.distance_to(dropoff_position)
 
             total_distance = distance_to_pickup + distance_from_pickup_to_dropoff
-
             earnings = self.assigned_reward
-            
+
             self.history.append({
                 "driver_id": self.id,
                 "request_id": self.current_request.id,
@@ -164,3 +163,4 @@ class Driver:
             self.current_request = None
             self.status = "IDLE"
             self.position_at_assignment = None
+            self.assigned_reward = 0.0
