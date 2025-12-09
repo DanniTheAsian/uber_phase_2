@@ -1,6 +1,5 @@
 from .driver_behaviour import DriverBehaviour
-from ..driver import Driver
-from ..offer import Offer
+
 
 class EarningMaxBehaviour(DriverBehaviour):
     """
@@ -27,7 +26,7 @@ class EarningMaxBehaviour(DriverBehaviour):
         """
         self.min_ratio = min_ratio
 
-    def decide(self, driver: Driver, offer: Offer, time: int) -> bool:
+    def decide(self, driver: 'Driver', offer: 'Offer', time: int) -> bool:
         """
         Decide whether the driver accepts the offer.
 
@@ -46,13 +45,27 @@ class EarningMaxBehaviour(DriverBehaviour):
 
         Returns:
             bool: True if the offer is accepted.
-        """
-        travel_time = offer.estimated_travel_time
         
+        Note:
+            - Returns False if estimated_reward is None
+            - Returns False if travel_time is 0 (avoid division by zero)
+            - Uses time-adjusted threshold: min_ratio * (1 + 0.0005 * time)
+        """
 
-        # TODO: Der skal være en if-statement hvis nu offer.estimated_rewared er None
-        ratio = offer.estimated_reward /travel_time
-        return ratio >= self.min_ratio
+        if offer.estimated_reward is None:
+            return False
+        
+        if offer.estimated_travel_time <= 0:
+            return False
+        
+        threshold = self.min_ratio * (1 + 0.0005 * time)
+        
+        ratio = offer.estimated_reward / offer.estimated_travel_time
+        return ratio >= threshold
 
+    # for debugging
+    def __repr__(self) -> str:
+        """String representation of the behaviour."""
 
-     
+        return f"EarningMaxBehaviour(min_ratio={self.min_ratio})"
+    
