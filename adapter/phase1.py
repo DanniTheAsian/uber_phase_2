@@ -23,8 +23,8 @@ def generate_drivers(n, width, height):
         speed = random.uniform(0.01, 1)
         x = random.uniform(0, width)
         y = random.uniform(0, height)
-        
-        drivers.append(i, Point(x,y), speed, behaviour = DriverBehaviour)
+        behaviour = DriverBehaviour
+        drivers.append(Driver(i, Point(x,y), speed, behaviour))
     return drivers
 
 def generate_requests(start_t, out_list, rate, width, height):
