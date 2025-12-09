@@ -1,4 +1,12 @@
 from adapter import SimulationAdapter
+from ..phase2.driver import Driver
+from ..phase2.request import Request
+from ..phase2.point import Point
+from ..phase2.behaviour.greedy_distance_behaviour import GreedyDistanceBehaviour
+from ..phase2.behaviour.earning_max_behaviour import EarningMaxBehaviour
+from ..phase2.behaviour.lazy_behaviour import LazyBehaviour
+import random
+
 
 ADAPTER = SimulationAdapter()
 
@@ -9,6 +17,28 @@ def load_requests(path):
     return []
 
 def generate_drivers(n, width, height):
+    drivers = []
+    width = 50
+    height = 30
+
+    for i in range(n):
+        speed = random.uniform(0.01, 1)
+        x = random.uniform(0, width)
+        y = random.uniform(0, height)
+        
+        # Randomly pick a behaviour type
+        behaviour_type = random.choice(['greedy', 'earning', 'lazy', None])
+        if behaviour_type == 'greedy':
+            behaviour = GreedyDistanceBehaviour(max_distance=random.uniform(5, 15))
+        elif behaviour_type == 'earning':
+            behaviour = EarningMaxBehaviour(min_ratio=random.uniform(1.0, 3.0))
+        elif behaviour_type == 'lazy':
+            behaviour = LazyBehaviour(max_idle=random.randint(5, 20))
+        else:
+            behaviour = None
+        
+        drivers.append(Driver(id=i, position = Point(x, y), speed = speed, behaviour = behaviour))
+    
     return [None] * n
 
 def generate_requests(start_t, out_list, rate, width, height):
