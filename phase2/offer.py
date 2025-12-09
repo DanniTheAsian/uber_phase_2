@@ -3,9 +3,6 @@ This module defines the offer class which represents
 a suggested assignment between a driver and a request
 """
 
-from .driver import Driver
-from .request import Request
-
 class Offer:
     """
     Represents an offer given to a driver to fulfill a request.
@@ -16,8 +13,8 @@ class Offer:
     """
 
     def __init__(self,
-                 driver: Driver,
-                 request: Request,
+                 driver: 'Driver',
+                 request: 'Request',
                  estimated_travel_time: float,
                  estimated_reward: float | None = None) -> None:
         """Initialize an Offer instance.
