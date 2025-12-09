@@ -2,7 +2,7 @@ import random
 from phase2.request import Request
 from phase2.point import Point
 
-class requestGenerator:
+class RequestGenerator:
     """
     Generates zero or more new Request objects based on the generator's rate.
     The simulation time is used to model time-dependent request rates,
@@ -27,11 +27,6 @@ class requestGenerator:
         but the Request object does not store it.
         """
         new_requests = []
-
-        if 200 <= time <= 300:
-            effective_rate = self.rate * 2
-        else:
-            effective_rate = self.rate
 
         if random.random() < self.rate:
             pickup = Point(random.uniform(0, self.width), random.uniform(0, self.height))

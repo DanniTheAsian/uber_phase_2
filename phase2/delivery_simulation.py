@@ -1,12 +1,12 @@
 """docstring"""
 
 from typing import List, Tuple
-from phase2.driver import Driver
-from phase2.request import Request
-from phase2.dispatch_policy import dispatch_policy
-from phase2.request_generator import request_generator   
-from phase2.mutation_rule import mutationrule          
-from phase2.offer import Offer
+from .driver import Driver
+from .request import Request
+from .policies.dispatch_policy import DispatchPolicy
+from .request_generator import RequestGenerator  
+from .mutationrule import mutationrule          
+from .offer import Offer
 
 
 class DeliverySimulation:
@@ -15,8 +15,8 @@ class DeliverySimulation:
         self,
         drivers: List[Driver],
         requests: List[Request],
-        dispatch_policy: dispatch_policy,
-        request_generator: request_generator,
+        dispatch_policy: DispatchPolicy,
+        request_generator: RequestGenerator,
         mutation_rule: mutationrule,
         timeout: int,
     ) -> None:
