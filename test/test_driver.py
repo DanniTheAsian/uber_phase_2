@@ -1,3 +1,7 @@
+"""
+Unit tests for the Driver class in phase2.driver module.
+"""
+
 import unittest
 from unittest.mock import Mock, patch
 from phase2.driver import Driver
@@ -6,18 +10,22 @@ from phase2.request import Request
 
 
 class TestDriverInitialization(unittest.TestCase):
-    """Test Driver initialization and basic attributes."""
+    """
+    Test Driver initialization and basic attributes.
+    """
     
     def test_driver_creation(self):
-        """Test basic Driver creation with required parameters."""
-        # Create a mock behaviour
+        """
+        Test basic Driver creation with required parameters.
+        """
+
         mock_behaviour = Mock()
         
         driver = Driver(
-            id=1,
-            position=Point(0, 0),
-            speed=2.5,
-            behaviour=mock_behaviour
+            id = 1,
+            position = Point(0, 0),
+            speed = 2.5,
+            behaviour = mock_behaviour
         )
         
         self.assertEqual(driver.id, 1)
@@ -29,19 +37,21 @@ class TestDriverInitialization(unittest.TestCase):
         self.assertEqual(driver.history, [])
         self.assertIsNone(driver.position_at_assignment)
     
-    def test_driver_with_optional_parameters(self):
-        """Test Driver creation with optional parameters."""
+    def test_driver_with_optional_attributes(self):
+        """
+        Test Driver creation with optional attributes.
+        """
         mock_behaviour = Mock()
         test_request = Request(id = 101, pickup = Point(0,0), dropoff = Point(10,0), creation_time = 0)
         
         driver = Driver(
-            id=2,
-            position=Point(5, 5),
-            speed=3.0,
-            behaviour=mock_behaviour,
-            status="TO_PICKUP",
-            current_request=test_request,
-            history=[{"test": "data"}]
+            id = 2,
+            position = Point(5, 5),
+            speed = 3.0,
+            behaviour = mock_behaviour,
+            status = "TO_PICKUP",
+            current_request = test_request,
+            history = [{"test": "data"}]
         )
         
         self.assertEqual(driver.status, "TO_PICKUP")
@@ -52,20 +62,26 @@ class TestDriverInitialization(unittest.TestCase):
 
 
 class TestDriverMovement(unittest.TestCase):
-    """Test Driver movement and step functionality."""
+    """
+    Test Driver movement and step functionality.
+    """
     
     def setUp(self):
-        """Set up test fixture before each test."""
+        """
+        Set up test fixture before each test.
+        """
         self.mock_behaviour = Mock()
         self.driver = Driver(
-            id=1,
-            position=Point(0, 0),
-            speed=2.0,
+            id = 1,
+            position = Point(0, 0),
+            speed = 2.0,
             behaviour=self.mock_behaviour
         )
     
     def test_step_with_no_target(self):
-        """Test step() when driver has no target (should do nothing)."""
+        """
+        Test step() when driver has no target (should do nothing).
+        """
        
         initial_position = self.driver.position
         self.driver.step(dt=1.0)
@@ -73,7 +89,9 @@ class TestDriverMovement(unittest.TestCase):
         self.assertEqual(self.driver.position.y, initial_position.y)
     
     def test_step_towards_target(self):
-        """Test step() moves driver towards target."""
+        """
+        Test step() moves driver towards target.
+        """
         
         request = Request(
             id = 101,
@@ -92,7 +110,9 @@ class TestDriverMovement(unittest.TestCase):
 
 
 class TestDriverStateTransitions(unittest.TestCase):
-    """Test Driver state transitions (pickup/dropoff)."""
+    """
+    Test Driver state transitions (pickup/dropoff).
+    """
     
     def setUp(self):
         self.mock_behaviour = Mock()
@@ -104,7 +124,9 @@ class TestDriverStateTransitions(unittest.TestCase):
         )
     
     def test_assign_request(self):
-        """Test assigning a request to driver."""
+        """
+        Test assigning a request to driver.
+        """
 
         mock_request = Mock(spec=Request)
         mock_request.id = 101
@@ -123,7 +145,9 @@ class TestDriverStateTransitions(unittest.TestCase):
         mock_request.mark_assigned.assert_called_once_with(1)
     
     def test_complete_pickup(self):
-        """Test completing a pickup."""
+        """
+        Test completing a pickup.
+        """
 
         mock_request = Mock(spec=Request)
         mock_request.mark_picked = Mock()
@@ -139,7 +163,9 @@ class TestDriverStateTransitions(unittest.TestCase):
         mock_request.mark_picked.assert_called_once_with(10)
     
     def test_complete_pickup_wrong_state(self):
-        """Test complete_pickup when driver is not in TO_PICKUP state."""
+        """
+        Test complete_pickup when driver is not in TO_PICKUP state.
+        """
         mock_request = Mock(spec=Request)
         mock_request.mark_picked = Mock()
         
@@ -154,7 +180,9 @@ class TestDriverStateTransitions(unittest.TestCase):
         self.assertEqual(self.driver.status, "IDLE")
     
     def test_complete_dropoff(self):
-        """Test completing a dropoff."""
+        """
+        Test completing a dropoff.
+        """
 
         request = Request(
             id=101,
@@ -190,7 +218,9 @@ class TestDriverStateTransitions(unittest.TestCase):
 
 
 class TestDriverTarget(unittest.TestCase):
-    """Test Driver.target_point() method."""
+    """ 
+    Test Driver.target_point() method.
+    """
     
     def setUp(self):
         self.mock_behaviour = Mock()
@@ -202,7 +232,9 @@ class TestDriverTarget(unittest.TestCase):
         )
     
     def test_target_point_idle(self):
-        """Test target_point() returns None when driver is idle."""
+        """
+        Test target_point() returns None when driver is idle.
+        """
  
         self.driver.status = "IDLE"
         self.driver.current_request = None
@@ -212,7 +244,9 @@ class TestDriverTarget(unittest.TestCase):
         self.assertIsNone(result)
     
     def test_target_point_to_pickup(self):
-        """Test target_point() returns pickup when status is TO_PICKUP."""
+        """
+        Test target_point() returns pickup when status is TO_PICKUP.
+        """
   
         request = Request(
             id=101,
@@ -230,7 +264,9 @@ class TestDriverTarget(unittest.TestCase):
         self.assertEqual(result.y, 5)    
     
     def test_target_point_to_dropoff(self):
-        """Test target_point() returns dropoff when status is TO_DROPOFF."""
+        """
+        Test target_point() returns dropoff when status is TO_DROPOFF.
+        """
 
         request = Request(
             id = 102,
@@ -248,4 +284,4 @@ class TestDriverTarget(unittest.TestCase):
         self.assertEqual(result.y, 6)
         
 if __name__ == '__main__':
-    unittest.main(verbosity=2)
+    unittest.main(verbosity = 2)
