@@ -60,7 +60,7 @@ class TestDriverMovement(TestCase):
         self.driver = Driver(
             id=1,
             position=Point(0, 0),
-            speed=2.0,  # 2 units per tick
+            speed=2.0,
             behaviour=self.mock_behaviour
         )
     
@@ -92,3 +92,61 @@ class TestDriverMovement(TestCase):
             self.assertEqual(self.driver.position.x, 2.0) 
             self.assertEqual(self.driver.position.y, 0.0)
 
+
+class TestDriverStateTransitions(TestCase):
+    """Test Driver state transitions (pickup/dropoff)."""
+    
+    def setUp(self):
+        self.mock_behaviour = Mock()
+        self.driver = Driver(
+            id=1,
+            position=Point(0, 0),
+            speed=1.0,
+            behaviour=self.mock_behaviour
+        )
+    
+    def test_assign_request(self):
+        """Test assigning a request to driver."""
+
+        mock_request = Mock(spec=Request)
+        mock_request.id = 101
+        mock_request.mark_assigned = Mock()
+        
+        self.driver.assign_request(mock_request)
+        
+
+        self.assertEqual(self.driver.current_request, mock_request)
+        self.assertEqual(self.driver.status, "TO_PICKUP")
+        self.assertEqual(self.driver.position_at_assignment, Point(0, 0))
+        mock_request.mark_assigned.assert_called_once_with(1)
+    
+    def test_complete_pickup(self):
+        """Test completing a pickup."""
+
+        mock_request = Mock(spec=Request)
+        mock_request.mark_picked = Mock()
+        
+
+        self.driver.current_request = mock_request
+        self.driver.status = "TO_PICKUP"
+        
+        self.driver.complete_pickup(time=10)
+        
+
+        self.assertEqual(self.driver.status, "TO_DROPOFF")
+        mock_request.mark_picked.assert_called_once_with(10)
+    
+    def test_complete_pickup_wrong_state(self):
+        """Test complete_pickup when driver is not in TO_PICKUP state."""
+        mock_request = Mock(spec=Request)
+        mock_request.mark_picked = Mock()
+        
+
+        self.driver.current_request = mock_request
+        self.driver.status = "IDLE"
+        
+        self.driver.complete_pickup(time=10)
+        
+  
+        mock_request.mark_picked.assert_not_called()
+        self.assertEqual(self.driver.status, "IDLE")
