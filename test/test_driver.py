@@ -68,10 +68,7 @@ class TestDriverMovement(unittest.TestCase):
         """Test step() when driver has no target (should do nothing)."""
        
         initial_position = self.driver.position
-        
         self.driver.step(dt=1.0)
-        
-        
         self.assertEqual(self.driver.position.x, initial_position.x)
         self.assertEqual(self.driver.position.y, initial_position.y)
     
@@ -118,7 +115,11 @@ class TestDriverStateTransitions(unittest.TestCase):
 
         self.assertEqual(self.driver.current_request, mock_request)
         self.assertEqual(self.driver.status, "TO_PICKUP")
-        self.assertEqual(self.driver.position_at_assignment, Point(0, 0))
+        self.assertIsNotNone(self.driver.position_at_assignment)
+        pos = self.driver.position_at_assignment
+        assert pos is not None
+        self.assertEqual(pos.x, 0)
+        self.assertEqual(pos.y, 0)
         mock_request.mark_assigned.assert_called_once_with(1)
     
     def test_complete_pickup(self):
