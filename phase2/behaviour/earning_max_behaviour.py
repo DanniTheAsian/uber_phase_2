@@ -53,14 +53,16 @@ class EarningMaxBehaviour(DriverBehaviour):
         """
 
         if offer.estimated_reward is None:
-            return False
+            reward = 0.0
+        else:
+            reward = offer.estimated_reward
         
         if offer.estimated_travel_time <= 0:
             return False
         
         threshold = self.min_ratio * (1 + 0.0005 * time)
         
-        ratio = offer.estimated_reward / offer.estimated_travel_time
+        ratio = reward / offer.estimated_travel_time
         return ratio >= threshold
 
     # for debugging
