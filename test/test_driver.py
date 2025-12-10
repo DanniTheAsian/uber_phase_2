@@ -49,3 +49,46 @@ class TestDriverInitialization(TestCase):
         assert driver.current_request is not None
         self.assertEqual(driver.current_request.id, 101)
         self.assertEqual(driver.history, [{"test": "data"}])
+
+
+class TestDriverMovement(TestCase):
+    """Test Driver movement and step functionality."""
+    
+    def setUp(self):
+        """Set up test fixture before each test."""
+        self.mock_behaviour = Mock()
+        self.driver = Driver(
+            id=1,
+            position=Point(0, 0),
+            speed=2.0,  # 2 units per tick
+            behaviour=self.mock_behaviour
+        )
+    
+    def test_step_with_no_target(self):
+        """Test step() when driver has no target (should do nothing)."""
+       
+        initial_position = self.driver.position
+        
+        self.driver.step(dt=1.0)
+        
+        
+        self.assertEqual(self.driver.position.x, initial_position.x)
+        self.assertEqual(self.driver.position.y, initial_position.y)
+    
+    def test_step_towards_target(self):
+        """Test step() moves driver towards target."""
+        
+        request = Request(
+            id=101,
+            pickup=Point(10, 0),
+            dropoff=Point(20, 0),
+            creation_time=0
+        )
+        
+
+        with patch.object(self.driver, 'target_point', return_value=Point(10, 0)):
+            
+            self.driver.step(dt=1.0) 
+            self.assertEqual(self.driver.position.x, 2.0) 
+            self.assertEqual(self.driver.position.y, 0.0)
+
