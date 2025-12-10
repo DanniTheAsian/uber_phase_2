@@ -1,5 +1,5 @@
 import unittest
-from unittest.mock import Mock, MagicMock, patch
+from unittest.mock import Mock, patch
 from phase2.driver import Driver
 from phase2.point import Point
 from phase2.request import Request
@@ -89,7 +89,8 @@ class TestDriverMovement(unittest.TestCase):
             self.driver.assign_request(request, reward = 15.0)
         
         self.driver.step(dt = 1.0)
-        self.assertEqual(self.driver.position, Point(2.0, 0.0))
+        self.assertEqual(self.driver.position.x, 2.0)
+        self.assertEqual(self.driver.position.y, 0.0)
         self.assertEqual(self.driver.status, "TO_PICKUP")
 
 
@@ -222,22 +223,29 @@ class TestDriverTarget(unittest.TestCase):
         self.driver.current_request = request
         
         result = self.driver.target_point()
-        self.assertEqual(result, Point(5, 5))
+        self.assertIsNotNone(result)
+        assert result is not None
+        self.assertEqual(result.x, 5)   
+        self.assertEqual(result.y, 5)    
     
     def test_target_point_to_dropoff(self):
         """Test target_point() returns dropoff when status is TO_DROPOFF."""
 
         request = Request(
-            id=102,
-            pickup=Point(0, 0),
-            dropoff=Point(8, 6),
+            id = 102,
+            pickup = Point(0, 0),
+            dropoff = Point(8, 6),
             creation_time=0
         )
         self.driver.status = "TO_DROPOFF"
         self.driver.current_request = request
         
         result = self.driver.target_point()
-        self.assertEqual(result, Point(8, 6))
+        self.assertIsNotNone(result)
+        assert result is not None
+        self.assertEqual(result.x, 8)
+        self.assertEqual(result.y, 6)
+        
 
 
 if __name__ == '__main__':
