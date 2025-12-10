@@ -247,7 +247,5 @@ class TestDriverTarget(unittest.TestCase):
         self.assertEqual(result.x, 8)
         self.assertEqual(result.y, 6)
         
-
-
 if __name__ == '__main__':
     unittest.main(verbosity=2)
