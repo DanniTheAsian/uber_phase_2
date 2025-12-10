@@ -1,49 +1,45 @@
 """
-A 2D point class with basic math operations
-
-Modules:
-- Math
-
+2D point helpers with basic vector arithmetic.
 """
 from math import sqrt
 
 class Point:
     """
-    A point in 2D space
-    
+    Immutable point in 2D space with common vector operations.
+
     Attributes:
-    x (float): x-value
-    y (float): y-value
+        x (float): Horizontal coordinate.
+        y (float): Vertical coordinate.
     """
     def __init__(self, x:float, y:float) -> None:
         """
-        Initialize a Point
-        
-        Arguments:
-            x (float): x-coordinate
-            y (float): y-coordinate
+        Create a point with explicit coordinates.
 
-        Return:
-            None
+        Args:
+            x (float): Horizontal coordinate.
+            y (float): Vertical coordinate.
 
         Example:
-            >>> p = Point(2,3)
-            >>> p.x, p.y
+            >>> p = Point(2, 3)
+            >>> (p.x, p.y)
             (2, 3)
         """
         self.x = x
         self.y = y
     
     def distance_to(self, other: "Point") -> float:
-        """Docstring
-        >>> self.x = 0
-        >>> self.y = 0
-        >>> other.x = 3
-        >>> other.y = 4
-        >>> point1 = Point(self.x, self.y)
-        >>> point2 = Point(other.x, other.y)
-        >>> point1.distance_to(point2)
-        5.0
+        """
+        Calculate the Euclidean distance to another point.
+
+        Args:
+            other (Point): The point to measure against.
+
+        Returns:
+            float: Non-negative Euclidean distance between the points.
+
+        Example:
+            >>> Point(0, 0).distance_to(Point(3, 4))
+            5.0
         """
         dx = self.x - other.x
         dy = self.y - other.y
@@ -51,13 +47,13 @@ class Point:
     
     def __add__(self, other: "Point") -> "Point":
         """
-        Add two points together (x + x, y + y) and returns a new point
-        
-        Arguments:
-            other (Point): The point to add.
-        
+        Return a new point representing component-wise addition.
+
+        Args:
+            other (Point): Point whose coordinates are added.
+
         Returns:
-            Point: A new point with the summed coordinates
+            Point: Fresh point containing the summed coordinates.
 
         Example:
             >>> p = Point(1, 2) + Point(3, 4)
@@ -68,13 +64,13 @@ class Point:
     
     def __iadd__(self, other: "Point") -> "Point":
         """
-        Add another point to this point (in-place)
-        
-        Arguments:
-            other (Point): the point to add
+        Add another point to this one in place.
 
-        return:
-            Point: Modified Point
+        Args:
+            other (Point): Point whose coordinates are added.
+
+        Returns:
+            Point: This point after mutation.
 
         Example:
             >>> p = Point(1, 1)
@@ -88,13 +84,13 @@ class Point:
 
     def __sub__(self, other: "Point") -> "Point":
         """
-        Subtract another point and return a new point.
+        Return a new point containing the coordinate differences.
 
-        Arguments:
-            other (Point): The point to subtract.
+        Args:
+            other (Point): Point to subtract.
 
         Returns:
-            Point: A new point containing the difference.
+            Point: Fresh point containing the difference.
 
         Example:
             >>> p = Point(5, 5) - Point(2, 3)
@@ -105,13 +101,13 @@ class Point:
     
     def __isub__(self, other: "Point") -> "Point":
         """
-        Subtract another point from this one (in-place).
+        Subtract another point from this one in place.
 
-        Arguments:
-            other (Point): The point to subtract.
+        Args:
+            other (Point): Point to subtract.
 
         Returns:
-            Point: The modified point.
+            Point: This point after mutation.
 
         Example:
             >>> p = Point(5, 5)
@@ -125,13 +121,13 @@ class Point:
     
     def __mul__(self, scalar: int | float) -> "Point":
         """
-        Multiply this point by a scalar and return a new point.
+        Scale the point by a scalar and return a new point.
 
-        Arguments:
-            scalar (int | float): The number to multiply with.
+        Args:
+            scalar (int | float): Factor to multiply the coordinates by.
 
         Returns:
-            Point: A new scaled point.
+            Point: Scaled point with multiplied coordinates.
 
         Example:
             >>> p = Point(2, 3) * 2
@@ -142,13 +138,13 @@ class Point:
     
     def __rmul__(self, scalar: int | float) -> "Point":
         """
-        Allow scalar * point multiplication.
+        Support scalar multiplication with the scalar on the left-hand side.
 
-        Arguments:
-            scalar (int | float): The number to multiply with.
+        Args:
+            scalar (int | float): Factor to multiply the coordinates by.
 
         Returns:
-            Point: A new scaled point.
+            Point: Scaled point with multiplied coordinates.
 
         Example:
             >>> p = 2 * Point(2, 3)

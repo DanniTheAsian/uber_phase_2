@@ -1,33 +1,26 @@
+"""
+Global greedy dispatch policy matching drivers to requests by distance.
+"""
 from .dispatch_policy import DispatchPolicy
 from ..driver import Driver
 from ..request import Request
 
 class GlobalGreedyPolicy(DispatchPolicy):
+    """
+    Match drivers to requests by globally minimizing pickup distances.
+    """
 
     def assign(self, drivers: list["Driver"], requests: list["Request"], time: int) -> list[tuple["Driver", "Request"]]:
         """
-        Assigns drivers to requests using a global greedy matching strategy.
+        Pair drivers and requests by iterating over combinations sorted by distance.
 
-        This method computes all possible (driver, request) combinations and 
-        calculates the distance between each driver's current position and the 
-        request's pickup location. All combinations are then sorted by distance 
-        in ascending order.
+        Args:
+            drivers (list[Driver]): Available drivers at the current tick.
+            requests (list[Request]): Active requests waiting for assignment.
+            time (int): Simulation tick (unused, kept for interface compatibility).
 
-        The algorithm selects matches greedily by iterating through the sorted 
-        combinations and assigning each driver to the closest available request, 
-        ensuring that no driver or request is assigned more than once.
-
-        Parameters:
-        drivers : list[Driver]
-            The list of available drivers at the current simulation step.
-        requests : list[Request]
-            The list of active requests waiting to be assigned.
-        time : int
-            The current simulation time (not used directly but kept for interface compatibility).
-
-        Return:
-        list[tuple[Driver, Request]]
-            A list of (driver, request) pairs representing the assignments made.
+        Returns:
+            list[tuple[Driver, Request]]: Greedy driver/request assignments.
         """
         combos = []
         for driver in drivers:
