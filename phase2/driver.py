@@ -164,3 +164,4 @@ class Driver:
             self.status = "IDLE"
             self.position_at_assignment = None
             self.assigned_reward = 0.0
+            

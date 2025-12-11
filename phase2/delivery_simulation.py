@@ -1,6 +1,7 @@
 from .driver import Driver
 from .request import Request
 from .offer import Offer
+from .mutationrule.mutationrule import MutationRule
 from .policies.dispatch_policy import DispatchPolicy
 from .request_generator import RequestGenerator
 from .mutationrule.mutationrule import MutationRule
@@ -15,7 +16,7 @@ class DeliverySimulation:
                  mutation_rule: MutationRule,
                  timeout: int,
                  base_reward: float = 25.0,    
-                 distance_rate: float = 0.2 
+                 distance_rate: float = 0.2
                  ) -> None:
         
         self.time: int = 0
@@ -63,7 +64,7 @@ class DeliverySimulation:
               
         # 3. Compute proposed assignments via dispatch_policy.
         
-        # find all idle drivers and all waiting requests
+        # Searching all idle drivers and all waiting requests
         idle_drivers = [d for d in self.drivers if d.status == "IDLE"]
         waiting_requests = [r for r in active_requests if r.status == "WAITING"]
     
@@ -87,7 +88,7 @@ class DeliverySimulation:
             
             reward = self._calculate_reward(driver, request)
             
-            offer = Offer(driver, request, estimated_time,reward)
+            offer = Offer(driver, request, estimated_time, reward)
 
             # Ask driver if they accept (if they have behaviour)
             if driver.behaviour and driver.behaviour.decide(driver, offer, self.time):
@@ -97,36 +98,36 @@ class DeliverySimulation:
         # 5. Resolve conflicts and finalise assignments.
         assigned_requests = set()
 
-        for driver, request in accepted_offers:
+        for driver, request, payment in accepted_offers:
             if request in assigned_requests:
                 continue
             if request.status != "WAITING":
                 continue
 
             try:
-            
-                driver.assign_request(request, reward)
+                driver.assign_request(request, payment)
                 assigned_requests.add(request)
 
             except Exception as e:
                 print(f"Assignment failed: {e}")
                 continue
+
+
         # 6. Move drivers and handle pickup/dropoff events.
         for driver in self.drivers:
-            # Move driver
-            driver.step(dt=1.0)
+            
+            driver.step(dt = 1.0)
             
             # Check pickup
-            if (driver.status == "TO_PICKUP" and 
-                driver.current_request and
-                driver.position == driver.current_request.pickup):
+            if driver.status == "TO_PICKUP" and driver.current_request and driver.position == driver.current_request.pickup:
+                
                 driver.complete_pickup(self.time)
             
-            # Check dropoff  
-            if (driver.status == "TO_DROPOFF" and
-                driver.current_request and
-                driver.position == driver.current_request.dropoff):
-                delivered_request = driver.complete_dropoff(self.time)
+            # Check dropoff
+            if driver.status == "TO_DROPOFF" and driver.current_request and driver.position == driver.current_request.dropoff:
+
+                delivered_request = driver.current_request
+                driver.complete_dropoff(self.time)
                 
                 if delivered_request:
                     self.served_count += 1
@@ -134,7 +135,9 @@ class DeliverySimulation:
                     self.total_wait_time += delivered_request.wait_time
 
 
-        # 7. Apply mutation_rule
+        
+
+
         
     
 
