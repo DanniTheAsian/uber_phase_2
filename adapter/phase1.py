@@ -1,6 +1,3 @@
-from __future__ import annotations
-
-import itertools
 import random
 from typing import Dict, List
 
@@ -8,7 +5,6 @@ from .adapter import SimulationAdapter
 
 
 ADAPTER = SimulationAdapter()
-_REQUEST_COUNTER = itertools.count(1)
 
 
 def load_drivers(_path):
@@ -37,6 +33,8 @@ def generate_drivers(n, width, height):
 
 
 def generate_requests(start_t, out_list, rate, width, height):
+    # Use the adapter-held counter to avoid module-level globals
+    # ADAPTER.next_request_id will be incremented for each new request
     if rate <= 0:
         return
 
@@ -49,7 +47,7 @@ def generate_requests(start_t, out_list, rate, width, height):
     for _ in range(count):
         out_list.append(
             {
-                "id": next(_REQUEST_COUNTER),
+                "id": ADAPTER.next_request_id,
                 "px": random.uniform(0, width),
                 "py": random.uniform(0, height),
                 "dx": random.uniform(0, width),
@@ -58,6 +56,7 @@ def generate_requests(start_t, out_list, rate, width, height):
                 "status": "waiting",
             }
         )
+        ADAPTER.next_request_id += 1
 
 def init_state(drivers, requests, timeout, req_rate, width, height):
     return ADAPTER.init_state(

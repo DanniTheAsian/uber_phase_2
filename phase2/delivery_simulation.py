@@ -5,7 +5,7 @@ from .driver import Driver
 from .request import Request
 from .policies.dispatch_policy import DispatchPolicy
 from .request_generator import RequestGenerator
-from .mutationrule import mutationrule
+from .mutationrule.mutationrule import MutationRule
 from .offer import Offer
 
 
@@ -17,7 +17,7 @@ class DeliverySimulation:
         requests: List[Request],
         dispatch_policy: DispatchPolicy,
         request_generator: RequestGenerator,
-        mutation_rule: mutationrule,
+        mutation_rule: MutationRule,
         timeout: int,
     ) -> None:
         """Initialize a DeliverySimulation instance.
@@ -164,14 +164,17 @@ class DeliverySimulation:
         for driver in self.drivers:
             driver.step(1.0)
 
-            if driver.at_pickup():
-                driver.complete_pickup(self.time)
+            # arrival detection: check proximity to pickup/dropoff points
+            if driver.current_request and driver.status == "TO_PICKUP":
+                if driver.position.distance_to(driver.current_request.pickup) < 1e-6:
+                    driver.complete_pickup(self.time)
 
-            if driver.at_dropoff():
-                delivered_req = driver.complete_dropoff(self.time)
-                if delivered_req is None:
-                    delivered_req = getattr(driver, "current_request", None)
-                if delivered_req:
-                    self.served_count += 1
-                    self.completed_deliveries += 1
-                    self.total_wait_time += getattr(delivered_req, "wait_time", 0)
+            if driver.current_request and driver.status == "TO_DROPOFF":
+                if driver.position.distance_to(driver.current_request.dropoff) < 1e-6:
+                    # capture request reference before completion clears it
+                    req = driver.current_request
+                    driver.complete_dropoff(self.time)
+                    if req:
+                        self.served_count += 1
+                        self.completed_deliveries += 1
+                        self.total_wait_time += getattr(req, "wait_time", 0)

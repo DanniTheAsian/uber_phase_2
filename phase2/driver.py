@@ -44,22 +44,16 @@ class Driver:
         else:
             self.history = history
     
-    def assign_request(self, request: Request, reward: float) -> None:
-        """ Assign a delivery request to the driver.
-        
-        Stores the driver's current position for distance calculation,
-        updates the driver's status to TO_PICKUP, and marks the request
-        as assigned to this driver.
-        
-        Args:
-            request (Request): The delivery request to assign.
-        
-        Returns:
-            None
+    def assign_request(self, request: Request, current_time: int) -> None:
+        """Assign a delivery request to the driver.
+
+        Records position at assignment, sets current request and status to
+        TO_PICKUP and marks the request as assigned.
         """
         self.position_at_assignment = self.position
         self.current_request = request
-        self.assigned_reward = reward
+        # reward estimation not available here; default to 0.0
+        self.assigned_reward = 0.0
         self.status = "TO_PICKUP"
         request.mark_assigned(self.id)
 
@@ -140,13 +134,18 @@ class Driver:
             Returns:
                 None
         """
-        if self.current_request and self.status == "TO_DROPOFF" and self.position_at_assignment is not None:
+        if self.current_request and self.status == "TO_DROPOFF":
             self.current_request.mark_delivered(time)
 
             pickup_position = self.current_request.pickup
             dropoff_position = self.current_request.dropoff
 
-            distance_to_pickup = self.position_at_assignment.distance_to(pickup_position)
+            # position_at_assignment may be None; guard accordingly
+            if self.position_at_assignment is not None:
+                distance_to_pickup = self.position_at_assignment.distance_to(pickup_position)
+            else:
+                distance_to_pickup = 0.0
+
             distance_from_pickup_to_dropoff = pickup_position.distance_to(dropoff_position)
 
             total_distance = distance_to_pickup + distance_from_pickup_to_dropoff
@@ -157,10 +156,13 @@ class Driver:
                 "request_id": self.current_request.id,
                 "completion_time": time,
                 "earnings": earnings,
-                "total_distance": total_distance
+                "total_distance": total_distance,
             })
-                            
+
             self.current_request = None
             self.status = "IDLE"
             self.position_at_assignment = None
             self.assigned_reward = 0.0
+
+    # Note: arrival detection is handled by DeliverySimulation by checking
+    # the driver's position against the request pickup/dropoff points.
