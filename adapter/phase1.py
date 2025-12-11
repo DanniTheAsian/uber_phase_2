@@ -1,11 +1,10 @@
-from typing import List, Dict, Tuple, Optional
+from typing import List, Dict, Tuple
 from .adapter import SimulationAdapter
 from phase2.driver import Driver
 from phase2.point import Point
 from phase2.request import Request
 from phase2.request_generator import RequestGenerator
 import random
-
 
 
 ADAPTER = SimulationAdapter()
