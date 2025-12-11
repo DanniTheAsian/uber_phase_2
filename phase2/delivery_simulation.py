@@ -72,7 +72,11 @@ class DeliverySimulation:
         """
 
         # 1) Generate new requests
-        new_requests: List[Request] = self.request_generator.maybe_generate(self.time) or []
+        try:
+            new_requests: List[Request] = self.request_generator.maybe_generate(self.time) or []
+        except (AttributeError, TypeError, ValueError) as err:
+            print(f"Request generator error at tick {self.time}: {err}")
+            new_requests = []
         if new_requests:
             self.requests.extend(new_requests)
 
@@ -89,9 +93,13 @@ class DeliverySimulation:
                         active_requests.append(req)
 
         # 3) Compute proposed assignments via dispatch_policy
-        proposals: List[Tuple[Driver, Request]] = self.dispatch_policy.assign(
-            self.drivers, active_requests, self.time
-        ) or []
+        try:
+            proposals: List[Tuple[Driver, Request]] = self.dispatch_policy.assign(
+                self.drivers, active_requests, self.time
+            ) or []
+        except (AttributeError, TypeError, ValueError) as err:
+            print(f"Dispatch policy error at tick {self.time}: {err}")
+            proposals = []
 
         # 4) Convert proposals to offers, ask driver behaviours to accept/reject
         accepted: List[Tuple[Driver, Request]] = []
@@ -102,12 +110,27 @@ class DeliverySimulation:
 
             try:
                 dist = driver.position.distance_to(req.pickup)
-                est_time = dist / (driver.speed or 1)
-            except Exception:
+                est_time = dist / driver.speed if driver.speed else 0.0
+            except (AttributeError, TypeError) as err:
+                try:
+                    driver_id = driver.id
+                except AttributeError:
+                    driver_id = "?"
+                print(f"Offer estimate error for driver {driver_id}: {err}")
                 est_time = 0.0
 
             offer = Offer(driver=driver, request=req, estimated_travel_time=est_time)
-            if driver.behaviour.decide(driver, offer, self.time):
+            try:
+                decision = driver.behaviour.decide(driver, offer, self.time)
+            except (AttributeError, TypeError, ValueError) as err:
+                try:
+                    driver_id = driver.id
+                except AttributeError:
+                    driver_id = "?"
+                print(f"Behaviour error for driver {driver_id}: {err}")
+                decision = False
+
+            if decision:
                 accepted.append((driver, req))
 
         # 5) Resolve conflicts and finalise assignments (first-come, first-served)
@@ -120,23 +143,44 @@ class DeliverySimulation:
 
         # 6) Move drivers and handle pickup/dropoff events
         for driver in self.drivers:
-            driver.step(1.0)
+            try:
+                driver.step(1.0)
 
-            if driver.at_pickup():
-                driver.complete_pickup(self.time)
+                if driver.at_pickup():
+                    driver.complete_pickup(self.time)
 
-            if driver.at_dropoff():
-                delivered_req = driver.complete_dropoff(self.time)
-                if delivered_req is None:
-                    delivered_req = getattr(driver, "current_request", None)
-                if delivered_req:
-                    self.served_count += 1
-                    self.completed_deliveries += 1
-                    self.total_wait_time += getattr(delivered_req, "wait_time", 0)
+                if driver.at_dropoff():
+                    delivered_req = driver.complete_dropoff(self.time)
+                    if delivered_req is None:
+                        try:
+                            delivered_req = driver.current_request
+                        except AttributeError:
+                            delivered_req = None
+                    if delivered_req:
+                        self.served_count += 1
+                        self.completed_deliveries += 1
+                        try:
+                            wait_time = delivered_req.wait_time
+                        except AttributeError:
+                            wait_time = 0
+                        self.total_wait_time += wait_time
+            except (AttributeError, TypeError, ValueError) as err:
+                try:
+                    driver_id = driver.id
+                except AttributeError:
+                    driver_id = "?"
+                print(f"Driver lifecycle error for driver {driver_id}: {err}")
 
         # 7) Apply mutation_rule to each driver
         for driver in self.drivers:
-            self.mutation_rule.maybe_mutate(driver, self.time)
+            try:
+                self.mutation_rule.maybe_mutate(driver, self.time)
+            except (AttributeError, TypeError, ValueError) as err:
+                try:
+                    driver_id = driver.id
+                except AttributeError:
+                    driver_id = "?"
+                print(f"Mutation error for driver {driver_id}: {err}")
 
         # 8) Increment time
         self.time += 1
