@@ -56,15 +56,39 @@ class EarningMaxBehaviour(DriverBehaviour):
             - Uses time-adjusted threshold: min_ratio * (1 + 0.0005 * time)
         """
 
-        if offer.estimated_reward is None:
+        try:
+            reward = offer.estimated_reward
+            travel_time = offer.estimated_travel_time
+        except (AttributeError, TypeError) as err:
+            print(f"EarningMaxBehaviour offer error: {err}")
             return False
-        
-        if offer.estimated_travel_time <= 0:
+
+        if reward is None:
             return False
-        
-        threshold = self.min_ratio * (1 + 0.0005 * time)
-        
-        ratio = offer.estimated_reward / offer.estimated_travel_time
+
+        try:
+            travel_time_value = float(travel_time)
+        except (TypeError, ValueError) as err:
+            print(f"EarningMaxBehaviour travel time error: {err}")
+            return False
+
+        if travel_time_value <= 0:
+            return False
+
+        try:
+            base_ratio = float(self.min_ratio)
+        except (TypeError, ValueError) as err:
+            print(f"EarningMaxBehaviour ratio error: {err}")
+            return False
+
+        threshold = base_ratio * (1 + 0.0005 * time)
+
+        try:
+            ratio = float(reward) / travel_time_value
+        except (TypeError, ValueError, ZeroDivisionError) as err:
+            print(f"EarningMaxBehaviour ratio calc error: {err}")
+            return False
+
         return ratio >= threshold
 
     def __repr__(self) -> str:
