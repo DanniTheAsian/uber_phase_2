@@ -125,16 +125,24 @@ class Driver:
         if destination is None:
             return
         
-        distance = self.position.distance_to(destination)
-        movement = self.speed * dt
+        try:
+            distance = self.position.distance_to(destination)
+            movement = self.speed * dt
+        except (AttributeError, TypeError, ValueError) as err:
+            print(f"Driver step error for driver {self.id}: {err}")
+            return
 
         if distance <= movement:
             self.position = destination
         else:
-            ratio = movement / distance
-            direction = destination - self.position
-            travel = direction * ratio
-            self.position += travel
+            try:
+                ratio = movement / distance
+                direction = destination - self.position
+                travel = direction * ratio
+                self.position += travel
+            except (TypeError, ValueError) as err:
+                print(f"Driver movement math error for driver {self.id}: {err}")
+                return
 
     def complete_pickup(self, time: int) -> None:
         """
@@ -174,10 +182,14 @@ class Driver:
             pickup_position = self.current_request.pickup
             dropoff_position = self.current_request.dropoff
 
-            distance_to_pickup = self.position_at_assignment.distance_to(pickup_position)
-            distance_from_pickup_to_dropoff = pickup_position.distance_to(dropoff_position)
+            try:
+                distance_to_pickup = self.position_at_assignment.distance_to(pickup_position)
+                distance_from_pickup_to_dropoff = pickup_position.distance_to(dropoff_position)
+                total_distance = distance_to_pickup + distance_from_pickup_to_dropoff
+            except (AttributeError, TypeError, ValueError) as err:
+                print(f"Driver dropoff distance error for driver {self.id}: {err}")
+                total_distance = 0.0
 
-            total_distance = distance_to_pickup + distance_from_pickup_to_dropoff
             earnings = self.assigned_reward
 
             self.history.append({
