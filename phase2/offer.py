@@ -27,7 +27,14 @@ class Offer:
             estimated_travel_time (float): Travel time estimate in simulation ticks.
             estimated_reward (float | None): Optional reward estimate for the trip.
         """
-        self.driver = driver
-        self.request = request
-        self.estimated_travel_time = estimated_travel_time
-        self.estimated_reward = estimated_reward
+        try:
+            self.driver = driver
+            self.request = request
+            self.estimated_travel_time = float(estimated_travel_time)
+            self.estimated_reward = estimated_reward if estimated_reward is None else float(estimated_reward)
+        except (TypeError, ValueError) as err:
+            print(f"Offer initialization error: {err}")
+            self.driver = driver
+            self.request = request
+            self.estimated_travel_time = 0.0
+            self.estimated_reward = None
