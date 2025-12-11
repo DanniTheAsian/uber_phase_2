@@ -87,12 +87,7 @@ class DeliverySimulation:
             
             reward = self._calculate_reward(driver, request)
             
-            offer = Offer(
-            driver = driver,
-            request = request,
-            estimated_travel_time = estimated_time,
-            estimated_reward = reward
-            )
+            offer = Offer(driver, request, estimated_time,reward)
 
             # Ask driver if they accept (if they have behaviour)
             if driver.behaviour and driver.behaviour.decide(driver, offer, self.time):
@@ -108,16 +103,39 @@ class DeliverySimulation:
             if request.status != "WAITING":
                 continue
 
-            # Reward based on distance
-            distance = driver.position.distance_to(request.pickup)
-            reward = distance * 1.0
+            try:
+            
+                driver.assign_request(request, reward)
+                assigned_requests.add(request)
 
-
-            driver.assign_request(request, reward= reward)
-                                  
-            assigned_requests.add(request)
+            except Exception as e:
+                print(f"Assignment failed: {e}")
+                continue
         # 6. Move drivers and handle pickup/dropoff events.
+        for driver in self.drivers:
+            # Move driver
+            driver.step(dt=1.0)
+            
+            # Check pickup
+            if (driver.status == "TO_PICKUP" and 
+                driver.current_request and
+                driver.position == driver.current_request.pickup):
+                driver.complete_pickup(self.time)
+            
+            # Check dropoff  
+            if (driver.status == "TO_DROPOFF" and
+                driver.current_request and
+                driver.position == driver.current_request.dropoff):
+                delivered_request = driver.complete_dropoff(self.time)
+                
+                if delivered_request:
+                    self.served_count += 1
+                    self.completed_deliveries += 1
+                    self.total_wait_time += delivered_request.wait_time
+
+
         # 7. Apply mutation_rule
+        
     
 
     def _calculate_reward(self, driver: Driver, request: Request) -> float:
