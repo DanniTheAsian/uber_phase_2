@@ -32,10 +32,18 @@ class GlobalGreedyPolicy(DispatchPolicy):
         combos = []
         for driver in drivers:
             for request in requests:
-                distance = driver.position.distance_to(request.pickup)
-                combos.append((distance, driver, request))
+                try:
+                    distance = driver.position.distance_to(request.pickup)
+                    combos.append((distance, driver, request))
+                except (AttributeError, TypeError, ValueError) as err:
+                    print(f"GlobalGreedyPolicy pairing error: {err}")
+                    continue
 
-        combos.sort(key=lambda combo: (combo[0], getattr(combo[1], "id", 0), getattr(combo[2], "id", 0)))
+        try:
+            combos.sort(key=lambda combo: (combo[0], getattr(combo[1], "id", 0), getattr(combo[2], "id", 0)))
+        except TypeError as err:
+            print(f"GlobalGreedyPolicy sort error: {err}")
+            combos = []
 
         used_drivers = set()
         used_requests = set()

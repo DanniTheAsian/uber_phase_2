@@ -43,6 +43,11 @@ class GreedyDistanceBehaviour(DriverBehaviour):
         Returns:
             bool: True if pickup distance is below max_distance.
         """
-        pickup_point = offer.request.pickup
-        distance = driver.position.distance_to(pickup_point)
+        try:
+            pickup_point = offer.request.pickup
+            distance = driver.position.distance_to(pickup_point)
+        except (AttributeError, TypeError, ValueError) as err:
+            print(f"GreedyDistanceBehaviour error: {err}")
+            return False
+
         return distance < self.max_distance
