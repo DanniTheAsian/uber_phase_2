@@ -140,6 +140,7 @@ class DeliverySimulation:
             self.mutation_rule.maybe_mutate(driver, self.time)
 
         # 8. Increment time.
+        self.time += 1
 
 
         
