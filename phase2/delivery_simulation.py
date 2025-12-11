@@ -135,7 +135,11 @@ class DeliverySimulation:
                     self.total_wait_time += delivered_request.wait_time
 
 
-        
+        # 7. Apply mutation_rule
+        for driver in self.drivers:
+            self.mutation_rule.maybe_mutate(driver, self.time)
+
+        # 8. Increment time.
 
 
         
