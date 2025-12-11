@@ -14,6 +14,8 @@ class DeliverySimulation:
                  request_generator: RequestGenerator,
                  mutation_rule: MutationRule,
                  timeout: int,
+                 base_reward: float = 25.0,    
+                 distance_rate: float = 0.2 
                  ) -> None:
         
         self.time: int = 0
@@ -24,6 +26,10 @@ class DeliverySimulation:
         self.dispatch_policy = dispatch_policy
         self.request_generator = request_generator
         self.mutation_rule = mutation_rule
+
+        # Reward System
+        self.base_reward = base_reward
+        self.distance_rate = distance_rate
 
         # Statistics
         self.served_count: int = 0
@@ -90,7 +96,40 @@ class DeliverySimulation:
 
 
         # 5. Resolve conflicts and finalise assignments.
+        assigned_requests = set()
+
+        for driver, request in accepted_offers:
+            if request in assigned_requests:
+                continue
+            if request.status != "WAITING":
+                continue
+
+            # Reward based on distance
+            distance = driver.position.distance_to(request.pickup)
+            reward = distance * 1.0
+
+
+            driver.assign_request(request, reward= reward)
+                                  
+            assigned_requests.add(request)
         # 6. Move drivers and handle pickup/dropoff events.
         # 7. Apply mutation_rule
     
 
+    def _calculate_reward(self, driver: Driver, request: Request) -> float:
+        """
+        Calculate reward for driver accepting a request.
+        
+        Formula: base_reward + (distance * distance_rate)
+        
+        Args:
+            driver: The driver who might accept
+            request: The request being considered
+            
+        Returns:
+            float: Reward amount in points
+        """
+
+        distance = driver.position.distance_to(request.pickup)
+
+        return self.base_reward + (distance * self.distance_rate)
