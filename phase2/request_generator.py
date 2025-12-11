@@ -41,11 +41,20 @@ class RequestGenerator:
         """
         new_requests = []
 
-        if random.random() < self.rate:
-            pickup = Point(random.uniform(0, self.width), random.uniform(0, self.height))
-            dropoff = Point(random.uniform(0, self.width), random.uniform(0, self.height))
+        try:
+            should_spawn = random.random() < self.rate
+        except (TypeError, ValueError) as err:
+            print(f"RequestGenerator rate error: {err}")
+            return new_requests
 
-            req = Request(id=self.next_id, pickup=pickup, dropoff=dropoff, creation_time=time)
+        if should_spawn:
+            try:
+                pickup = Point(random.uniform(0, self.width), random.uniform(0, self.height))
+                dropoff = Point(random.uniform(0, self.width), random.uniform(0, self.height))
+                req = Request(id=self.next_id, pickup=pickup, dropoff=dropoff, creation_time=time)
+            except (TypeError, ValueError) as err:
+                print(f"RequestGenerator point error: {err}")
+                return new_requests
 
             self.next_id += 1
             new_requests.append(req)
