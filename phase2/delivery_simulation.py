@@ -132,10 +132,13 @@ class DeliverySimulation:
 
 
     def _propose_assignments(self, active_requests: List[Request]) -> List[Tuple[Driver, Request]]:
+        if self.dispatch_policy is None:
+            return []
+
         proposals = self.dispatch_policy.assign(
-            self.drivers, active_requests, self.time
-        ) or []
+        self.drivers, active_requests, self.time) or []
         return proposals
+
 
     def _process_offers(self, proposals: List[Tuple[Driver, Request]]) -> List[Tuple[Driver, Request]]:
         accepted = []
