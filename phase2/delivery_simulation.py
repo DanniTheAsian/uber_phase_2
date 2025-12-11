@@ -143,8 +143,49 @@ class DeliverySimulation:
         self.time += 1
 
 
+    def get_snapshot(self) -> dict:
+        drivers_data = []
         
-    
+        for driver in self.drivers:
+            driver_info = {
+                "id": driver.id,
+                "x": driver.position.x,
+                "y": driver.position.y,
+                "status": driver.status
+            }
+            drivers_data.append(driver_info)
+
+            
+        pickup_positions = []
+        dropoff_positions = []
+        for request in self.requests:
+            if request.status in ("WAITING", "ASSIGNED"):
+                pickup_positions.append((request.pickup.x, request.pickup.y))
+            elif request.status == "PICKED":
+                dropoff_positions.append((request.dropoff.x, request.dropoff.y))
+        
+        
+        if self.completed_deliveries > 0:
+            avg_wait = self.total_wait_time / self.completed_deliveries
+        else:
+            avg_wait = 0.0
+
+
+        stats = {
+            "served": self.served_count,
+            "expired": self.expired_count,
+            "avg_wait": avg_wait
+        }
+        
+        snapshot = {
+            "time": self.time,
+            "drivers": drivers_data,
+            "pickups": pickup_positions,
+            "dropoffs": dropoff_positions,
+            "statistics": stats
+        }
+        
+        return snapshot
 
     def _calculate_reward(self, driver: Driver, request: Request) -> float:
         """
@@ -162,4 +203,4 @@ class DeliverySimulation:
 
         distance = driver.position.distance_to(request.pickup)
 
-        return self.base_reward + (distance * self.distance_rate)
+        return self.base_reward + distance * self.distance_rate
