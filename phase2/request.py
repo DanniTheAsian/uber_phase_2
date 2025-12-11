@@ -34,10 +34,25 @@ class Request:
         Returns:
             None
         """
-        self.id = id
-        self.pickup = pickup
-        self.dropoff = dropoff
-        self.creation_time = creation_time
+        try:
+            self.id = int(id)
+        except (TypeError, ValueError) as err:
+            print(f"Request init id error: {err}")
+            self.id = -1
+
+        self.pickup = pickup if isinstance(pickup, Point) else None
+        if self.pickup is None:
+            print("Request init pickup error: invalid Point")
+
+        self.dropoff = dropoff if isinstance(dropoff, Point) else None
+        if self.dropoff is None:
+            print("Request init dropoff error: invalid Point")
+
+        try:
+            self.creation_time = int(creation_time)
+        except (TypeError, ValueError) as err:
+            print(f"Request init creation time error: {err}")
+            self.creation_time = 0
 
         self.status = "WAITING"
         self.assigned_driver_id: int | None = None
@@ -65,8 +80,13 @@ class Request:
         Returns:
             None
         """
-        self.status = "ASSIGNED"
-        self.assigned_driver_id = driver_id
+        try:
+            self.status = "ASSIGNED"
+            self.assigned_driver_id = int(driver_id)
+        except (TypeError, ValueError) as err:
+            print(f"Request mark_assigned error: {err}")
+            self.status = "ASSIGNED"
+            self.assigned_driver_id = None
 
     def mark_picked(self, t: int) -> None:
         """
@@ -82,7 +102,11 @@ class Request:
             None
         """
         self.status = "PICKED"
-        self.wait_time = t - self.creation_time
+        try:
+            self.wait_time = int(t) - self.creation_time
+        except (TypeError, ValueError) as err:
+            print(f"Request mark_picked error: {err}")
+            self.wait_time = 0
 
     def mark_delivered(self, t: int) -> None:
         """
@@ -98,7 +122,11 @@ class Request:
             None
         """
         self.status = "DELIVERED"
-        self.wait_time = t - self.creation_time
+        try:
+            self.wait_time = int(t) - self.creation_time
+        except (TypeError, ValueError) as err:
+            print(f"Request mark_delivered error: {err}")
+            self.wait_time = 0
 
     def mark_expired(self, t: int) -> None:
         """
@@ -115,7 +143,11 @@ class Request:
             None
         """
         self.status = "EXPIRED"
-        self.wait_time = t - self.creation_time
+        try:
+            self.wait_time = int(t) - self.creation_time
+        except (TypeError, ValueError) as err:
+            print(f"Request mark_expired error: {err}")
+            self.wait_time = 0
 
     def update_wait(self, current_time: int) -> None:
         """
@@ -127,4 +159,8 @@ class Request:
         Returns:
             None
         """
-        self.wait_time = current_time - self.creation_time
+        try:
+            self.wait_time = int(current_time) - self.creation_time
+        except (TypeError, ValueError) as err:
+            print(f"Request update_wait error: {err}")
+            self.wait_time = 0

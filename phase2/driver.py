@@ -61,15 +61,24 @@ class Driver:
         Returns:
             None
         """
-        self.position_at_assignment = self.position
-        self.current_request = request
-        if reward is None and isinstance(assignment_meta, (int, float)):
-            # Compatibility: older call sites pass current simulation time as the second argument.
-            self.assigned_reward = 0.0
-        else:
-            self.assigned_reward = reward if reward is not None else 0.0
-        self.status = "TO_PICKUP"
-        request.mark_assigned(self.id)
+        try:
+            self.position_at_assignment = self.position
+            self.current_request = request
+            if reward is None and isinstance(assignment_meta, (int, float)):
+                # Compatibility: older call sites pass current simulation time as the second argument.
+                self.assigned_reward = 0.0
+            else:
+                self.assigned_reward = reward if reward is not None else 0.0
+            self.status = "TO_PICKUP"
+            request.mark_assigned(self.id)
+        except AttributeError as err:
+            print(f"Driver assign_request attribute error for driver {self.id}: {err}")
+            self.current_request = None
+            self.status = "IDLE"
+        except (TypeError, ValueError) as err:
+            print(f"Driver assign_request error for driver {self.id}: {err}")
+            self.current_request = None
+            self.status = "IDLE"
 
     def _is_at_target(self, target: Point | None) -> bool:
         if target is None or self.position is None:
@@ -95,14 +104,21 @@ class Driver:
                          the dropoff point if status is TO_DROPOFF,
                          or None if the driver is idle or has no request.
         """
-        if self.current_request is None or self.status == "IDLE":
+        try:
+            request = self.current_request
+            status = self.status
+        except AttributeError as err:
+            print(f"Driver target_point error for driver {getattr(self, 'id', '?')}: {err}")
+            return None
+
+        if request is None or status == "IDLE":
             return None
         
-        if self.status == "TO_PICKUP":
-            return self.current_request.pickup
+        if status == "TO_PICKUP":
+            return getattr(request, "pickup", None)
         
-        if self.status == "TO_DROPOFF":
-            return self.current_request.dropoff
+        if status == "TO_DROPOFF":
+            return getattr(request, "dropoff", None)
         
         return None # returns None for unexpected status.
 
@@ -159,7 +175,10 @@ class Driver:
 
         if self.current_request and self.status == "TO_PICKUP":
             self.status = "TO_DROPOFF"
-            self.current_request.mark_picked(time)
+            try:
+                self.current_request.mark_picked(time)
+            except (AttributeError, TypeError, ValueError) as err:
+                print(f"Driver complete_pickup error for driver {self.id}: {err}")
         
     def complete_dropoff(self, time:int) -> None:
         """
@@ -177,7 +196,10 @@ class Driver:
             None
         """
         if self.current_request and self.status == "TO_DROPOFF" and self.position_at_assignment is not None:
-            self.current_request.mark_delivered(time)
+            try:
+                self.current_request.mark_delivered(time)
+            except (AttributeError, TypeError, ValueError) as err:
+                print(f"Driver complete_dropoff error for driver {self.id}: {err}")
 
             pickup_position = self.current_request.pickup
             dropoff_position = self.current_request.dropoff

@@ -28,7 +28,13 @@ class ExplorationMutationRule(MutationRule):
             >>> rule.probability
             0.1
         """
-        self.probability = probability
+        try:
+            value = float(probability)
+        except (TypeError, ValueError) as err:
+            print(f"ExplorationMutationRule init error: {err}")
+            value = 0.0
+
+        self.probability = min(1.0, max(0.0, value))
 
     def maybe_mutate(self, driver: "Driver", time: int) -> None:
         """
@@ -47,14 +53,35 @@ class ExplorationMutationRule(MutationRule):
         Returns:
             None
         """
+        try:
+            time_value = float(time)
+        except (TypeError, ValueError) as err:
+            print(f"ExplorationMutationRule time error: {err}")
+            return
 
-        effective_probability = self.probability * (1 + time * 0.0005)
-        effective_probability = min(1.0, effective_probability)
+        effective_probability = self.probability * (1 + time_value * 0.0005)
+        effective_probability = min(1.0, max(0.0, effective_probability))
 
-        if random.random() < effective_probability:
+        try:
+            roll = random.random()
+        except (RuntimeError, ValueError) as err:  # random shouldn't fail, but guard anyway
+            print(f"ExplorationMutationRule random error: {err}")
+            return
 
-            if isinstance(driver.behaviour, LazyBehaviour):
-                driver.behaviour = GreedyDistanceBehaviour(max_distance=10)
+        if roll < effective_probability:
+            try:
+                behaviour = driver.behaviour
+            except AttributeError as err:
+                print(f"ExplorationMutationRule behaviour error: {err}")
+                return
 
+            if isinstance(behaviour, LazyBehaviour):
+                try:
+                    driver.behaviour = GreedyDistanceBehaviour(max_distance=10)
+                except (AttributeError, TypeError, ValueError) as err:
+                    print(f"ExplorationMutationRule switch-to-greedy error: {err}")
             else:
-                driver.behaviour = LazyBehaviour(max_idle=5)
+                try:
+                    driver.behaviour = LazyBehaviour(max_idle=5)
+                except (AttributeError, TypeError, ValueError) as err:
+                    print(f"ExplorationMutationRule switch-to-lazy error: {err}")

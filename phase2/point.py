@@ -27,8 +27,17 @@ class Point:
             >>> p.x, p.y
             (2, 3)
         """
-        self.x = x
-        self.y = y
+        try:
+            self.x = float(x)
+        except (TypeError, ValueError) as err:
+            print(f"Point init x error: {err}")
+            self.x = 0.0
+
+        try:
+            self.y = float(y)
+        except (TypeError, ValueError) as err:
+            print(f"Point init y error: {err}")
+            self.y = 0.0
     
     def distance_to(self, other: "Point") -> float:
         """
@@ -44,9 +53,13 @@ class Point:
             >>> Point(0, 0).distance_to(Point(3, 4))
             5.0
         """
-        dx = self.x - other.x
-        dy = self.y - other.y
-        return sqrt(dx**2 + dy**2)
+        try:
+            dx = self.x - other.x
+            dy = self.y - other.y
+            return sqrt(dx**2 + dy**2)
+        except (AttributeError, TypeError, ValueError) as err:
+            print(f"Point distance error: {err}")
+            return 0.0
     
     def __add__(self, other: "Point") -> "Point":
         """
@@ -63,7 +76,11 @@ class Point:
             >>> (p.x, p.y)
             (4, 6)
         """
-        return Point(self.x + other.x, self.y + other.y)
+        try:
+            return Point(self.x + other.x, self.y + other.y)
+        except (AttributeError, TypeError, ValueError) as err:
+            print(f"Point add error: {err}")
+            return Point(self.x, self.y)
     
     def __iadd__(self, other: "Point") -> "Point":
         """
@@ -81,8 +98,11 @@ class Point:
             >>> (p.x, p.y)
             (3, 4)
         """
-        self.x += other.x
-        self.y += other.y
+        try:
+            self.x += other.x
+            self.y += other.y
+        except (AttributeError, TypeError, ValueError) as err:
+            print(f"Point iadd error: {err}")
         return self
 
     def __sub__(self, other: "Point") -> "Point":
@@ -100,7 +120,11 @@ class Point:
             >>> (p.x, p.y)
             (3, 2)
         """
-        return Point(self.x - other.x, self.y - other.y)
+        try:
+            return Point(self.x - other.x, self.y - other.y)
+        except (AttributeError, TypeError, ValueError) as err:
+            print(f"Point sub error: {err}")
+            return Point(self.x, self.y)
     
     def __isub__(self, other: "Point") -> "Point":
         """
@@ -118,8 +142,11 @@ class Point:
             >>> (p.x, p.y)
             (3, 2)
         """
-        self.x -= other.x
-        self.y -= other.y
+        try:
+            self.x -= other.x
+            self.y -= other.y
+        except (AttributeError, TypeError, ValueError) as err:
+            print(f"Point isub error: {err}")
         return self
     
     def __mul__(self, scalar: int | float) -> "Point":
@@ -137,7 +164,12 @@ class Point:
             >>> (p.x, p.y)
             (4, 6)
         """
-        return Point(self.x * scalar, self.y * scalar)
+        try:
+            factor = float(scalar)
+        except (TypeError, ValueError) as err:
+            print(f"Point mul error: {err}")
+            factor = 1.0
+        return Point(self.x * factor, self.y * factor)
     
     def __rmul__(self, scalar: int | float) -> "Point":
         """
