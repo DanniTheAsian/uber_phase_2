@@ -4,8 +4,6 @@ from .offer import Offer
 from .mutationrule.mutationrule import MutationRule
 from .policies.dispatch_policy import DispatchPolicy
 from .request_generator import RequestGenerator
-from .mutationrule.mutationrule import MutationRule
-
 
 class DeliverySimulation:
     def __init__(self,
@@ -163,8 +161,7 @@ class DeliverySimulation:
                 pickup_positions.append((request.pickup.x, request.pickup.y))
             elif request.status == "PICKED":
                 dropoff_positions.append((request.dropoff.x, request.dropoff.y))
-        
-        
+       
         if self.completed_deliveries > 0:
             avg_wait = self.total_wait_time / self.completed_deliveries
         else:

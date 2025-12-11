@@ -1,51 +1,33 @@
+from typing import List, Dict, Tuple
 from phase2.delivery_simulation import DeliverySimulation
+from phase2.policies.nearest_neighbor_policy import NearestNeighborPolicy
+from phase2.mutationrule.exploration import ExplorationMutationRule
+from phase2.request_generator import RequestGenerator
+from phase2.driver import Driver
+from phase2.point import Point
+from phase2.request import Request
 
 class SimulationAdapter:
-    """Adapter class that connects the GUI with the DeliverySimulation backend."""
-
-    def __init__(self):
+    def __init__(self) -> None:
         self.sim = None
 
-    def init_state(self, drivers, requests, timeout, req_rate, width, height):
-        """Phase1 backend calls this."""
-        self.sim = DeliverySimulation(
-            num_drivers=len(drivers),
-            width=width,
-            height=height,
-            rate=req_rate,
-            dispatch_policy=None,
-            mutation_rule=None,
-            timeout=timeout,
-        )
+    def init_state(self, drivers: List[Driver], requests: List[Request], timeout: int, req_rate: float, width: int, height: int) -> Dict:
+        dispatch_policy = NearestNeighborPolicy()
+        mutation_rule = ExplorationMutationRule(0.1)
+        request_generator = RequestGenerator(req_rate, width, height)
+
+        self.sim = DeliverySimulation(drivers, requests, dispatch_policy, request_generator, mutation_rule, timeout)
 
         return {"t": 0}
+    
+    def simulation_step(self, state: Dict) -> Tuple[Dict, Dict]:
 
-    def simulate_step(self, state):
-        """Phase1 backend calls this."""
-        if self.sim is None:
-            raise RuntimeError("Simulation not initialized")
-
+        if self.sim == None:
+            raise RuntimeError("Simulation is not initialized.")
+        
         self.sim.tick()
-
         snapshot = self.sim.get_snapshot()
-
-        # update Phase1 state dict
         state["t"] = self.sim.time
 
-        metrics = snapshot["statistics"]
-
-        return state, metrics
-
-    def get_plot_data(self):
-        if self.sim is None:
-            raise RuntimeError("Simulation not initialized")
-
-        snapshot = self.sim.get_snapshot()
-
-        return {
-            "driver_positions": snapshot["driver_positions"],
-            "driver_headings": snapshot["driver_headings"],
-            "pickup_positions": snapshot["pickup_positions"],
-            "dropoff_positions": snapshot["dropoff_positions"],
-            "statistics": snapshot["statistics"],
-        }
+        return state, snapshot["statistics"]
+    
