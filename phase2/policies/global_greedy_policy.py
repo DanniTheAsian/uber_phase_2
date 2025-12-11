@@ -7,21 +7,28 @@ from ..request import Request
 
 class GlobalGreedyPolicy(DispatchPolicy):
     """
-    Match drivers to requests by globally minimizing pickup distances.
-    """
+    Dispatch policy that considers all possible (driver, request) combinations
+    and selects assignments using a global greedy strategy.
 
+    The policy evaluates every driver–request pair, ranks them by distance
+    from the driver’s current position to the request’s pickup location, and
+    greedily assigns matches in ascending distance order while ensuring that
+    each driver and each request is used at most once.
+    """
+    
     def assign(self, drivers: list["Driver"], requests: list["Request"], time: int) -> list[tuple["Driver", "Request"]]:
         """
-        Pair drivers and requests by iterating over combinations sorted by distance.
+        Assign drivers to requests using a global greedy matching strategy.
 
         Args:
-            drivers (list[Driver]): Available drivers at the current tick.
-            requests (list[Request]): Active requests waiting for assignment.
-            time (int): Simulation tick (unused, kept for interface compatibility).
+            drivers (list[Driver]): The list of available drivers at the current simulation step.
+            requests (list[Request]): The list of active requests waiting to be assigned.
+            time (int): The current simulation time (not used directly but kept for interface compatibility).
 
         Returns:
-            list[tuple[Driver, Request]]: Greedy driver/request assignments.
-        """
+            list[tuple[Driver, Request]]: A list of (driver, request) pairs selected by
+            the global greedy matching process.
+    """
         combos = []
         for driver in drivers:
             for request in requests:

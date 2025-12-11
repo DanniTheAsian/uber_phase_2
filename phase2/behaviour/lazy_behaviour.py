@@ -1,3 +1,7 @@
+"""
+Driver behaviour that only accepts requests after a minimum wait time.
+"""
+
 from .driver_behaviour import DriverBehaviour
 
 
@@ -12,7 +16,7 @@ class LazyBehaviour(DriverBehaviour):
         """
         Initialize the behaviour with a required minimum wait time.
 
-        Arguments:
+        Args:
             max_idle (int): The minimum wait_time a request must have
                             before the driver accepts it.
 
@@ -30,7 +34,7 @@ class LazyBehaviour(DriverBehaviour):
         The driver accepts the request only if the request's wait_time
         is equal to or greater than the configured threshold.
 
-        Arguments:
+        Args:
             driver (Driver): The driver making the decision.
             offer (Offer): Contains the request with its wait_time.
             time (int): Current simulation time (not used here).

@@ -1,3 +1,8 @@
+"""
+Mutation rule that introduces probabilistic exploration by occasionally
+switching a driver's behaviour.
+"""
+
 import random
 from .mutationrule import MutationRule
 from ..behaviour.greedy_distance_behaviour import GreedyDistanceBehaviour
@@ -15,7 +20,7 @@ class ExplorationMutationRule(MutationRule):
         """
         Initialize the rule with a base mutation probability.
 
-        Arguments:
+        Args:
             probability (float): Base probability between 0 and 1.
 
         Example:
@@ -35,7 +40,7 @@ class ExplorationMutationRule(MutationRule):
         If the driver currently uses LazyBehaviour, it becomes
         GreedyDistanceBehaviour. Otherwise, it becomes LazyBehaviour.
 
-        Arguments:
+        Args:
             driver (Driver): The driver that may mutate.
             time (int): Current simulation time.
 
@@ -43,10 +48,10 @@ class ExplorationMutationRule(MutationRule):
             None
         """
 
-        effective_probality = self.probability * (1 + time * 0.0005)
-        effective_probality = min(1.0, effective_probality)
+        effective_probability = self.probability * (1 + time * 0.0005)
+        effective_probability = min(1.0, effective_probability)
 
-        if random.random() < effective_probality:
+        if random.random() < effective_probability:
 
             if isinstance(driver.behaviour, LazyBehaviour):
                 driver.behaviour = GreedyDistanceBehaviour(max_distance=10)

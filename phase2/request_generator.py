@@ -8,11 +8,10 @@ from .point import Point
 
 class RequestGenerator:
     """
-    Generate new requests using a stochastic rate and bounded map dimensions.
-
-    The generator keeps track of the map's width and height so that pickup and
-    dropoff points always fall within bounds, and it increments internal IDs to
-    ensure every request is unique.
+    Generate new requests using a random rate and bounded map dimensions.
+    The generator keeps track of the map's width and height so that pickup
+    and dropoff points always fall within bounds, and it increments
+    internal IDs to ensure every request is unique.
     """
 
     def __init__(self, rate:float, width:int, height: int):

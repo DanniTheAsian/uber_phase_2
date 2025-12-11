@@ -1,5 +1,5 @@
 """
-Core delivery simulation loop coordinating drivers, requests, and policies.
+Defines the main delivery simulation and the classes it depends on.
 """
 
 from typing import List, Tuple
@@ -13,10 +13,11 @@ from .offer import Offer
 
 class DeliverySimulation:
     """
-    Simulate drivers serving delivery requests over discrete time steps.
+    Simulates drivers serving delivery requests over discrete time steps.
 
-    The simulation orchestrates request generation, policy-based dispatching,
-    driver movement, pickups/dropoffs, mutation rules, and statistics.
+    The simulation handles request generation, dispatching through a policy,
+    driver acceptance behavior, movement, pickup/dropoff events, mutation
+    rules, and collection of performance statistics.
     """
 
     def __init__(
@@ -29,18 +30,16 @@ class DeliverySimulation:
         timeout: int,
     ) -> None:
         """
-        Create a delivery simulation with the provided participants and rules.
-
+        Initialize a DeliverySimulation.
         Args:
             drivers (list[Driver]): All drivers in the simulation.
             requests (list[Request]): Existing requests, both active and completed.
-            dispatch_policy (DispatchPolicy): Strategy for assigning drivers.
-            request_generator (RequestGenerator): Component that spawns new requests.
-            mutation_rule (mutationrule): Rule set that mutates driver behaviour.
-            timeout (int): Maximum wait time before a request expires.
+            dispatch_policy (DispatchPolicy): Strategy for assigning drivers to requests.
+            request_generator (RequestGenerator): Generates new requests.
+            mutation_rule (MutationRule): Rule that may mutate driver behaviour over time.
+            timeout (int): Maximum wait time (in ticks) before a request expires.
 
-        Returns:
-            None
+        This constructor also initializes global statistics and the simulation clock.
         """
 
         self.time: int = 0
@@ -61,12 +60,15 @@ class DeliverySimulation:
         """
         Advance the simulation by one time step.
 
-        The method executes the full eight-step pipeline: generate requests,
-        update wait times, dispatch, evaluate offers, resolve conflicts, move
-        drivers, mutate behaviours, and increment time.
-
-        Returns:
-            None
+        This method performs the full 8-step simulation pipeline:
+        1. Generate new requests.
+        2. Update waiting times and mark expired requests.
+        3. Compute proposed assignments via dispatch_policy.
+        4. Convert proposals to offers, ask driver behaviours to accept/reject.
+        5. Resolve conflicts and finalize assignments.
+        6. Move drivers and handle pickup/dropoff events.
+        7. Apply mutation_rule to each driver.
+        8. Increase the simulation time.
         """
 
         # 1) Generate new requests
@@ -101,7 +103,7 @@ class DeliverySimulation:
             try:
                 dist = driver.position.distance_to(req.pickup)
                 est_time = dist / (driver.speed or 1)
-            except (AttributeError, TypeError, ZeroDivisionError):
+            except Exception:
                 est_time = 0.0
 
             offer = Offer(driver=driver, request=req, estimated_travel_time=est_time)
@@ -141,10 +143,12 @@ class DeliverySimulation:
 
     def get_snapshot(self) -> dict:
         """
-        Capture a serializable snapshot for the GUI.
-
-        Returns:
-            dict: Current time, driver positions, outstanding stops, and stats.
+        Return a dictionary containing:
+               - list of driver positions,
+               - list of pickup positions (for WAITING/ASSIGNED requests),
+               - list of dropoff positions (for PICKED requests),
+               - statistics (served, expired, average waiting time).
+             Used by the GUI adapter.
         """
         drivers_snapshot = []
         for d in self.drivers:

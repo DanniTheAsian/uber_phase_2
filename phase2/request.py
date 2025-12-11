@@ -17,13 +17,22 @@ class Request:
 
     def __init__(
         self,
-    id: int,  # noqa: A003
+        id: int,
         pickup: Point,
         dropoff: Point,
         creation_time: int,
     ) -> None:
         """
-        Create a request with pickup/dropoff points recorded at creation_time.
+        Initialize a Request instance.
+
+        Args:
+            id (int): Unique identifier for the request.
+            pickup (Point): Pickup location on the map.
+            dropoff (Point): Dropoff location on the map.
+            creation_time (int): Simulation time tick when the request was created.
+
+        Returns:
+            None
         """
         self.id = id
         self.pickup = pickup
@@ -36,40 +45,86 @@ class Request:
 
     def is_active(self) -> bool:
         """
-        Return True when the status matches a recognized lifecycle state.
+        Check that the request status is one of the recognized lifecycle states.
+
+        Returns:
+            bool: True if the status matches WAITING/ASSIGNED/PICKED/DELIVERED/EXPIRED.
         """
         return self.status in ["WAITING", "ASSIGNED", "PICKED", "DELIVERED", "EXPIRED"]
 
     def mark_assigned(self, driver_id: int) -> None:
         """
-        Mark the request as assigned and store the provided driver_id.
+        Mark the request as assigned to a driver.
+
+        Updates the status to ASSIGNED and stores the id of the driver
+        that has been chosen to handle this request.
+
+        Args:
+            driver_id (int): The id of the assigned driver.
+
+        Returns:
+            None
         """
         self.status = "ASSIGNED"
         self.assigned_driver_id = driver_id
 
     def mark_picked(self, t: int) -> None:
         """
-        Mark the request as picked and capture the wait time at tick t.
+        Mark the request as picked up by the driver.
+
+        Updates the status to PICKED and sets the waiting time to the
+        time elapsed since creation.
+
+        Args:
+            t (int): Current simulation time tick when pickup happens.
+
+        Returns:
+            None
         """
         self.status = "PICKED"
         self.wait_time = t - self.creation_time
 
     def mark_delivered(self, t: int) -> None:
         """
-        Mark the request as delivered and freeze the wait time at tick t.
+        Mark the request as delivered to the customer.
+
+        Updates the status to DELIVERED and sets the waiting time to the
+        total time from creation until delivery.
+
+        Args:
+            t (int): Current simulation time tick when delivery happens.
+
+        Returns:
+            None
         """
         self.status = "DELIVERED"
         self.wait_time = t - self.creation_time
 
     def mark_expired(self, t: int) -> None:
         """
-        Mark the request as expired after waiting too long at tick t.
+        Mark the request as expired.
+
+        Used when the request has waited too long without being
+        completed. Updates the status to EXPIRED and sets the
+        waiting time to the elapsed time since creation.
+
+        Args:
+            t (int): Current simulation time tick when the request expires.
+
+        Returns:
+            None
         """
         self.status = "EXPIRED"
         self.wait_time = t - self.creation_time
 
     def update_wait(self, current_time: int) -> None:
         """
-        Recalculate wait_time using the provided current_time tick.
+        Recalculate the waiting time based on the current simulation time.
+
+        Args:
+            current_time (int): Current simulation time tick.
+
+        Returns:
+            None
         """
         self.wait_time = current_time - self.creation_time

@@ -1,5 +1,6 @@
-"""
-Driver entities that navigate the map and fulfil delivery requests.
+""" 
+This module contains the Driver class which represents 
+an autonomous driver agent in the simulation system.
 """
 
 from .behaviour.driver_behaviour import DriverBehaviour
@@ -10,24 +11,25 @@ ARRIVAL_EPSILON = 1e-3
 
 class Driver:
     """
-    Autonomous driver agent that moves across the map and serves requests.
-
-    Each driver tracks its behaviour policy, current status, and completed trip
-    history so that policies and analysis can inspect past performance.
+    An autonomous driver agent in the system 
+    where each driver can move on the map,
+    accept or reject requests based on their behaviour policy,
+    and maintain a history of completed trips for statistics.
     """
     def __init__(self, driver_id: int, position: Point, speed: float, behaviour: DriverBehaviour | None = None, status: str = "IDLE", current_request: Request | None = None, history: list | None = None) -> None:
         """
-        Create a driver with an initial position, speed, and behaviour.
+        Initialize Driver instance
 
         Args:
-            driver_id (int): Unique identifier for the driver.
+            driver_id (int): Unique identifier for the driver
             position (Point): Starting position on the map.
             speed (float): Movement speed in units per simulation tick.
-            behaviour (DriverBehaviour | None): Policy controlling acceptance decisions.
-            status (str): Initial lifecycle status, defaults to "IDLE".
-            current_request (Request | None): Request already assigned to the driver.
-            history (list | None): Completed trip history; defaults to an empty list.
-
+            behaviour (DriverBehaviour): Decision Policy for accepting or rejecting requests.
+            status (str, optional): Initial status of the driver. Defaults to "IDLE".
+            current_request (Request | None, optional): Current assigned request. Defaults to None.
+            assigned_reward (float, optional): Reward associated with the assigned request. Defaults to 0.0.
+            history (list | None, optional): List of completed trips for statistics. Defaults to None which initializes an empty list.
+         
         Returns:
             None
         """
@@ -48,16 +50,14 @@ class Driver:
     def assign_request(self, request: Request, assignment_meta: float | None = None, reward: float | None = None) -> None:
         """
         Assign a delivery request to the driver.
-
-        Stores the driver's position for distance calculations, updates the
-        status to ``TO_PICKUP``, and marks the request as assigned.
-
+        
+        Stores the driver's current position for distance calculation,
+        updates the driver's status to TO_PICKUP, and marks the request
+        as assigned to this driver.
+        
         Args:
-            request (Request): Delivery request to assign.
-            assignment_meta (float | None): Optional legacy metadata, such as the
-                simulation tick when the assignment was made.
-            reward (float | None): Reward associated with the offer; defaults to 0.0.
-
+            request (Request): The delivery request to assign.
+        
         Returns:
             None
         """
@@ -72,47 +72,28 @@ class Driver:
         request.mark_assigned(self.id)
 
     def _is_at_target(self, target: Point | None) -> bool:
-        """
-        Determine whether the driver is within the arrival epsilon of a target.
-
-        Args:
-            target (Point | None): Destination to compare against.
-
-        Returns:
-            bool: True when the driver is effectively at the target.
-        """
         if target is None or self.position is None:
             return False
         return self.position.distance_to(target) <= ARRIVAL_EPSILON
 
     def at_pickup(self) -> bool:
-        """
-        Check whether the driver has arrived at the pickup location.
-
-        Returns:
-            bool: True when the driver is heading to pickup and has arrived.
-        """
         if not self.current_request or self.status != "TO_PICKUP":
             return False
         return self._is_at_target(self.current_request.pickup)
 
     def at_dropoff(self) -> bool:
-        """
-        Check whether the driver has arrived at the dropoff location.
-
-        Returns:
-            bool: True when the driver is heading to dropoff and has arrived.
-        """
         if not self.current_request or self.status != "TO_DROPOFF":
             return False
         return self._is_at_target(self.current_request.dropoff)
 
     def target_point(self) -> Point | None:
         """
-        Return the driver's current navigation target.
-
+        Get the driver's current target destination.
+        
         Returns:
-            Point | None: Pickup, dropoff, or None when idle.
+            Point | None: The pickup point if status is TO_PICKUP,
+                         the dropoff point if status is TO_DROPOFF,
+                         or None if the driver is idle or has no request.
         """
         if self.current_request is None or self.status == "IDLE":
             return None
@@ -128,13 +109,13 @@ class Driver:
     def step(self, dt: float) -> None:
         """
         Move the driver towards its current target.
-
-        The driver advances at its configured speed for the provided time step
-        and snaps to the destination if it would overshoot.
-
+        
+        The driver moves at its speed for the given time step. If the
+        target is within reach, the driver arrives exactly at the target.
+        
         Args:
-            dt (float): Time step duration in simulation ticks.
-
+            dt (float): Time step duration.
+        
         Returns:
             None
         """
@@ -157,11 +138,13 @@ class Driver:
 
     def complete_pickup(self, time: int) -> None:
         """
-        Finish the pickup process and transition to dropoff.
+        The driver completes the pickup process, 
+        updates its status to TO_DROPOFF 
+        and marks the request as picked.
 
         Args:
-            time (int): Simulation tick when the pickup completes.
-
+            time (int): The current simulation time tick.
+                
         Returns:
             None
         """
@@ -172,11 +155,16 @@ class Driver:
         
     def complete_dropoff(self, time:int) -> None:
         """
-        Finish the dropoff process and record the completed trip.
+        The driver completes the dropoff process, 
+        marks the request as delivered,
+        records the trip in history,
+        clears the current request,
+        and its position when the request was received,
+        and updates its status to IDLE
 
         Args:
-            time (int): Simulation tick when the dropoff completes.
-
+            time (int): The current simulation time tick when dropoff is completed.
+            
         Returns:
             None
         """
