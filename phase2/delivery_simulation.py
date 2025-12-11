@@ -1,5 +1,6 @@
 from .driver import Driver
 from .request import Request
+from .offer import Offer
 from .policies.dispatch_policy import DispatchPolicy
 from .request_generator import RequestGenerator
 from .mutationrule.mutationrule import MutationRule
@@ -61,8 +62,8 @@ class DeliverySimulation:
         waiting_requests = [r for r in active_requests if r.status == "WAITING"]
     
         proposals = self.dispatch_policy.assign(
-            idle_drivers, 
-            waiting_requests, 
+            idle_drivers,
+            waiting_requests,
             self.time
         )
         # proposals returns a list[tuple[Driver, Request]]
@@ -78,10 +79,14 @@ class DeliverySimulation:
             
             offer = Offer(
             driver=driver,
-            request=request, 
+            request=request,
             estimated_travel_time=estimated_time,
-            estimated_reward=???  # MAJOR PROBLEM
+            estimated_reward=None
             )
+
+            # Ask driver if they accept (if they have behaviour)
+            if driver.behaviour and driver.behaviour.decide(driver, offer, self.time):
+                accepted_offers.append((driver, request))
 
 
         # 5. Resolve conflicts and finalise assignments.
