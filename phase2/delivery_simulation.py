@@ -76,18 +76,22 @@ class DeliverySimulation:
 
         # 4. Convert proposals to offers, ask driver behaviours to accept/reject.
         accepted_offers = []
+
         for driver, request in proposals:
             distance = driver.position.distance_to(request.pickup)
+
             if driver.speed <= 0:
                 estimated_time = 0.0
             else:
                 estimated_time = distance / driver.speed
             
+            reward = self._calculate_reward(driver, request)
+            
             offer = Offer(
-            driver=driver,
-            request=request,
-            estimated_travel_time=estimated_time,
-            estimated_reward=None
+            driver = driver,
+            request = request,
+            estimated_travel_time = estimated_time,
+            estimated_reward = reward
             )
 
             # Ask driver if they accept (if they have behaviour)
