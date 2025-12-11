@@ -42,7 +42,7 @@ class DeliverySimulation:
         # 1. Generate new requests.
         new_requests = self.request_generator.maybe_generate(self.time)
         if new_requests:
-            self.requests.extend(new_requests)
+            self.requests = self.requests + new_requests
 
         # 2. Update waiting times and mark expired requests.
         active_requests = []
@@ -90,20 +90,20 @@ class DeliverySimulation:
 
             # Ask driver if they accept (if they have behaviour)
             if driver.behaviour and driver.behaviour.decide(driver, offer, self.time):
-                accepted_offers.append((driver, request))
+                accepted_offers.append((driver, request, reward))
 
 
         # 5. Resolve conflicts and finalise assignments.
         assigned_requests = set()
 
-        for driver, request, payment in accepted_offers:
+        for driver, request, reward in accepted_offers:
             if request in assigned_requests:
                 continue
             if request.status != "WAITING":
                 continue
 
             try:
-                driver.assign_request(request, payment)
+                driver.assign_request(request, reward)
                 assigned_requests.add(request)
 
             except Exception as e:
