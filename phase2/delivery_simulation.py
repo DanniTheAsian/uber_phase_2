@@ -118,17 +118,21 @@ class DeliverySimulation:
 
 
     def _update_waiting_time(self) -> List[Request]:
-        active_requests: List[Request] = []
+        """Update waiting times and return only WAITING requests that haven't expired.
+        
+        This filters to only WAITING requests for assignment proposals.
+        ASSIGNED/PICKED requests are handled separately by their drivers.
+        """
+        waiting_requests: List[Request] = []
         for req in self.requests:
-            if req.is_active():
+            if req.status == "WAITING":
                 req.update_wait(self.time)
-                if req.wait_time > self.timeout and req.status != "EXPIRED":
+                if req.wait_time > self.timeout:
                     req.mark_expired(self.time)
                     self.expired_count += 1
                 else:
-                    if req.status in ("WAITING", "ASSIGNED", "PICKED"):
-                        active_requests.append(req)
-        return active_requests
+                    waiting_requests.append(req)
+        return waiting_requests
 
 
     def _propose_assignments(self, active_requests: List[Request]) -> List[Tuple[Driver, Request]]:
@@ -154,11 +158,14 @@ class DeliverySimulation:
 
     def _finalize_assigments(self, accepted: List[Tuple[Driver, Request]]) -> None:
         used_requests = set()
+        used_drivers = set()
         for driver, req in accepted:
-            if req in used_requests or req.status == "ASSIGNED":
+            # Skip if request already assigned or driver already has an assignment
+            if req in used_requests or driver in used_drivers or req.status == "ASSIGNED":
                 continue
             driver.assign_request(req, self.time)
             used_requests.add(req)
+            used_drivers.add(driver)
 
     def _move_drivers_and_handle_events(self) -> None:
         for driver in self.drivers:

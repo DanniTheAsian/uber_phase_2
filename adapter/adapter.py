@@ -1,5 +1,6 @@
 # adapter/adapter.py
 
+import random
 from phase2.request_generator import RequestGenerator
 from phase2.delivery_simulation import DeliverySimulation
 from phase2.point import Point
@@ -36,15 +37,21 @@ class SimulationAdapter:
         speed = float(driver.get("speed", driver.get("v", 1.0)))
         bid = int(driver.get("id", driver.get("driver_id", 0)))
 
-        behaviour_name = str(driver.get("behaviour", "lazy")).lower()
+        behaviour_name = str(driver.get("behaviour", "")).lower()
         if behaviour_name in ("lazy",):
-            behaviour = LazyBehaviour(max_idle=5)
+            behaviour = LazyBehaviour(max_idle=1)
         elif behaviour_name in ("greedy", "distance"):
-            behaviour = GreedyDistanceBehaviour(max_distance=10.0)
+            behaviour = GreedyDistanceBehaviour(max_distance=1000.0)
         elif behaviour_name in ("earning", "earn", "earning_max"):
-            behaviour = EarningMaxBehaviour(min_ratio=1.0)
+            behaviour = EarningMaxBehaviour(min_ratio=0.01)
         else:
-            behaviour = LazyBehaviour(max_idle= 5)
+            # Some drivers start without behaviour (25% random) and mutate to get one
+            if random.random() < 0.25:
+                behaviour = None
+            else:
+                # Others: vary behavior by driver id to get different behaviors
+                behaviour_cycle = [LazyBehaviour(max_idle=1), GreedyDistanceBehaviour(max_distance=1000.0), EarningMaxBehaviour(min_ratio=0.01)]
+                behaviour = behaviour_cycle[bid % len(behaviour_cycle)]
 
         status = str(driver.get("status", "idle")).upper()
 
@@ -82,7 +89,8 @@ class SimulationAdapter:
 
         pending = []
         for r in sim.requests:
-            if not r.is_active():
+            # Show all requests except DELIVERED (show WAITING, ASSIGNED, PICKED, EXPIRED)
+            if r.status == "DELIVERED":
                 continue
             status = r.status.lower()
             pending.append({
@@ -153,7 +161,8 @@ class SimulationAdapter:
 
         s = self._state_from_sim()
         driver_positions = [(d["x"], d["y"]) for d in s["drivers"]]
-        pickup_positions = [(r["px"], r["py"]) for r in s["pending"] if r["status"] in ("waiting", "assigned")]
+        # Show pickups while waiting, assigned, or expired (disappear only when picked)
+        pickup_positions = [(r["px"], r["py"]) for r in s["pending"] if r["status"] in ("waiting", "assigned", "expired")]
         dropoff_positions = [(r["dx"], r["dy"]) for r in s["pending"] if r["status"] == "picked"]
 
         # headings / quiver: use tx/ty if available

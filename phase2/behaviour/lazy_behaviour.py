@@ -27,8 +27,9 @@ class LazyBehaviour(DriverBehaviour):
         """
         Decide whether the driver accepts the offer.
 
-        The driver accepts the request only if the request's wait_time
-        is equal to or greater than the configured threshold.
+        The driver accepts the request only if:
+        1. The driver is currently IDLE (not on a delivery)
+        2. The request's wait_time is equal to or greater than the configured threshold.
 
         Arguments:
             driver (Driver): The driver making the decision.
@@ -36,7 +37,8 @@ class LazyBehaviour(DriverBehaviour):
             time (int): Current simulation time (not used here).
 
         Returns:
-            bool: True if request.wait_time >= max_idle, otherwise False.
+            bool: True if driver is IDLE and request.wait_time >= max_idle, otherwise False.
         """
         
-        return offer.request.wait_time >= self.max_idle
+        # Only accept if driver is idle and request has waited long enough
+        return driver.status == "IDLE" and offer.request.wait_time >= self.max_idle

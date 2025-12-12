@@ -2,6 +2,7 @@ import random
 from .mutationrule import MutationRule
 from ..behaviour.greedy_distance_behaviour import GreedyDistanceBehaviour
 from ..behaviour.lazy_behaviour import LazyBehaviour
+from ..behaviour.earning_max_behaviour import EarningMaxBehaviour
 from ..driver import Driver
 
 class ExplorationMutationRule(MutationRule):
@@ -30,10 +31,11 @@ class ExplorationMutationRule(MutationRule):
         Mutate the driver's behaviour based on an exploration probability.
         The probability slowly increases with time:
 
-            effective_probability = min(1.0, probability * (1 + time * 0.001))
+            effective_probability = min(1.0, probability * (1 + time * 0.0005))
 
-        If the driver currently uses LazyBehaviour, it becomes
-        GreedyDistanceBehaviour. Otherwise, it becomes LazyBehaviour.
+        If the driver's behaviour is LazyBehaviour, it becomes GreedyDistanceBehaviour.
+        If it's GreedyDistanceBehaviour, it becomes EarningMaxBehaviour.
+        Otherwise, it becomes LazyBehaviour.
 
         Arguments:
             driver (Driver): The driver that may mutate.
@@ -43,13 +45,16 @@ class ExplorationMutationRule(MutationRule):
             None
         """
 
-        effective_probality = self.probability * (1 + time * 0.0005)
-        effective_probality = min(1.0, effective_probality)
+        effective_probability = self.probability * (1 + time * 0.0005)
+        effective_probability = min(1.0, effective_probability)
 
-        if random.random() < effective_probality:
+        if random.random() < effective_probability:
 
             if isinstance(driver.behaviour, LazyBehaviour):
-                driver.behaviour = GreedyDistanceBehaviour(max_distance=10)
+                driver.behaviour = GreedyDistanceBehaviour(max_distance=10.0)
+
+            elif isinstance(driver.behaviour, GreedyDistanceBehaviour):
+                driver.behaviour = EarningMaxBehaviour(min_ratio=1.0)
 
             else:
                 driver.behaviour = LazyBehaviour(max_idle=5)

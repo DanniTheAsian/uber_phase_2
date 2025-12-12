@@ -32,7 +32,8 @@ class NearestNeighborPolicy(DispatchPolicy):
     def assign(self, drivers: list[Driver], requests: list[Request], time: int) -> list[tuple[Driver, Request]]:
         matches = []
     
-        idle_drivers = drivers[:]
+        # Filter to only IDLE drivers available for new assignments
+        idle_drivers = [d for d in drivers if d.status == "IDLE"]
         waiting_requests = requests[:]
 
         while idle_drivers and waiting_requests:
