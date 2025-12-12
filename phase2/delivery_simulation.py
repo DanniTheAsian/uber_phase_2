@@ -6,16 +6,7 @@ from .policies.dispatch_policy import DispatchPolicy
 from .request_generator import RequestGenerator
 
 class DeliverySimulation:
-    def __init__(self,
-                 drivers: list[Driver],
-                 requests: list[Request],
-                 dispatch_policy: DispatchPolicy,
-                 request_generator: RequestGenerator,
-                 mutation_rule: MutationRule,
-                 timeout: int,
-                 base_reward: float = 25.0,    
-                 distance_rate: float = 0.2
-                 ) -> None:
+    def __init__(self, drivers: list[Driver], requests: list[Request], dispatch_policy: DispatchPolicy, request_generator: RequestGenerator, mutation_rule: MutationRule, timeout: int, base_reward: float = 25.0, distance_rate: float = 0.2) -> None:
         
         self.time: int = 0
         self.timeout: int = timeout
@@ -113,17 +104,13 @@ class DeliverySimulation:
 
         # 6. Move drivers and handle pickup/dropoff events.
         for driver in self.drivers:
-            
             driver.step(dt = 1.0)
             
-            # Check pickup
+            
             if driver.status == "TO_PICKUP" and driver.current_request and driver.position == driver.current_request.pickup:
-                
                 driver.complete_pickup(self.time)
             
-            # Check dropoff
             if driver.status == "TO_DROPOFF" and driver.current_request and driver.position == driver.current_request.dropoff:
-
                 delivered_request = driver.current_request
                 driver.complete_dropoff(self.time)
                 
@@ -152,7 +139,6 @@ class DeliverySimulation:
                 "status": driver.status
             }
             drivers_data.append(driver_info)
-
             
         pickup_positions = []
         dropoff_positions = []
