@@ -7,6 +7,7 @@ import random
 from .mutationrule import MutationRule
 from ..behaviour.greedy_distance_behaviour import GreedyDistanceBehaviour
 from ..behaviour.lazy_behaviour import LazyBehaviour
+from ..behaviour.earning_max_behaviour import EarningMaxBehaviour
 from ..driver import Driver
 
 class ExplorationMutationRule(MutationRule):
@@ -41,10 +42,11 @@ class ExplorationMutationRule(MutationRule):
         Mutate the driver's behaviour based on an exploration probability.
         The probability slowly increases with time:
 
-            effective_probability = min(1.0, probability * (1 + time * 0.001))
+            effective_probability = min(1.0, probability * (1 + time * 0.0005))
 
-        If the driver currently uses LazyBehaviour, it becomes
-        GreedyDistanceBehaviour. Otherwise, it becomes LazyBehaviour.
+        If the driver's behaviour is LazyBehaviour, it becomes GreedyDistanceBehaviour.
+        If it's GreedyDistanceBehaviour, it becomes EarningMaxBehaviour.
+        Otherwise, it becomes LazyBehaviour.
 
         Args:
             driver (Driver): The driver that may mutate.
@@ -53,33 +55,18 @@ class ExplorationMutationRule(MutationRule):
         Returns:
             None
         """
-        try:
-            time_value = float(time)
-        except (TypeError, ValueError) as err:
-            print(f"ExplorationMutationRule time error: {err}")
-            return
 
-        effective_probability = self.probability * (1 + time_value * 0.0005)
-        effective_probability = min(1.0, max(0.0, effective_probability))
+        effective_probability = self.probability * (1 + time * 0.0005)
+        effective_probability = min(1.0, effective_probability)
 
-        try:
-            roll = random.random()
-        except (RuntimeError, ValueError) as err:  # random shouldn't fail, but guard anyway
-            print(f"ExplorationMutationRule random error: {err}")
-            return
+        if random.random() < effective_probability:
 
-        if roll < effective_probability:
-            try:
-                behaviour = driver.behaviour
-            except AttributeError as err:
-                print(f"ExplorationMutationRule behaviour error: {err}")
-                return
+            if isinstance(driver.behaviour, LazyBehaviour):
+                driver.behaviour = GreedyDistanceBehaviour(max_distance=10.0)
 
-            if isinstance(behaviour, LazyBehaviour):
-                try:
-                    driver.behaviour = GreedyDistanceBehaviour(max_distance=10)
-                except (AttributeError, TypeError, ValueError) as err:
-                    print(f"ExplorationMutationRule switch-to-greedy error: {err}")
+            elif isinstance(driver.behaviour, GreedyDistanceBehaviour):
+                driver.behaviour = EarningMaxBehaviour(min_ratio=1.0)
+
             else:
                 try:
                     driver.behaviour = LazyBehaviour(max_idle=5)

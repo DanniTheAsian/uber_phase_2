@@ -37,8 +37,9 @@ def assign(self, drivers: list[Driver], requests: list[Request], time: int) -> l
 
     matches = []
     
-    idle_drivers = drivers[:]
-    waiting_requests = requests[:]
+        # Filter to only IDLE drivers available for new assignments
+        idle_drivers = [d for d in drivers if d.status == "IDLE"]
+        waiting_requests = requests[:]
 
     while idle_drivers and waiting_requests:
             best_pair = None

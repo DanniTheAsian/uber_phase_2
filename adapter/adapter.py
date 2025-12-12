@@ -1,212 +1,185 @@
-from __future__ import annotations
+# adapter/adapter.py
 
-from typing import Any, Dict
-
-from phase2.behaviour.greedy_distance_behaviour import GreedyDistanceBehaviour
-from phase2.behaviour.lazy_behaviour import LazyBehaviour
-from phase2.delivery_simulation import DeliverySimulation
-from phase2.driver import Driver
-from phase2.point import Point
-from phase2.policies.global_greedy_policy import GlobalGreedyPolicy
-from phase2.request import Request
+import random
 from phase2.request_generator import RequestGenerator
+from phase2.delivery_simulation import DeliverySimulation
+from phase2.point import Point
+from phase2.driver import Driver
+from phase2.request import Request
+
+from phase2.behaviour.lazy_behaviour import LazyBehaviour
+from phase2.behaviour.greedy_distance_behaviour import GreedyDistanceBehaviour
+from phase2.behaviour.earning_max_behaviour import EarningMaxBehaviour
+
+from phase2.policies.nearest_neighbor_policy import NearestNeighborPolicy
 from phase2.mutationrule.exploration import ExplorationMutationRule
 
 
 class SimulationAdapter:
-    """Adapter class that connects the GUI with the DeliverySimulation backend."""
+    """Adapter that maps the procedural dict API (UI) to phase2 objects.
 
-    ACTIVE_REQUEST_STATES = {"WAITING", "ASSIGNED", "PICKED"}
+    Responsibilities:
+    - Convert input driver/request dicts into `Driver`/`Request` objects.
+    - Create a `DeliverySimulation` with sensible defaults if not provided.
+    - Expose `init_state` and `simulate_step` that work with the GUI's dict
+      representation (keys used by `gui._engine`).
+    """
 
-    def __init__(self) -> None:
+    def __init__(self):
         self.sim: DeliverySimulation | None = None
-        self.request_generator: RequestGenerator | None = None
-        self.dispatch_policy = GlobalGreedyPolicy()
-        self.mutation_rule = ExplorationMutationRule(probability=0.05)
-        self._next_driver_id = 0
-        self._next_request_id = 1
-        self._grid_width = 50
-        self._grid_height = 30
-        self._state_cache: Dict[str, Any] = {
-            "t": 0,
-            "drivers": [],
-            "pending": [],
-            "served": 0,
-            "expired": 0,
+        # request id counter stored on adapter instance to avoid module globals
+        self.next_request_id: int = 1
+
+    # --- Converters: dict -> objects ------------------------------------------------
+    def _make_driver(self, driver: dict) -> Driver:
+        x = float(driver.get("x", 0.0))
+        y = float(driver.get("y", 0.0))
+        speed = float(driver.get("speed", driver.get("v", 1.0)))
+        bid = int(driver.get("id", driver.get("driver_id", 0)))
+
+        behaviour_name = str(driver.get("behaviour", "")).lower()
+        if behaviour_name in ("lazy",):
+            behaviour = LazyBehaviour(max_idle=1)
+        elif behaviour_name in ("greedy", "distance"):
+            behaviour = GreedyDistanceBehaviour(max_distance=1000.0)
+        elif behaviour_name in ("earning", "earn", "earning_max"):
+            behaviour = EarningMaxBehaviour(min_ratio=0.01)
+        else:
+            # Some drivers start without behaviour (25% random) and mutate to get one
+            if random.random() < 0.25:
+                behaviour = None
+            else:
+                # Others: vary behavior by driver id to get different behaviors
+                behaviour_cycle = [LazyBehaviour(max_idle=1), GreedyDistanceBehaviour(max_distance=1000.0), EarningMaxBehaviour(min_ratio=0.01)]
+                behaviour = behaviour_cycle[bid % len(behaviour_cycle)]
+
+        status = str(driver.get("status", "idle")).upper()
+
+        return Driver(id=bid, position=Point(x, y), speed=speed, behaviour=behaviour, status=status)
+
+    def _make_request(self, r: dict) -> Request:
+        rid = int(r.get("id", r.get("rid", r.get("req_id", 0))))
+        px = float(r.get("px", r.get("x", 0.0)))
+        py = float(r.get("py", r.get("y", 0.0)))
+        dx = float(r.get("dx", r.get("tx", 0.0)))
+        dy = float(r.get("dy", r.get("ty", 0.0)))
+        t = int(r.get("t", 0))
+
+        pickup = Point(px, py)
+        dropoff = Point(dx, dy)
+        return Request(id=rid, pickup=pickup, dropoff=dropoff, creation_time=t)
+
+    # --- View builder: objects -> dict (UI friendly) --------------------------------
+    def _state_from_sim(self) -> dict:
+        sim = self.sim
+        assert sim is not None
+
+        drivers = []
+        for driver in sim.drivers:
+            target = driver.target_point()
+            drivers.append({
+                "id": driver.id,
+                "x": float(driver.position.x),
+                "y": float(driver.position.y),
+                "status": str(driver.status).lower(),
+                "rid": driver.current_request.id if driver.current_request else None,
+                "tx": float(target.x) if target else None,
+                "ty": float(target.y) if target else None,
+            })
+
+        pending = []
+        for r in sim.requests:
+            # Show all requests except DELIVERED (show WAITING, ASSIGNED, PICKED, EXPIRED)
+            if r.status == "DELIVERED":
+                continue
+            status = r.status.lower()
+            pending.append({
+                "id": r.id,
+                "px": float(r.pickup.x),
+                "py": float(r.pickup.y),
+                "dx": float(r.dropoff.x),
+                "dy": float(r.dropoff.y),
+                "status": "waiting" if status == "waiting" else ("assigned" if status == "assigned" else ("picked" if status == "picked" else status)),
+                "t": int(r.creation_time),
+            })
+
+        stats = {
+            "served": sim.served_count,
+            "expired": sim.expired_count,
+            "avg_wait": (sim.total_wait_time / sim.completed_deliveries) if sim.completed_deliveries else 0.0,
         }
 
-    # ------------------------------------------------------------------
-    # Public API used by phase1 backend
-    # ------------------------------------------------------------------
+        return {
+            "t": int(sim.time),
+            "drivers": drivers,
+            "pending": pending,
+            "served": int(sim.served_count),
+            "expired": int(sim.expired_count),
+            "statistics": stats,
+        }
+
+    # --- Public adapter API ---------------------------------------------------------
     def init_state(self, drivers, requests, timeout, req_rate, width, height):
-        """Phase1 backend calls this."""
-        self._grid_width = width
-        self._grid_height = height
-        self._next_driver_id = 0
-        self._next_request_id = 1
+        """Initialize the `DeliverySimulation` from procedural backend inputs.
 
-        driver_objs = [self._driver_from_dict(d) for d in drivers]
-        request_objs = [self._request_from_dict(r) for r in requests]
+        Parameters expect lists of plain dicts (or None). Returns a state dict
+        compatible with `gui._engine.AppSimState.sim`.
+        """
+        # convert to objects
+        drivers_objs = [self._make_driver(driver) for driver in (drivers or [])]
+        requests_objs = [self._make_request(r) for r in (requests or [])]
 
-        self.request_generator = RequestGenerator(rate=req_rate, width=width, height=height)
+        request_gen = RequestGenerator(rate=req_rate, width=width, height=height)
+
+        dispatch_policy = NearestNeighborPolicy()
+        mutation_rule = ExplorationMutationRule(probability=0.01)
+
         self.sim = DeliverySimulation(
-            drivers=driver_objs,
-            requests=request_objs,
-            dispatch_policy=self.dispatch_policy,
-            request_generator=self.request_generator,
-            mutation_rule=self.mutation_rule,
+            drivers=drivers_objs,
+            requests=requests_objs,
+            dispatch_policy=dispatch_policy,
+            request_generator=request_gen,
+            mutation_rule=mutation_rule,
             timeout=timeout,
         )
 
-        self._state_cache = self._build_state_dict()
-        return dict(self._state_cache)
+        return self._state_from_sim()
 
     def simulate_step(self, state):
-        """Phase1 backend calls this."""
+        """Advance the simulation one tick and return (new_state, metrics)."""
         if self.sim is None:
             raise RuntimeError("Simulation not initialized")
 
         self.sim.tick()
-        self._state_cache = self._build_state_dict()
-        metrics = self._build_metrics()
-        return dict(self._state_cache), metrics
+        new_state = self._state_from_sim()
+        metrics = new_state.get("statistics", {"served": 0, "expired": 0, "avg_wait": 0.0})
+        return new_state, metrics
 
     def get_plot_data(self):
         if self.sim is None:
             raise RuntimeError("Simulation not initialized")
 
-        state = self._state_cache or self._build_state_dict()
-        driver_positions = [(d["x"], d["y"]) for d in state.get("drivers", [])]
-        driver_targets = [
-            (d.get("tx"), d.get("ty")) for d in state.get("drivers", [])
-        ]
-        pickup_positions = [(r["px"], r["py"]) for r in state.get("pending", []) if r.get("status") in {"waiting", "assigned"}]
-        dropoff_positions = [(r["dx"], r["dy"]) for r in state.get("pending", []) if r.get("status") == "picked"]
+        s = self._state_from_sim()
+        driver_positions = [(d["x"], d["y"]) for d in s["drivers"]]
+        # Show pickups while waiting, assigned, or expired (disappear only when picked)
+        pickup_positions = [(r["px"], r["py"]) for r in s["pending"] if r["status"] in ("waiting", "assigned", "expired")]
+        dropoff_positions = [(r["dx"], r["dy"]) for r in s["pending"] if r["status"] == "picked"]
+
+        # headings / quiver: use tx/ty if available
+        driver_headings = []
+        for d in s["drivers"]:
+            if d.get("tx") is not None and d.get("ty") is not None:
+                ux = d["tx"] - d["x"]
+                uy = d["ty"] - d["y"]
+            else:
+                ux = 0.0
+                uy = 0.0
+            driver_headings.append((ux, uy))
 
         return {
             "driver_positions": driver_positions,
-            "driver_targets": driver_targets,
+            "driver_headings": driver_headings,
             "pickup_positions": pickup_positions,
             "dropoff_positions": dropoff_positions,
-            "statistics": self._build_metrics(),
-        }
-
-    # ------------------------------------------------------------------
-    # Internal helpers
-    # ------------------------------------------------------------------
-    def _driver_from_dict(self, data: Driver | Dict[str, Any]) -> Driver:
-        if isinstance(data, Driver):
-            self._next_driver_id = max(self._next_driver_id, data.id + 1)
-            return data
-
-        driver_id = int(data.get("id", self._next_driver_id))
-        self._next_driver_id = max(self._next_driver_id, driver_id + 1)
-
-        x = float(data.get("x", 0.0))
-        y = float(data.get("y", 0.0))
-        speed = float(data.get("speed", 1.0))
-        behaviour = self._make_behaviour(data.get("behaviour"))
-
-        status = str(data.get("status", "IDLE")).upper()
-        if status not in {"IDLE", "TO_PICKUP", "TO_DROPOFF"}:
-            status = "IDLE"
-
-        return Driver(
-            driver_id=driver_id,
-            position=Point(x, y),
-            speed=speed,
-            behaviour=behaviour,
-            status=status,
-        )
-
-    def _request_from_dict(self, data: Request | Dict[str, Any]) -> Request:
-        if isinstance(data, Request):
-            self._next_request_id = max(self._next_request_id, data.id + 1)
-            return data
-
-        request_id = int(data.get("id", self._next_request_id))
-        self._next_request_id = max(self._next_request_id, request_id + 1)
-
-        pickup = Point(float(data.get("px", data.get("pickup_x", 0.0))), float(data.get("py", data.get("pickup_y", 0.0))))
-        dropoff = Point(float(data.get("dx", data.get("dropoff_x", 0.0))), float(data.get("dy", data.get("dropoff_y", 0.0))))
-        creation_time = int(data.get("t", data.get("creation_time", 0)))
-
-        req = Request(id=request_id, pickup=pickup, dropoff=dropoff, creation_time=creation_time)
-        status = str(data.get("status", "waiting")).upper()
-        req.status = status if status in {"WAITING", "ASSIGNED", "PICKED", "DELIVERED", "EXPIRED"} else "WAITING"
-        req.wait_time = int(data.get("wait_time", data.get("wait", 0)))
-        return req
-
-    def _make_behaviour(self, descriptor: Any):
-        name = str(descriptor).lower() if descriptor is not None else "lazy"
-        if "greedy" in name:
-            return GreedyDistanceBehaviour(max_distance=10.0)
-        return LazyBehaviour(max_idle=5)
-
-    def _build_state_dict(self) -> Dict[str, Any]:
-        if self.sim is None:
-            return dict(self._state_cache)
-
-        drivers_state = [self._driver_to_dict(driver) for driver in self.sim.drivers]
-        pending_requests = [
-            self._request_to_dict(req)
-            for req in self.sim.requests
-            if req.status in self.ACTIVE_REQUEST_STATES
-        ]
-
-        state = {
-            "t": self.sim.time,
-            "drivers": drivers_state,
-            "pending": pending_requests,
-            "served": self.sim.served_count,
-            "expired": self.sim.expired_count,
-        }
-        return state
-
-    def _driver_to_dict(self, driver: Driver) -> Dict[str, Any]:
-        target = driver.target_point()
-        current_request_id = driver.current_request.id if driver.current_request else None
-        return {
-            "id": driver.id,
-            "x": driver.position.x if driver.position else 0.0,
-            "y": driver.position.y if driver.position else 0.0,
-            "status": driver.status.lower(),
-            "tx": target.x if target else None,
-            "ty": target.y if target else None,
-            "rid": current_request_id,
-            "speed": driver.speed,
-        }
-
-    def _request_to_dict(self, request: Request) -> Dict[str, Any]:
-        status_map = {
-            "WAITING": "waiting",
-            "ASSIGNED": "assigned",
-            "PICKED": "picked",
-            "DELIVERED": "delivered",
-            "EXPIRED": "expired",
-        }
-        return {
-            "id": request.id,
-            "px": request.pickup.x,
-            "py": request.pickup.y,
-            "dx": request.dropoff.x,
-            "dy": request.dropoff.y,
-            "status": status_map.get(request.status, request.status.lower()),
-            "t": request.creation_time,
-            "wait": request.wait_time,
-        }
-
-    def _build_metrics(self) -> Dict[str, Any]:
-        if self.sim is None:
-            return {"served": 0, "expired": 0, "avg_wait": 0.0}
-
-        avg_wait = (
-            self.sim.total_wait_time / self.sim.completed_deliveries
-            if self.sim.completed_deliveries
-            else 0.0
-        )
-        return {
-            "served": self.sim.served_count,
-            "expired": self.sim.expired_count,
-            "avg_wait": avg_wait,
+            "statistics": s.get("statistics", {}),
         }

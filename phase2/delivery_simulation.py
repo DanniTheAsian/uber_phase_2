@@ -6,8 +6,8 @@ from typing import List, Tuple
 from .driver import Driver
 from .request import Request
 from .policies.dispatch_policy import DispatchPolicy
-from .request_generator import RequestGenerator  
-from .mutationrule import mutationrule          
+from .request_generator import RequestGenerator
+from .mutationrule.mutationrule import MutationRule
 from .offer import Offer
 
 
@@ -26,7 +26,7 @@ class DeliverySimulation:
         requests: List[Request],
         dispatch_policy: DispatchPolicy,
         request_generator: RequestGenerator,
-        mutation_rule: mutationrule,
+        mutation_rule: MutationRule,
         timeout: int,
     ) -> None:
         """
@@ -72,104 +72,17 @@ class DeliverySimulation:
         """
 
         # 1) Generate new requests
-        try:
-            new_requests: List[Request] = self.request_generator.maybe_generate(self.time) or []
-        except (AttributeError, TypeError, ValueError) as err:
-            print(f"Request generator error at tick {self.time}: {err}")
-            new_requests = []
-        if new_requests:
-            self.requests.extend(new_requests)
+        self._generate_new_requests()
 
-        # 2) Update waiting times and mark expired requests
-        active_requests: List[Request] = []
-        for req in self.requests:
-            if req.is_active():
-                req.update_wait(self.time)
-                if req.wait_time > self.timeout and req.status != "EXPIRED":
-                    req.mark_expired(self.time)
-                    self.expired_count += 1
-                else:
-                    if req.status in ("WAITING", "ASSIGNED", "PICKED"):
-                        active_requests.append(req)
+        active_requests = self._update_waiting_time()
 
-        # 3) Compute proposed assignments via dispatch_policy
-        try:
-            proposals: List[Tuple[Driver, Request]] = self.dispatch_policy.assign(
-                self.drivers, active_requests, self.time
-            ) or []
-        except (AttributeError, TypeError, ValueError) as err:
-            print(f"Dispatch policy error at tick {self.time}: {err}")
-            proposals = []
+        proposals = self._propose_assignments(active_requests)
 
-        # 4) Convert proposals to offers, ask driver behaviours to accept/reject
-        accepted: List[Tuple[Driver, Request]] = []
-        for item in proposals:
-            if not (isinstance(item, tuple) and len(item) >= 2):
-                continue
-            driver, req = item[0], item[1]
+        accepted = self._process_offers(proposals)
 
-            try:
-                dist = driver.position.distance_to(req.pickup)
-                est_time = dist / driver.speed if driver.speed else 0.0
-            except (AttributeError, TypeError) as err:
-                try:
-                    driver_id = driver.id
-                except AttributeError:
-                    driver_id = "?"
-                print(f"Offer estimate error for driver {driver_id}: {err}")
-                est_time = 0.0
+        self._finalize_assigments(accepted)
 
-            offer = Offer(driver=driver, request=req, estimated_travel_time=est_time)
-            try:
-                decision = driver.behaviour.decide(driver, offer, self.time)
-            except (AttributeError, TypeError, ValueError) as err:
-                try:
-                    driver_id = driver.id
-                except AttributeError:
-                    driver_id = "?"
-                print(f"Behaviour error for driver {driver_id}: {err}")
-                decision = False
-
-            if decision:
-                accepted.append((driver, req))
-
-        # 5) Resolve conflicts and finalise assignments (first-come, first-served)
-        used_requests = set()
-        for driver, req in accepted:
-            if req in used_requests or req.status == "ASSIGNED":
-                continue
-            driver.assign_request(req, self.time)
-            used_requests.add(req)
-
-        # 6) Move drivers and handle pickup/dropoff events
-        for driver in self.drivers:
-            try:
-                driver.step(1.0)
-
-                if driver.at_pickup():
-                    driver.complete_pickup(self.time)
-
-                if driver.at_dropoff():
-                    delivered_req = driver.complete_dropoff(self.time)
-                    if delivered_req is None:
-                        try:
-                            delivered_req = driver.current_request
-                        except AttributeError:
-                            delivered_req = None
-                    if delivered_req:
-                        self.served_count += 1
-                        self.completed_deliveries += 1
-                        try:
-                            wait_time = delivered_req.wait_time
-                        except AttributeError:
-                            wait_time = 0
-                        self.total_wait_time += wait_time
-            except (AttributeError, TypeError, ValueError) as err:
-                try:
-                    driver_id = driver.id
-                except AttributeError:
-                    driver_id = "?"
-                print(f"Driver lifecycle error for driver {driver_id}: {err}")
+        self._move_drivers_and_handle_events()
 
         # 7) Apply mutation_rule to each driver
         for driver in self.drivers:
@@ -220,3 +133,78 @@ class DeliverySimulation:
                 "avg_wait": avg_wait,
             }
         }
+    
+    def _generate_new_requests(self):
+        new_requests: List[Request] = self.request_generator.maybe_generate(self.time) or []
+        if new_requests:
+            self.requests.extend(new_requests)
+
+
+    def _update_waiting_time(self) -> List[Request]:
+        """Update waiting times and return only WAITING requests that haven't expired.
+        
+        This filters to only WAITING requests for assignment proposals.
+        ASSIGNED/PICKED requests are handled separately by their drivers.
+        """
+        waiting_requests: List[Request] = []
+        for req in self.requests:
+            if req.status == "WAITING":
+                req.update_wait(self.time)
+                if req.wait_time > self.timeout:
+                    req.mark_expired(self.time)
+                    self.expired_count += 1
+                else:
+                    waiting_requests.append(req)
+        return waiting_requests
+
+
+    def _propose_assignments(self, active_requests: List[Request]) -> List[Tuple[Driver, Request]]:
+        if self.dispatch_policy is None:
+            return []
+
+        proposals = self.dispatch_policy.assign(
+        self.drivers, active_requests, self.time) or []
+        return proposals
+
+
+    def _process_offers(self, proposals: List[Tuple[Driver, Request]]) -> List[Tuple[Driver, Request]]:
+        accepted = []
+        for driver, req in proposals:
+            dist = driver.position.distance_to(req.pickup)
+            est_time = dist / (driver.speed or 1)
+            offer = Offer(driver, req, est_time)
+
+            if driver.behaviour.decide(driver, offer, self.time):
+                accepted.append((driver, req))
+
+        return accepted
+
+    def _finalize_assigments(self, accepted: List[Tuple[Driver, Request]]) -> None:
+        used_requests = set()
+        used_drivers = set()
+        for driver, req in accepted:
+            # Skip if request already assigned or driver already has an assignment
+            if req in used_requests or driver in used_drivers or req.status == "ASSIGNED":
+                continue
+            driver.assign_request(req, self.time)
+            used_requests.add(req)
+            used_drivers.add(driver)
+
+    def _move_drivers_and_handle_events(self) -> None:
+        for driver in self.drivers:
+            driver.step(1.0)
+
+            # arrival detection: check proximity to pickup/dropoff points
+            if driver.current_request and driver.status == "TO_PICKUP":
+                if driver.position.distance_to(driver.current_request.pickup) < 1e-6:
+                    driver.complete_pickup(self.time)
+
+            if driver.current_request and driver.status == "TO_DROPOFF":
+                if driver.position.distance_to(driver.current_request.dropoff) < 1e-6:
+                    # capture request reference before completion clears it
+                    req = driver.current_request
+                    driver.complete_dropoff(self.time)
+                    if req:
+                        self.served_count += 1
+                        self.completed_deliveries += 1
+                        self.total_wait_time += getattr(req, "wait_time", 0)
