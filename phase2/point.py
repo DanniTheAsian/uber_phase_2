@@ -19,11 +19,11 @@ class Point:
         """
         Initialize a Point
         
-        Arguments:
+        Args:
             x (float): x-coordinate
             y (float): y-coordinate
 
-        Return:
+        Returns:
             None
 
         Example:
@@ -35,15 +35,14 @@ class Point:
         self.y = y
     
     def distance_to(self, other: "Point") -> float:
-        """Docstring
-        >>> self.x = 0
-        >>> self.y = 0
-        >>> other.x = 3
-        >>> other.y = 4
-        >>> point1 = Point(self.x, self.y)
-        >>> point2 = Point(other.x, other.y)
-        >>> point1.distance_to(point2)
-        5.0
+        """
+        Calculate the Euclidean distance to another point.
+
+        Example:
+            >>> point1 = Point(0, 0)
+            >>> point2 = Point(3, 4)
+            >>> point1.distance_to(point2)
+            5.0
         """
         dx = self.x - other.x
         dy = self.y - other.y
@@ -53,9 +52,9 @@ class Point:
         """
         Add two points together (x + x, y + y) and returns a new point
         
-        Arguments:
+        Args:
             other (Point): The point to add.
-        
+
         Returns:
             Point: A new point with the summed coordinates
 
@@ -70,10 +69,10 @@ class Point:
         """
         Add another point to this point (in-place)
         
-        Arguments:
+        Args:
             other (Point): the point to add
 
-        return:
+        Returns:
             Point: Modified Point
 
         Example:
@@ -90,7 +89,7 @@ class Point:
         """
         Subtract another point and return a new point.
 
-        Arguments:
+        Args:
             other (Point): The point to subtract.
 
         Returns:
@@ -107,7 +106,7 @@ class Point:
         """
         Subtract another point from this one (in-place).
 
-        Arguments:
+        Args:
             other (Point): The point to subtract.
 
         Returns:
@@ -127,7 +126,7 @@ class Point:
         """
         Multiply this point by a scalar and return a new point.
 
-        Arguments:
+        Args:
             scalar (int | float): The number to multiply with.
 
         Returns:
@@ -144,7 +143,7 @@ class Point:
         """
         Allow scalar * point multiplication.
 
-        Arguments:
+        Args:
             scalar (int | float): The number to multiply with.
 
         Returns:

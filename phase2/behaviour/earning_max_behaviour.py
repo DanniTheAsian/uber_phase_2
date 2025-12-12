@@ -1,3 +1,10 @@
+"""
+Earning-maximising driver behaviour.
+
+This behaviour accepts offers when the expected reward per unit of travel
+time exceeds a configurable threshold (optionally adjusted by time).
+"""
+
 from .driver_behaviour import DriverBehaviour
 
 
@@ -16,7 +23,7 @@ class EarningMaxBehaviour(DriverBehaviour):
         """
         Initialize the behaviour with a minimum ratio threshold.
 
-        Arguments:
+        Args:
             min_ratio (float): Minimum acceptable reward/time ratio.
 
         Example:
@@ -38,7 +45,7 @@ class EarningMaxBehaviour(DriverBehaviour):
 
             effective_threshold = min_ratio * (1 + 0.0005 * time)
 
-        Arguments:
+        Args:
             driver (Driver): The driver making the decision.
             offer (Offer): Contains estimated_reward and travel_time.
             time (int): Current simulation time.

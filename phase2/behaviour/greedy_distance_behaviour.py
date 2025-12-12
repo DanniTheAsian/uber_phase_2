@@ -1,3 +1,10 @@
+"""
+Greedy-distance driver behaviour.
+
+This module defines a behaviour where drivers accept offers when the pickup
+location is within a configured maximum distance from their current position.
+"""
+
 from .driver_behaviour import DriverBehaviour
 
 
@@ -10,10 +17,10 @@ class GreedyDistanceBehaviour(DriverBehaviour):
         """
         Initialize the behaviour with a maximum allowed pickup distance.
 
-        Arguments:
+        Args:
             max_distance (float): The farthest distance the driver will accept.
 
-        Return:
+        Returns:
             None
 
         Example:
@@ -31,7 +38,7 @@ class GreedyDistanceBehaviour(DriverBehaviour):
         to the pickup point and accepts the offer if the distance is
         below the configured maximum.
 
-        Arguments:
+        Args:
             driver (Driver): The driver making the decision.
             offer (Offer): Contains the request and its pickup position.
             time (int): Current simulation time (not used here).

@@ -1,3 +1,11 @@
+"""
+Performance-based mutation rule.
+
+This module implements a mutation rule that adjusts a driver's behaviour
+based on recent trip performance. If the driver's average served count over
+the last N trips is below a threshold, the driver becomes less selective.
+"""
+
 from .mutationrule import MutationRule
 from ..behaviour.greedy_distance_behaviour import GreedyDistanceBehaviour
 from ..driver import Driver
@@ -17,18 +25,14 @@ class PerformanceBasedMutation(MutationRule):
     """
    
     def __init__(self, threshold: float, N: int ) -> None:
-        """
-        Initialize the mutation rule.
+        """Initialize the mutation rule.
 
-        Parameters
-        ----------
-        threshold : float
-            The minimum acceptable average number of served requests across
-            the last N trips. If the driver performs below this threshold,
-            a mutation will occur.
-        N : int
-            The number of most recent trips to include when evaluating the
-            driver's performance window.
+        Args:
+            threshold (float): The minimum acceptable average number of served requests across
+                the last N trips. If the driver performs below this threshold,
+                a mutation will occur.
+            N (int): The number of most recent trips to include when evaluating the
+                driver's performance window.
         """
         self.threshold = threshold
         self.N = N
@@ -41,14 +45,12 @@ class PerformanceBasedMutation(MutationRule):
         Each history entry is expected to contain a "served" field indicating
         how many requests the driver served in that completed trip.
 
-        Arguments
-        driver : Driver
-            The driver whose behaviour may be mutated.
-        time : int
-            The current simulation time. Included to satisfy the MutationRule
-            interface; not directly used in this rule.
+        Args:
+            driver (Driver): The driver whose behaviour may be mutated.
+            time (int): The current simulation time. Included to satisfy the MutationRule
+                interface; not directly used in this rule.
 
-        Return:
+        Returns:
             None
         """
         if len(driver.history) < self.N:

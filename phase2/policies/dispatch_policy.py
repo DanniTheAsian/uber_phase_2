@@ -1,3 +1,11 @@
+"""
+Abstract base for dispatch policies.
+
+Subclasses implement strategies to propose driver-request assignments for
+each simulation tick. The interface expects an `assign` method that returns
+a list of (driver, request) pairs.
+"""
+
 from abc import ABC,abstractmethod
 from ..driver import Driver
 from ..request import Request
@@ -16,21 +24,15 @@ class DispatchPolicy(ABC):
     """
     @abstractmethod
     def assign(self, drivers: list[Driver], requests: list[Request], time: int) -> list[tuple[Driver, Request]]:
-                """
-        Return proposed (driver, request) assignments for this tick.
+        """Return proposed (driver, request) assignments for this tick.
 
-        Parameters
-        ----------
-        drivers : list[Driver]
-            The list of available drivers.
-        requests : list[Request]
-            The list of pending requests.
-        time : int
-            The current simulation time. Subclasses may use this to incorporate
-            temporal logic, such as prioritizing older requests or idle drivers.
+        Args:
+            drivers (list[Driver]): The list of available drivers.
+            requests (list[Request]): The list of pending requests.
+            time (int): The current simulation time. Subclasses may use this to incorporate
+                temporal logic, such as prioritizing older requests or idle drivers.
 
-        Returns
-        list[tuple[Driver, Request]]
-            The assignments chosen by the policy for this tick.
+        Returns:
+            list[tuple[Driver, Request]]: The assignments chosen by the policy for this tick.
         """
             

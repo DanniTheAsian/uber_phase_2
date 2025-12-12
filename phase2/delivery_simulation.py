@@ -1,4 +1,12 @@
-"""docstring"""
+"""
+Delivery simulation core loop and orchestration.
+
+This module implements the DeliverySimulation class which coordinates drivers,
+requests, the dispatch policy, the request generator, and mutation rules.
+The main simulation step is performed by `tick()` which runs request
+generation, waiting-time updates, assignment proposals, offer processing,
+driver movement and mutations.
+"""
 
 from typing import List, Tuple
 from .driver import Driver
@@ -21,6 +29,7 @@ class DeliverySimulation:
         timeout: int,
     ) -> None:
         """Initialize a DeliverySimulation instance.
+
         Args:
             drivers (list[Driver]): All drivers in the simulation.
             requests (list[Request]): Existing requests, both active and completed.
@@ -184,4 +193,7 @@ class DeliverySimulation:
                     if req:
                         self.served_count += 1
                         self.completed_deliveries += 1
-                        self.total_wait_time += getattr(req, "wait_time", 0)
+                        try:
+                            self.total_wait_time += req.wait_time
+                        except (AttributeError, TypeError):
+                            pass

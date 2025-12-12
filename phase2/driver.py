@@ -15,18 +15,18 @@ class Driver:
     and maintain a history of completed trips for statistics.
     """
     def __init__(self, id: int, position: Point, speed: float, behaviour: DriverBehaviour | None = None, status: str = "IDLE", current_request: Request | None = None, history: list | None = None) -> None:
-        """ Initialize Driver instance
+        """Initialize Driver instance.
 
         Args:
-            id (int): Unique identifier for the driver
+            id (int): Unique identifier for the driver.
             position (Point): Starting position on the map.
             speed (float): Movement speed in units per simulation tick.
-            behaviour (DriverBehaviour): Decision Policy for accepting or rejecting requests.
+            behaviour (DriverBehaviour | None): Decision policy for accepting or rejecting requests.
             status (str, optional): Initial status of the driver. Defaults to "IDLE".
             current_request (Request | None, optional): Current assigned request. Defaults to None.
             assigned_reward (float, optional): Reward associated with the assigned request. Defaults to 0.0.
             history (list | None, optional): List of completed trips for statistics. Defaults to None which initializes an empty list.
-         
+
         Returns:
             None
         """
@@ -106,15 +106,16 @@ class Driver:
             self.position += travel
 
     def complete_pickup(self, time: int) -> None:
-        """ The driver completes the pickup process, 
-            updates its status to TO_DROPOFF 
-            and marks the request as picked.
+        """The driver completes the pickup process.
 
-            Args:
-                time (int): The current simulation time tick.
-                
-            Returns:
-                None
+        Updates the driver's status to TO_DROPOFF and marks the current
+        request as picked.
+
+        Args:
+            time (int): The current simulation time tick.
+
+        Returns:
+            None
         """
 
         if self.current_request and self.status == "TO_PICKUP":
@@ -122,17 +123,17 @@ class Driver:
             self.current_request.mark_picked(time)
         
     def complete_dropoff(self, time:int) -> None:
-        """ The driver completes the dropoff process, 
-            marks the request as delivered,
-            records the trip in history,
-            clears the current request,
-            and its position when the request was received,
-            and updates its status to IDLE
-            Args:
-                time (int): The current simulation time tick when dropoff is completed.
-            
-            Returns:
-                None
+        """The driver completes the dropoff process.
+
+        Marks the request as delivered, records the trip in history,
+        clears the current request and assignment information, and
+        updates the driver's status to IDLE.
+
+        Args:
+            time (int): The current simulation time tick when dropoff is completed.
+
+        Returns:
+            None
         """
         if self.current_request and self.status == "TO_DROPOFF":
             self.current_request.mark_delivered(time)
@@ -150,7 +151,6 @@ class Driver:
 
             total_distance = distance_to_pickup + distance_from_pickup_to_dropoff
             earnings = self.assigned_reward
-
             self.history.append({
                 "driver_id": self.id,
                 "request_id": self.current_request.id,

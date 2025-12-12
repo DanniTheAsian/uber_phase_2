@@ -22,7 +22,7 @@ class DriverBehaviour(ABC):
         """
         Decide whether the driver accepts the offer.
 
-        Arguments:
+        Args:
             driver (Driver): The driver making the decision.
             offer (Offer): The incoming offer containing request info.
             time (int): The current simulation time.

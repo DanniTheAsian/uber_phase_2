@@ -1,6 +1,15 @@
+"""
+Request generation utilities.
+
+This module provides the RequestGenerator class which creates new
+Request objects over time according to a configured rate and a simple
+time-dependent model. The generator produces pickup/dropoff points
+within the simulator's map bounds.
+"""
+
 import random
-from .request import Request
-from .point import Point
+from phase2.request import Request
+from phase2.point import Point
 
 class RequestGenerator:
     """

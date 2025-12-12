@@ -22,7 +22,7 @@ class MutationRule(ABC):
         """
         Decide whether the driver should mutate to another behaviour.
 
-        Arguments:
+        Args:
             driver (Driver): The driver that may mutate.
             time (int): Current simulation time.
 

@@ -1,3 +1,11 @@
+"""
+Global greedy dispatch policy.
+
+This module implements a global greedy matching strategy which computes all
+driver-request pairs, sorts them by driver-to-pickup distance and greedily
+assigns the nearest available request to each driver.
+"""
+
 from .dispatch_policy import DispatchPolicy
 from ..driver import Driver
 from ..request import Request
@@ -17,17 +25,13 @@ class GlobalGreedyPolicy(DispatchPolicy):
         combinations and assigning each driver to the closest available request, 
         ensuring that no driver or request is assigned more than once.
 
-        Parameters:
-        drivers : list[Driver]
-            The list of available drivers at the current simulation step.
-        requests : list[Request]
-            The list of active requests waiting to be assigned.
-        time : int
-            The current simulation time (not used directly but kept for interface compatibility).
+        Args:
+            drivers (list[Driver]): The list of available drivers at the current simulation step.
+            requests (list[Request]): The list of active requests waiting to be assigned.
+            time (int): The current simulation time (not used directly but kept for interface compatibility).
 
-        Return:
-        list[tuple[Driver, Request]]
-            A list of (driver, request) pairs representing the assignments made.
+        Returns:
+            list[tuple[Driver, Request]]: A list of (driver, request) pairs representing the assignments made.
         """
         combos = []
         for driver in drivers:

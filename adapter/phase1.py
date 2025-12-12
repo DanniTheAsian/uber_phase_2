@@ -1,10 +1,11 @@
 import random
 from typing import Dict, List
 
-from .adapter import SimulationAdapter
+from adapter.adapter import SimulationAdapter
 
 
 ADAPTER = SimulationAdapter()
+
 
 
 def load_drivers(_path):
