@@ -1,3 +1,7 @@
+"""
+Driver behaviour that accepts offers based on a minimum reward-to-time ratio.
+"""
+
 from .driver_behaviour import DriverBehaviour
 
 
@@ -10,13 +14,13 @@ class EarningMaxBehaviour(DriverBehaviour):
     earning per unit of travel time is high enough.
 
     Attributes:
-        min_ratio (float): The minimum required reward/travel_time ratio
+            min_ratio (float): The minimum required reward/travel_time ratio
     """
     def __init__(self, min_ratio):
         """
         Initialize the behaviour with a minimum ratio threshold.
 
-        Arguments:
+        Args:
             min_ratio (float): Minimum acceptable reward/time ratio.
 
         Example:
@@ -38,7 +42,7 @@ class EarningMaxBehaviour(DriverBehaviour):
 
             effective_threshold = min_ratio * (1 + 0.0005 * time)
 
-        Arguments:
+        Args:
             driver (Driver): The driver making the decision.
             offer (Offer): Contains estimated_reward and travel_time.
             time (int): Current simulation time.
@@ -46,24 +50,47 @@ class EarningMaxBehaviour(DriverBehaviour):
         Returns:
             bool: True if the offer is accepted.
         
-        Note:
+        Notes:
             - Returns False if estimated_reward is None
             - Returns False if travel_time is 0 (avoid division by zero)
             - Uses time-adjusted threshold: min_ratio * (1 + 0.0005 * time)
         """
 
-        if offer.estimated_reward is None:
+        try:
+            reward = offer.estimated_reward
+            travel_time = offer.estimated_travel_time
+        except (AttributeError, TypeError) as err:
+            print(f"EarningMaxBehaviour offer error: {err}")
             return False
-        
-        if offer.estimated_travel_time <= 0:
+
+        if reward is None:
             return False
-        
-        threshold = self.min_ratio * (1 + 0.0005 * time)
-        
-        ratio = offer.estimated_reward / offer.estimated_travel_time
+
+        try:
+            travel_time_value = float(travel_time)
+        except (TypeError, ValueError) as err:
+            print(f"EarningMaxBehaviour travel time error: {err}")
+            return False
+
+        if travel_time_value <= 0:
+            return False
+
+        try:
+            base_ratio = float(self.min_ratio)
+        except (TypeError, ValueError) as err:
+            print(f"EarningMaxBehaviour ratio error: {err}")
+            return False
+
+        threshold = base_ratio * (1 + 0.0005 * time)
+
+        try:
+            ratio = float(reward) / travel_time_value
+        except (TypeError, ValueError, ZeroDivisionError) as err:
+            print(f"EarningMaxBehaviour ratio calc error: {err}")
+            return False
+
         return ratio >= threshold
 
-    # for debugging
     def __repr__(self) -> str:
         """String representation of the behaviour."""
 

@@ -1,5 +1,5 @@
 """
-This module contains the Request class which represents
+This module contains the Request class, which represents
 a single customer order in the delivery simulation.
 """
 
@@ -10,11 +10,9 @@ class Request:
     """
     Represents a single delivery request in the system.
 
-    A request keeps track of its pickup and dropoff locations,
-    when it was created in the simulation, its current status
-    (e.g. WAITING, ASSIGNED, PICKED, DELIVERED, EXPIRED),
-    which driver is assigned to it, and how long it
-    has been waiting in total.
+    It records pickup and dropoff locations, the creation tick, lifecycle
+    status (e.g. ``WAITING``, ``ASSIGNED``, ``PICKED``, ``DELIVERED``, ``EXPIRED``),
+    the assigned driver, and the total time spent waiting.
     """
 
     def __init__(
@@ -24,7 +22,8 @@ class Request:
         dropoff: Point,
         creation_time: int,
     ) -> None:
-        """Initialize a Request instance.
+        """
+        Initialize a Request instance.
 
         Args:
             id (int): Unique identifier for the request.
@@ -35,29 +34,42 @@ class Request:
         Returns:
             None
         """
-        self.id = id
-        self.pickup = pickup
-        self.dropoff = dropoff
-        self.creation_time = creation_time
+        try:
+            self.id = int(id)
+        except (TypeError, ValueError) as err:
+            print(f"Request init id error: {err}")
+            self.id = -1
+
+        self.pickup = pickup if isinstance(pickup, Point) else None
+        if self.pickup is None:
+            print("Request init pickup error: invalid Point")
+
+        self.dropoff = dropoff if isinstance(dropoff, Point) else None
+        if self.dropoff is None:
+            print("Request init dropoff error: invalid Point")
+
+        try:
+            self.creation_time = int(creation_time)
+        except (TypeError, ValueError) as err:
+            print(f"Request init creation time error: {err}")
+            self.creation_time = 0
 
         self.status = "WAITING"
         self.assigned_driver_id: int | None = None
         self.wait_time: int = 0
 
     def is_active(self) -> bool:
-        """Check if the request is in a known, normal state.
-
-        In this implementation a request is considered active as long as
-        its status is one of the standard states in the request process
-        (WAITING, ASSIGNED, PICKED, DELIVERED or EXPIRED).
+        """
+        Check that the request status is one of the recognized lifecycle states.
 
         Returns:
-            bool: True if the status is a known state, False otherwise.
+            bool: True if the status matches WAITING/ASSIGNED/PICKED/DELIVERED/EXPIRED.
         """
         return self.status in ["WAITING", "ASSIGNED", "PICKED", "DELIVERED", "EXPIRED"]
 
     def mark_assigned(self, driver_id: int) -> None:
-        """Mark the request as assigned to a driver.
+        """
+        Mark the request as assigned to a driver.
 
         Updates the status to ASSIGNED and stores the id of the driver
         that has been chosen to handle this request.
@@ -68,11 +80,17 @@ class Request:
         Returns:
             None
         """
-        self.status = "ASSIGNED"
-        self.assigned_driver_id = driver_id
+        try:
+            self.status = "ASSIGNED"
+            self.assigned_driver_id = int(driver_id)
+        except (TypeError, ValueError) as err:
+            print(f"Request mark_assigned error: {err}")
+            self.status = "ASSIGNED"
+            self.assigned_driver_id = None
 
     def mark_picked(self, t: int) -> None:
-        """Mark the request as picked up by the driver.
+        """
+        Mark the request as picked up by the driver.
 
         Updates the status to PICKED and sets the waiting time to the
         time elapsed since creation.
@@ -84,10 +102,15 @@ class Request:
             None
         """
         self.status = "PICKED"
-        self.wait_time = t - self.creation_time
+        try:
+            self.wait_time = int(t) - self.creation_time
+        except (TypeError, ValueError) as err:
+            print(f"Request mark_picked error: {err}")
+            self.wait_time = 0
 
     def mark_delivered(self, t: int) -> None:
-        """Mark the request as delivered to the customer.
+        """
+        Mark the request as delivered to the customer.
 
         Updates the status to DELIVERED and sets the waiting time to the
         total time from creation until delivery.
@@ -99,10 +122,15 @@ class Request:
             None
         """
         self.status = "DELIVERED"
-        self.wait_time = t - self.creation_time
+        try:
+            self.wait_time = int(t) - self.creation_time
+        except (TypeError, ValueError) as err:
+            print(f"Request mark_delivered error: {err}")
+            self.wait_time = 0
 
     def mark_expired(self, t: int) -> None:
-        """Mark the request as expired.
+        """
+        Mark the request as expired.
 
         Used when the request has waited too long without being
         completed. Updates the status to EXPIRED and sets the
@@ -115,10 +143,15 @@ class Request:
             None
         """
         self.status = "EXPIRED"
-        self.wait_time = t - self.creation_time
+        try:
+            self.wait_time = int(t) - self.creation_time
+        except (TypeError, ValueError) as err:
+            print(f"Request mark_expired error: {err}")
+            self.wait_time = 0
 
     def update_wait(self, current_time: int) -> None:
-        """Recalculate the waiting time based on the current simulation time.
+        """
+        Recalculate the waiting time based on the current simulation time.
 
         Args:
             current_time (int): Current simulation time tick.
@@ -126,4 +159,8 @@ class Request:
         Returns:
             None
         """
-        self.wait_time = current_time - self.creation_time
+        try:
+            self.wait_time = int(current_time) - self.creation_time
+        except (TypeError, ValueError) as err:
+            print(f"Request update_wait error: {err}")
+            self.wait_time = 0

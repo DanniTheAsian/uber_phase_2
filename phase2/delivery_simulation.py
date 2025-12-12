@@ -1,4 +1,6 @@
-"""docstring"""
+"""
+Defines the main delivery simulation and the classes it depends on.
+"""
 
 from typing import List, Tuple
 from .driver import Driver
@@ -10,6 +12,13 @@ from .offer import Offer
 
 
 class DeliverySimulation:
+    """
+    Simulates drivers serving delivery requests over discrete time steps.
+
+    The simulation handles request generation, dispatching through a policy,
+    driver acceptance behavior, movement, pickup/dropoff events, mutation
+    rules, and collection of performance statistics.
+    """
 
     def __init__(
         self,
@@ -20,14 +29,15 @@ class DeliverySimulation:
         mutation_rule: mutationrule,
         timeout: int,
     ) -> None:
-        """Initialize a DeliverySimulation instance.
+        """
+        Initialize a DeliverySimulation.
         Args:
             drivers (list[Driver]): All drivers in the simulation.
             requests (list[Request]): Existing requests, both active and completed.
-            dispatch_policy (DispatchPolicy): Strategy for driver_request assignment.
-            request_generator (RequestGenerator): Generates new requests over time.
-            mutation_rule (MutationRule): Updates driver behaviour over time.
-            timeout (int): Maximum wait time before a request expires.
+            dispatch_policy (DispatchPolicy): Strategy for assigning drivers to requests.
+            request_generator (RequestGenerator): Generates new requests.
+            mutation_rule (MutationRule): Rule that may mutate driver behaviour over time.
+            timeout (int): Maximum wait time (in ticks) before a request expires.
 
         This constructor also initializes global statistics and the simulation clock.
         """
@@ -53,17 +63,20 @@ class DeliverySimulation:
         This method performs the full 8-step simulation pipeline:
         1. Generate new requests.
         2. Update waiting times and mark expired requests.
-        3. Ask the dispatch policy for proposed assignments.
-        4. Convert proposals to offers and let drivers accept or reject them.
+        3. Compute proposed assignments via dispatch_policy.
+        4. Convert proposals to offers, ask driver behaviours to accept/reject.
         5. Resolve conflicts and finalize assignments.
         6. Move drivers and handle pickup/dropoff events.
-        7. Apply driver mutation rules.
+        7. Apply mutation_rule to each driver.
         8. Increase the simulation time.
-        All core simulation logic happens here.
         """
 
         # 1) Generate new requests
-        new_requests: List[Request] = self.request_generator.maybe_generate(self.time) or []
+        try:
+            new_requests: List[Request] = self.request_generator.maybe_generate(self.time) or []
+        except (AttributeError, TypeError, ValueError) as err:
+            print(f"Request generator error at tick {self.time}: {err}")
+            new_requests = []
         if new_requests:
             self.requests.extend(new_requests)
 
@@ -80,9 +93,13 @@ class DeliverySimulation:
                         active_requests.append(req)
 
         # 3) Compute proposed assignments via dispatch_policy
-        proposals: List[Tuple[Driver, Request]] = self.dispatch_policy.assign(
-            self.drivers, active_requests, self.time
-        ) or []
+        try:
+            proposals: List[Tuple[Driver, Request]] = self.dispatch_policy.assign(
+                self.drivers, active_requests, self.time
+            ) or []
+        except (AttributeError, TypeError, ValueError) as err:
+            print(f"Dispatch policy error at tick {self.time}: {err}")
+            proposals = []
 
         # 4) Convert proposals to offers, ask driver behaviours to accept/reject
         accepted: List[Tuple[Driver, Request]] = []
@@ -93,12 +110,27 @@ class DeliverySimulation:
 
             try:
                 dist = driver.position.distance_to(req.pickup)
-                est_time = dist / (driver.speed or 1)
-            except Exception:
+                est_time = dist / driver.speed if driver.speed else 0.0
+            except (AttributeError, TypeError) as err:
+                try:
+                    driver_id = driver.id
+                except AttributeError:
+                    driver_id = "?"
+                print(f"Offer estimate error for driver {driver_id}: {err}")
                 est_time = 0.0
 
             offer = Offer(driver=driver, request=req, estimated_travel_time=est_time)
-            if driver.behaviour.decide(driver, offer, self.time):
+            try:
+                decision = driver.behaviour.decide(driver, offer, self.time)
+            except (AttributeError, TypeError, ValueError) as err:
+                try:
+                    driver_id = driver.id
+                except AttributeError:
+                    driver_id = "?"
+                print(f"Behaviour error for driver {driver_id}: {err}")
+                decision = False
+
+            if decision:
                 accepted.append((driver, req))
 
         # 5) Resolve conflicts and finalise assignments (first-come, first-served)
@@ -111,29 +143,57 @@ class DeliverySimulation:
 
         # 6) Move drivers and handle pickup/dropoff events
         for driver in self.drivers:
-            driver.step(1.0)
+            try:
+                driver.step(1.0)
 
-            if driver.at_pickup():
-                driver.complete_pickup(self.time)
+                if driver.at_pickup():
+                    driver.complete_pickup(self.time)
 
-            if driver.at_dropoff():
-                delivered_req = driver.complete_dropoff(self.time)
-                if delivered_req is None:
-                    delivered_req = getattr(driver, "current_request", None)
-                if delivered_req:
-                    self.served_count += 1
-                    self.completed_deliveries += 1
-                    self.total_wait_time += getattr(delivered_req, "wait_time", 0)
+                if driver.at_dropoff():
+                    delivered_req = driver.complete_dropoff(self.time)
+                    if delivered_req is None:
+                        try:
+                            delivered_req = driver.current_request
+                        except AttributeError:
+                            delivered_req = None
+                    if delivered_req:
+                        self.served_count += 1
+                        self.completed_deliveries += 1
+                        try:
+                            wait_time = delivered_req.wait_time
+                        except AttributeError:
+                            wait_time = 0
+                        self.total_wait_time += wait_time
+            except (AttributeError, TypeError, ValueError) as err:
+                try:
+                    driver_id = driver.id
+                except AttributeError:
+                    driver_id = "?"
+                print(f"Driver lifecycle error for driver {driver_id}: {err}")
 
         # 7) Apply mutation_rule to each driver
         for driver in self.drivers:
-            self.mutation_rule.maybe_mutate(driver, self.time)
+            try:
+                self.mutation_rule.maybe_mutate(driver, self.time)
+            except (AttributeError, TypeError, ValueError) as err:
+                try:
+                    driver_id = driver.id
+                except AttributeError:
+                    driver_id = "?"
+                print(f"Mutation error for driver {driver_id}: {err}")
 
         # 8) Increment time
         self.time += 1
 
     def get_snapshot(self) -> dict:
-        """Return a state snapshot for the GUI."""
+        """
+        Return a dictionary containing:
+               - list of driver positions,
+               - list of pickup positions (for WAITING/ASSIGNED requests),
+               - list of dropoff positions (for PICKED requests),
+               - statistics (served, expired, average waiting time).
+             Used by the GUI adapter.
+        """
         drivers_snapshot = []
         for d in self.drivers:
             pos = d.position

@@ -1,39 +1,68 @@
-from .adapter import SimulationAdapter
-from phase2.driver import Driver
-from phase2.request import Request
-from phase2.point import Point
-from phase2.behaviour.driver_behaviour import DriverBehaviour
+from __future__ import annotations
+
+import itertools
 import random
+from typing import Dict, List
+
+from .adapter import SimulationAdapter
 
 
 ADAPTER = SimulationAdapter()
+_REQUEST_COUNTER = itertools.count(1)
 
-def load_drivers(path):
+
+def load_drivers(_path):
     return []
 
-def load_requests(path):
+
+def load_requests(_path):
     return []
+
 
 def generate_drivers(n, width, height):
-    drivers = []
-    width = 50
-    height = 30
-
+    drivers: List[Dict] = []
     for i in range(n):
-        speed = random.uniform(0.01, 1)
-        x = random.uniform(0, width)
-        y = random.uniform(0, height)
-
-        drivers.append(Driver(i, Point(x,y), speed, behaviour=None))
+        speed = random.uniform(0.5, 1.5)
+        drivers.append(
+            {
+                "id": i,
+                "x": random.uniform(0, width),
+                "y": random.uniform(0, height),
+                "speed": speed,
+                "status": "idle",
+                "behaviour": "lazy",
+            }
+        )
     return drivers
 
+
 def generate_requests(start_t, out_list, rate, width, height):
-    pass
+    if rate <= 0:
+        return
+
+    whole = int(rate)
+    fractional = rate - whole
+    count = whole
+    if random.random() < fractional:
+        count += 1
+
+    for _ in range(count):
+        out_list.append(
+            {
+                "id": next(_REQUEST_COUNTER),
+                "px": random.uniform(0, width),
+                "py": random.uniform(0, height),
+                "dx": random.uniform(0, width),
+                "dy": random.uniform(0, height),
+                "t": start_t,
+                "status": "waiting",
+            }
+        )
 
 def init_state(drivers, requests, timeout, req_rate, width, height):
     return ADAPTER.init_state(
-        drivers=drivers,
-        requests=requests,
+        drivers=list(drivers or []),
+        requests=list(requests or []),
         timeout=timeout,
         req_rate=req_rate,
         width=width,

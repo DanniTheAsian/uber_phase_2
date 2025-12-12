@@ -7,6 +7,8 @@ from .behaviour.driver_behaviour import DriverBehaviour
 from .point import Point
 from .request import Request
 
+ARRIVAL_EPSILON = 1e-3
+
 class Driver:
     """
     An autonomous driver agent in the system 
@@ -14,11 +16,12 @@ class Driver:
     accept or reject requests based on their behaviour policy,
     and maintain a history of completed trips for statistics.
     """
-    def __init__(self, id: int, position: Point, speed: float, behaviour: DriverBehaviour | None = None, status: str = "IDLE", current_request: Request | None = None, history: list | None = None) -> None:
-        """ Initialize Driver instance
+    def __init__(self, driver_id: int, position: Point, speed: float, behaviour: DriverBehaviour | None = None, status: str = "IDLE", current_request: Request | None = None, history: list | None = None) -> None:
+        """
+        Initialize Driver instance
 
         Args:
-            id (int): Unique identifier for the driver
+            driver_id (int): Unique identifier for the driver
             position (Point): Starting position on the map.
             speed (float): Movement speed in units per simulation tick.
             behaviour (DriverBehaviour): Decision Policy for accepting or rejecting requests.
@@ -30,7 +33,7 @@ class Driver:
         Returns:
             None
         """
-        self.id = id
+        self.id = driver_id
         self.position = position
         self.speed = speed
         self.behaviour = behaviour
@@ -44,8 +47,9 @@ class Driver:
         else:
             self.history = history
     
-    def assign_request(self, request: Request, reward: float) -> None:
-        """ Assign a delivery request to the driver.
+    def assign_request(self, request: Request, assignment_meta: float | None = None, reward: float | None = None) -> None:
+        """
+        Assign a delivery request to the driver.
         
         Stores the driver's current position for distance calculation,
         updates the driver's status to TO_PICKUP, and marks the request
@@ -57,33 +61,74 @@ class Driver:
         Returns:
             None
         """
-        self.position_at_assignment = self.position
-        self.current_request = request
-        self.assigned_reward = reward
-        self.status = "TO_PICKUP"
-        request.mark_assigned(self.id)
+        try:
+            self.position_at_assignment = self.position
+            self.current_request = request
+            if reward is None and isinstance(assignment_meta, (int, float)):
+                # Compatibility: older call sites pass current simulation time as the second argument.
+                self.assigned_reward = 0.0
+            else:
+                self.assigned_reward = reward if reward is not None else 0.0
+            self.status = "TO_PICKUP"
+            request.mark_assigned(self.id)
+        except AttributeError as err:
+            print(f"Driver assign_request attribute error for driver {self.id}: {err}")
+            self.current_request = None
+            self.status = "IDLE"
+        except (TypeError, ValueError) as err:
+            print(f"Driver assign_request error for driver {self.id}: {err}")
+            self.current_request = None
+            self.status = "IDLE"
+
+    def _is_at_target(self, target: Point | None) -> bool:
+        if target is None or self.position is None:
+            return False
+        return self.position.distance_to(target) <= ARRIVAL_EPSILON
+
+    def at_pickup(self) -> bool:
+        if not self.current_request or self.status != "TO_PICKUP":
+            return False
+        return self._is_at_target(self.current_request.pickup)
+
+    def at_dropoff(self) -> bool:
+        if not self.current_request or self.status != "TO_DROPOFF":
+            return False
+        return self._is_at_target(self.current_request.dropoff)
 
     def target_point(self) -> Point | None:
-        """ Get the driver's current target destination.
+        """
+        Get the driver's current target destination.
         
         Returns:
             Point | None: The pickup point if status is TO_PICKUP,
                          the dropoff point if status is TO_DROPOFF,
                          or None if the driver is idle or has no request.
         """
-        if self.current_request is None or self.status == "IDLE":
+        try:
+            request = self.current_request
+            status = self.status
+        except AttributeError as err:
+            print(f"Driver target_point error for driver {self.id}: {err}")
+            return None
+
+        if request is None or status == "IDLE":
             return None
         
-        if self.status == "TO_PICKUP":
-            return self.current_request.pickup
-        
-        if self.status == "TO_DROPOFF":
-            return self.current_request.dropoff
-        
+        try:
+            if status == "TO_PICKUP":
+                return request.pickup
+
+            if status == "TO_DROPOFF":
+                return request.dropoff
+        except AttributeError as err:
+            print(f"Driver target_point request error for driver {self.id}: {err}")
+            return None
+
         return None # returns None for unexpected status.
 
     def step(self, dt: float) -> None:
-        """ Move the driver towards its current target.
+        """
+        Move the driver towards its current target.
         
         The driver moves at its speed for the given time step. If the
         target is within reach, the driver arrives exactly at the target.
@@ -100,56 +145,77 @@ class Driver:
         if destination is None:
             return
         
-        distance = self.position.distance_to(destination)
-        movement = self.speed * dt
+        try:
+            distance = self.position.distance_to(destination)
+            movement = self.speed * dt
+        except (AttributeError, TypeError, ValueError) as err:
+            print(f"Driver step error for driver {self.id}: {err}")
+            return
 
         if distance <= movement:
             self.position = destination
         else:
-            ratio = movement / distance
-            direction = destination - self.position
-            travel = direction * ratio
-            self.position += travel
+            try:
+                ratio = movement / distance
+                direction = destination - self.position
+                travel = direction * ratio
+                self.position += travel
+            except (TypeError, ValueError) as err:
+                print(f"Driver movement math error for driver {self.id}: {err}")
+                return
 
     def complete_pickup(self, time: int) -> None:
-        """ The driver completes the pickup process, 
-            updates its status to TO_DROPOFF 
-            and marks the request as picked.
+        """
+        The driver completes the pickup process, 
+        updates its status to TO_DROPOFF 
+        and marks the request as picked.
 
-            Args:
-                time (int): The current simulation time tick.
+        Args:
+            time (int): The current simulation time tick.
                 
-            Returns:
-                None
+        Returns:
+            None
         """
 
         if self.current_request and self.status == "TO_PICKUP":
             self.status = "TO_DROPOFF"
-            self.current_request.mark_picked(time)
+            try:
+                self.current_request.mark_picked(time)
+            except (AttributeError, TypeError, ValueError) as err:
+                print(f"Driver complete_pickup error for driver {self.id}: {err}")
         
     def complete_dropoff(self, time:int) -> None:
-        """ The driver completes the dropoff process, 
-            marks the request as delivered,
-            records the trip in history,
-            clears the current request,
-            and its position when the request was received,
-            and updates its status to IDLE
-            Args:
-                time (int): The current simulation time tick when dropoff is completed.
+        """
+        The driver completes the dropoff process, 
+        marks the request as delivered,
+        records the trip in history,
+        clears the current request,
+        and its position when the request was received,
+        and updates its status to IDLE
+
+        Args:
+            time (int): The current simulation time tick when dropoff is completed.
             
-            Returns:
-                None
+        Returns:
+            None
         """
         if self.current_request and self.status == "TO_DROPOFF" and self.position_at_assignment is not None:
-            self.current_request.mark_delivered(time)
+            try:
+                self.current_request.mark_delivered(time)
+            except (AttributeError, TypeError, ValueError) as err:
+                print(f"Driver complete_dropoff error for driver {self.id}: {err}")
 
             pickup_position = self.current_request.pickup
             dropoff_position = self.current_request.dropoff
 
-            distance_to_pickup = self.position_at_assignment.distance_to(pickup_position)
-            distance_from_pickup_to_dropoff = pickup_position.distance_to(dropoff_position)
+            try:
+                distance_to_pickup = self.position_at_assignment.distance_to(pickup_position)
+                distance_from_pickup_to_dropoff = pickup_position.distance_to(dropoff_position)
+                total_distance = distance_to_pickup + distance_from_pickup_to_dropoff
+            except (AttributeError, TypeError, ValueError) as err:
+                print(f"Driver dropoff distance error for driver {self.id}: {err}")
+                total_distance = 0.0
 
-            total_distance = distance_to_pickup + distance_from_pickup_to_dropoff
             earnings = self.assigned_reward
 
             self.history.append({

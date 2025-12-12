@@ -1,29 +1,25 @@
 """
-A 2D point class with basic math operations
-
-Modules:
-- Math
-
+A 2D point class with basic math operations.
 """
 from math import sqrt
 
 class Point:
     """
-    A point in 2D space
+    A point in 2D space.
     
     Attributes:
-    x (float): x-value
-    y (float): y-value
+    x (float): x-value.
+    y (float): y-value.
     """
     def __init__(self, x:float, y:float) -> None:
         """
         Initialize a Point
         
-        Arguments:
-            x (float): x-coordinate
-            y (float): y-coordinate
+        Args:
+            x (float): x-coordinate.
+            y (float): y-coordinate.
 
-        Return:
+        Returns:
             None
 
         Example:
@@ -31,29 +27,45 @@ class Point:
             >>> p.x, p.y
             (2, 3)
         """
-        self.x = x
-        self.y = y
+        try:
+            self.x = float(x)
+        except (TypeError, ValueError) as err:
+            print(f"Point init x error: {err}")
+            self.x = 0.0
+
+        try:
+            self.y = float(y)
+        except (TypeError, ValueError) as err:
+            print(f"Point init y error: {err}")
+            self.y = 0.0
     
     def distance_to(self, other: "Point") -> float:
-        """Docstring
-        >>> self.x = 0
-        >>> self.y = 0
-        >>> other.x = 3
-        >>> other.y = 4
-        >>> point1 = Point(self.x, self.y)
-        >>> point2 = Point(other.x, other.y)
-        >>> point1.distance_to(point2)
-        5.0
         """
-        dx = self.x - other.x
-        dy = self.y - other.y
-        return sqrt(dx**2 + dy**2)
+        Calculate the straight-line distance between two points.
+
+        Args:
+            other (Point): The point to measure the distance to.
+
+        Returns:
+            float: The non-negative distance.
+
+        Example:
+            >>> Point(0, 0).distance_to(Point(3, 4))
+            5.0
+        """
+        try:
+            dx = self.x - other.x
+            dy = self.y - other.y
+            return sqrt(dx**2 + dy**2)
+        except (AttributeError, TypeError, ValueError) as err:
+            print(f"Point distance error: {err}")
+            return 0.0
     
     def __add__(self, other: "Point") -> "Point":
         """
         Add two points together (x + x, y + y) and returns a new point
         
-        Arguments:
+        Args:
             other (Point): The point to add.
         
         Returns:
@@ -64,13 +76,17 @@ class Point:
             >>> (p.x, p.y)
             (4, 6)
         """
-        return Point(self.x + other.x, self.y + other.y)
+        try:
+            return Point(self.x + other.x, self.y + other.y)
+        except (AttributeError, TypeError, ValueError) as err:
+            print(f"Point add error: {err}")
+            return Point(self.x, self.y)
     
     def __iadd__(self, other: "Point") -> "Point":
         """
         Add another point to this point (in-place)
         
-        Arguments:
+        Args:
             other (Point): the point to add
 
         return:
@@ -82,15 +98,18 @@ class Point:
             >>> (p.x, p.y)
             (3, 4)
         """
-        self.x += other.x
-        self.y += other.y
+        try:
+            self.x += other.x
+            self.y += other.y
+        except (AttributeError, TypeError, ValueError) as err:
+            print(f"Point iadd error: {err}")
         return self
 
     def __sub__(self, other: "Point") -> "Point":
         """
         Subtract another point and return a new point.
 
-        Arguments:
+        Args:
             other (Point): The point to subtract.
 
         Returns:
@@ -101,13 +120,17 @@ class Point:
             >>> (p.x, p.y)
             (3, 2)
         """
-        return Point(self.x - other.x, self.y - other.y)
+        try:
+            return Point(self.x - other.x, self.y - other.y)
+        except (AttributeError, TypeError, ValueError) as err:
+            print(f"Point sub error: {err}")
+            return Point(self.x, self.y)
     
     def __isub__(self, other: "Point") -> "Point":
         """
         Subtract another point from this one (in-place).
 
-        Arguments:
+        Args:
             other (Point): The point to subtract.
 
         Returns:
@@ -119,15 +142,18 @@ class Point:
             >>> (p.x, p.y)
             (3, 2)
         """
-        self.x -= other.x
-        self.y -= other.y
+        try:
+            self.x -= other.x
+            self.y -= other.y
+        except (AttributeError, TypeError, ValueError) as err:
+            print(f"Point isub error: {err}")
         return self
     
     def __mul__(self, scalar: int | float) -> "Point":
         """
         Multiply this point by a scalar and return a new point.
 
-        Arguments:
+        Args:
             scalar (int | float): The number to multiply with.
 
         Returns:
@@ -138,13 +164,18 @@ class Point:
             >>> (p.x, p.y)
             (4, 6)
         """
-        return Point(self.x * scalar, self.y * scalar)
+        try:
+            factor = float(scalar)
+        except (TypeError, ValueError) as err:
+            print(f"Point mul error: {err}")
+            factor = 1.0
+        return Point(self.x * factor, self.y * factor)
     
     def __rmul__(self, scalar: int | float) -> "Point":
         """
         Allow scalar * point multiplication.
 
-        Arguments:
+        Args:
             scalar (int | float): The number to multiply with.
 
         Returns:
