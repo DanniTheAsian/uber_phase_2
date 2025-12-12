@@ -184,9 +184,9 @@ class DeliverySimulation:
         
         snapshot = {
             "time": self.time,
-            "drivers": driver_positions,
-            "pickups": pickup_positions,
-            "dropoffs": dropoff_positions,
+            "driver_positions": driver_positions,
+            "pickup_positions": pickup_positions,
+            "dropoff_positions": dropoff_positions,
             "statistics": stats
         }
         

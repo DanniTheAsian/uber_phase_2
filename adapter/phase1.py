@@ -5,7 +5,7 @@ from phase2.request import Request
 from phase2.request_generator import RequestGenerator
 import random
 
-NUM_DRIVERS = 5
+
 ADAPTER = SimulationAdapter()
 
 def load_drivers(path):
@@ -50,3 +50,19 @@ def init_state(drivers: list[Driver], requests: list[Request], timeout: int, req
 
 def simulate_step(state: dict) -> tuple[dict, dict]:
     return ADAPTER.simulation_step(state)
+
+def get_plot_data() -> dict:
+    """Return data needed for plotting."""
+    if ADAPTER.sim is None:
+        raise RuntimeError("Simulation not initialized")
+    
+    # Hent snapshot fra simulationen
+    snapshot = ADAPTER.sim.get_snapshot()
+    
+    # Returnér i det format der forventes
+    return {
+        "driver_positions": snapshot.get("driver_positions", []),
+        "pickup_positions": snapshot.get("pickup_positions", []),
+        "dropoff_positions": snapshot.get("dropoff_positions", []),
+        "statistics": snapshot.get("statistics", {})
+    }
