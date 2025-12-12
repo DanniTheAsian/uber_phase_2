@@ -38,14 +38,29 @@ def generate_requests(start_t: int, out_list: list[dict], req_rate: float, width
 
 def init_state(drivers: list[Driver], requests: list[Request], timeout: int, req_rate: float, width: int, height: int) -> dict:
     print(f"=== PHASE1 init_state ===")
-    print(f"Input: {len(drivers)} drivers, {len(requests)} request OBJECTS")
-    
-    # INGEN konvertering nødvendig - de er allerede Request objekter!
+    print(f"Input: {len(drivers)} drivers, {len(requests)} requests")
     print(f"First request type: {type(requests[0]) if requests else 'None'}")
     
-    # Send direkte videre til adapter
-    result = ADAPTER.init_state(drivers, requests, timeout, req_rate, width, height)
+    # KONVERTER dicts til Request objekter
+    request_objects = []
+    for req in requests:
+        if isinstance(req, dict):
+            # Konverter dict til Request
+            request = Request(
+                id=req["id"],
+                pickup=Point(req["pickup"]["x"], req["pickup"]["y"]),
+                dropoff=Point(req["dropoff"]["x"], req["dropoff"]["y"]),
+                creation_time=req.get("creation_time", 0)
+            )
+            if "status" in req:
+                request.status = req["status"]
+            request_objects.append(request)
+        else:
+            request_objects.append(req)  # Allerede Request objekt
+    
+    print(f"Converted to {len(request_objects)} Request objects")
     print("=========================")
+    result = ADAPTER.init_state(drivers, request_objects, timeout, req_rate, width, height)
     return result
 
 def simulate_step(state: dict) -> tuple[dict, dict]:

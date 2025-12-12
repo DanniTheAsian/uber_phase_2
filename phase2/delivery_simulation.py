@@ -156,6 +156,7 @@ class DeliverySimulation:
         driver_positions = []
         
         for driver in self.drivers:
+            print(f"DEBUG: Driver {driver.id} at ({driver.position.x:.2f}, {driver.position.y:.2f})")
             driver_positions.append((driver.position.x, driver.position.y))
             
         pickup_positions = []
@@ -172,9 +173,9 @@ class DeliverySimulation:
         else:
             avg_wait = 0.0
         
-        # Debug print
+        
         print(f"SNAPSHOT: {len(driver_positions)} drivers, "
-            f"{len(pickup_positions)} pickups, {len(dropoff_positions)} dropoffs")
+          f"{len(pickup_positions)} pickups, {len(dropoff_positions)} dropoffs")
 
         stats = {
             "served": self.served_count,
