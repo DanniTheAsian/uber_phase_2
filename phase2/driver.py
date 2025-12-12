@@ -108,18 +108,22 @@ class Driver:
             request = self.current_request
             status = self.status
         except AttributeError as err:
-            print(f"Driver target_point error for driver {getattr(self, 'id', '?')}: {err}")
+            print(f"Driver target_point error for driver {self.id}: {err}")
             return None
 
         if request is None or status == "IDLE":
             return None
         
-        if status == "TO_PICKUP":
-            return getattr(request, "pickup", None)
-        
-        if status == "TO_DROPOFF":
-            return getattr(request, "dropoff", None)
-        
+        try:
+            if status == "TO_PICKUP":
+                return request.pickup
+
+            if status == "TO_DROPOFF":
+                return request.dropoff
+        except AttributeError as err:
+            print(f"Driver target_point request error for driver {self.id}: {err}")
+            return None
+
         return None # returns None for unexpected status.
 
     def step(self, dt: float) -> None:
