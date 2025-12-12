@@ -1,6 +1,6 @@
 # adapter/adapter.py
 
-import random
+import random 
 from phase2.request_generator import RequestGenerator
 from phase2.delivery_simulation import DeliverySimulation
 from phase2.point import Point
