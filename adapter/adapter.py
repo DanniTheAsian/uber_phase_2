@@ -11,7 +11,11 @@ class SimulationAdapter:
     def __init__(self) -> None:
         self.sim = None
 
-    def init_state(self, drivers: List[Driver], requests: List[Request], timeout: int, req_rate: float, width: int, height: int) -> Dict:
+    def init_state(self, drivers: list[Driver], requests: list[Request], timeout: int, req_rate: float, width: int, height: int) -> dict:
+        print(f"DEBUG adapter.init_state: Received {len(requests)} requests")
+        if requests:
+            print(f"DEBUG adapter.init_state: First request type: {type(requests[0])}")
+
         dispatch_policy = NearestNeighborPolicy()
         mutation_rule = ExplorationMutationRule(0.1)
         request_generator = RequestGenerator(req_rate, width, height)

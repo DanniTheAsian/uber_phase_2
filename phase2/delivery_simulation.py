@@ -1,6 +1,7 @@
 from .driver import Driver
 from .request import Request
-from .offer import Offer
+from .offer import Offer 
+from .point import Point # for debugging
 from .mutationrule.mutationrule import MutationRule
 from .policies.dispatch_policy import DispatchPolicy
 from .request_generator import RequestGenerator
@@ -32,11 +33,36 @@ class DeliverySimulation:
 
         # 1. Generate new requests.
         new_requests = self.request_generator.maybe_generate(self.time)
+        print(f"DEBUG tick: Generated {len(new_requests)} new requests")
         if new_requests:
+            print(f"DEBUG tick: Type of first new request: {type(new_requests[0])}")
             self.requests = self.requests + new_requests
 
         # 2. Update waiting times and mark expired requests.
+        print(f"DEBUG tick: Total requests: {len(self.requests)}")
+        for i, req in enumerate(self.requests[:3]):  # Kun første 3 for ikke for meget output
+            print(f"DEBUG tick: Request {i}: type={type(req)}")
         active_requests = []
+
+         # Konverter alle dicts til Request objekter
+        converted_requests = []
+        for req in self.requests:
+            if isinstance(req, dict):
+                # Konverter dict til Request
+                req_obj = Request(
+                    id=req["id"],
+                    pickup = Point(req["pickup"]["x"], req["pickup"]["y"]),
+                    dropoff = Point(req["dropoff"]["x"], req["dropoff"]["y"]),
+                    creation_time=req.get("creation_time", self.time)
+                )
+                if "status" in req:
+                    req_obj.status = req["status"]
+                converted_requests.append(req_obj)
+            else:
+                converted_requests.append(req)
+    
+        # Opdater self.requests med konverterede objekter
+        self.requests = converted_requests
         for req in self.requests:
             if req.is_active():
                 # Update wait time
@@ -101,11 +127,9 @@ class DeliverySimulation:
                 print(f"Assignment failed: {e}")
                 continue
 
-
         # 6. Move drivers and handle pickup/dropoff events.
         for driver in self.drivers:
             driver.step(dt = 1.0)
-            
             
             if driver.status == "TO_PICKUP" and driver.current_request and driver.position == driver.current_request.pickup:
                 driver.complete_pickup(self.time)
@@ -129,19 +153,14 @@ class DeliverySimulation:
 
 
     def get_snapshot(self) -> dict:
-        drivers_data = []
+        driver_positions = []
         
         for driver in self.drivers:
-            driver_info = {
-                "id": driver.id,
-                "x": driver.position.x,
-                "y": driver.position.y,
-                "status": driver.status
-            }
-            drivers_data.append(driver_info)
+            driver_positions.append((driver.position.x, driver.position.y))
             
         pickup_positions = []
         dropoff_positions = []
+
         for request in self.requests:
             if request.status in ("WAITING", "ASSIGNED"):
                 pickup_positions.append((request.pickup.x, request.pickup.y))
@@ -152,7 +171,10 @@ class DeliverySimulation:
             avg_wait = self.total_wait_time / self.completed_deliveries
         else:
             avg_wait = 0.0
-
+        
+        # Debug print
+        print(f"SNAPSHOT: {len(driver_positions)} drivers, "
+            f"{len(pickup_positions)} pickups, {len(dropoff_positions)} dropoffs")
 
         stats = {
             "served": self.served_count,
@@ -162,7 +184,7 @@ class DeliverySimulation:
         
         snapshot = {
             "time": self.time,
-            "drivers": drivers_data,
+            "drivers": driver_positions,
             "pickups": pickup_positions,
             "dropoffs": dropoff_positions,
             "statistics": stats
