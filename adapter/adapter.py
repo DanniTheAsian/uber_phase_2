@@ -31,6 +31,16 @@ class SimulationAdapter:
         
         self.sim.tick()
         snapshot = self.sim.get_snapshot()
+
+        # DEBUG: Vis snapshot indhold
+        print(f"\n=== ADAPTER SNAPSHOT ===")
+        print(f"Snapshot keys: {snapshot.keys()}")
+        print(f"driver_positions length: {len(snapshot.get('driver_positions', []))}")
+        print(f"pickup_positions length: {len(snapshot.get('pickup_positions', []))}")
+        print(f"dropoff_positions length: {len(snapshot.get('dropoff_positions', []))}")
+        print("=======================\n")
+
+
         state["t"] = self.sim.time
 
         return state, snapshot["statistics"]
