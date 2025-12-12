@@ -71,10 +71,12 @@ def get_plot_data() -> dict:
     if ADAPTER.sim is None:
         raise RuntimeError("Simulation not initialized")
     
-    # Hent snapshot fra simulationen
     snapshot = ADAPTER.sim.get_snapshot()
     
-    # Returnér i det format der forventes
+    print(f"\n=== GET_PLOT_DATA ===")
+    print(f"Returning: {len(snapshot.get('driver_positions', []))} drivers")
+    print("====================\n")
+    
     return {
         "driver_positions": snapshot.get("driver_positions", []),
         "pickup_positions": snapshot.get("pickup_positions", []),
