@@ -210,3 +210,4 @@ class DeliverySimulation:
         distance = driver.position.distance_to(request.pickup)
 
         return self.base_reward + distance * self.distance_rate
+

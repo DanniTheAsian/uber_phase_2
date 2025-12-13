@@ -1,4 +1,4 @@
-from .adapter import SimulationAdapter
+from .adapter import Adapter
 from phase2.driver import Driver
 from phase2.point import Point
 from phase2.request import Request
@@ -6,7 +6,7 @@ from phase2.request_generator import RequestGenerator
 import random
 
 
-ADAPTER = SimulationAdapter()
+ADAPTER = Adapter()
 
 def load_drivers(path):
     return []
@@ -14,14 +14,42 @@ def load_drivers(path):
 def load_requests(path):
     return []
 
-def generate_drivers(n: int, width: int, height: int) -> list[Driver]:
+def generate_drivers(n: int, width: int, height: int) -> list[Dict]:
     drivers = []
     for i in range(n):
         speed = random.uniform(0.01, 1.0)
         x = random.uniform(0, width)
         y = random.uniform(0, height)
-        drivers.append(Driver(i, Point(x, y), speed))
+        driver = Driver(i, Point(x, y), speed, status="IDLE", behaviour=None)
+
+        drivers.append(
+            {"id": driver.id,
+             "x": driver.position.x,
+             "y": driver.position.y,
+             "speed": driver.speed,
+             "status": driver.status,
+             "behavior": None
+             }
+        ) 
+
     return drivers
+
+def generate_drivers(n, width, height):
+    drivers: List[Dict] = []
+    for i in range(n):
+        speed = random.uniform(0.5, 1.5)
+        drivers.append(
+            {
+                "id": i,
+                "x": random.uniform(0, width),
+                "y": random.uniform(0, height),
+                "speed": speed,
+                "status": "idle",
+                "behaviour": "lazy",
+            }
+        )
+    return drivers
+
 
 def generate_requests(start_t: int, out_list: list[dict], req_rate: float, width: int, height: int) -> None:
     request_generator = RequestGenerator(req_rate, width, height)
