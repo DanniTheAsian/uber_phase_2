@@ -89,7 +89,10 @@ class DeliverySimulation:
 
         # 7) Apply mutation_rule to each driver
         for driver in self.drivers:
-            self.mutation_rule.maybe_mutate(driver, self.time)
+            try:
+                self.mutation_rule.maybe_mutate(driver, self.time)
+            except (AttributeError, TypeError, ValueError) as err:
+                print(f"Mutation error at time {self.time}: {err}")
 
         # 8) Increment time
         self.time += 1

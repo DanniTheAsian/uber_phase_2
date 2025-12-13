@@ -46,7 +46,12 @@ class NearestNeighborPolicy(DispatchPolicy):
 
             for driver in idle_drivers:
                 for request in waiting_requests:
-                    distance = driver.position.distance_to(request.pickup)
+                    try:
+                        distance = driver.position.distance_to(request.pickup)
+                    except (AttributeError, TypeError, ValueError) as err:
+                        print(f"Skipping driver/request pair due to distance error: {err}")
+                        continue
+
                     if distance < best_distance:
                         best_distance = distance
                         best_pair = (driver, request)
