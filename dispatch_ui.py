@@ -114,4 +114,17 @@ if __name__ == "__main__":
 
     main(_backend)
 
-#additional code for the metrics' report
+    #additional code for the metrics' report
+
+    # After GUI closes, plot cumulative requests if simulation exists
+    try:
+        from adapter.phase1 import ADAPTER
+        from metrics_report import plot_cumulative_requests_over_time
+        if ADAPTER.sim is not None:
+            plot_cumulative_requests_over_time(ADAPTER.sim)
+        else:
+            print("No simulation being plotted.")
+    except Exception as e:
+        print(f"Plot could not dispplay: {e}")
+
+

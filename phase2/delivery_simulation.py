@@ -54,6 +54,8 @@ class DeliverySimulation:
         self.expired_count: int = 0
         self.total_wait_time: int = 0
         self.completed_deliveries: int = 0
+        # Log for metrics over time
+        self.metrics_log = []
 
     def tick(self) -> None:
         """
@@ -90,6 +92,15 @@ class DeliverySimulation:
 
         # 8) Increment time
         self.time += 1
+
+        # Log metrics for plotting
+        avg_wait = (self.total_wait_time / self.completed_deliveries) if self.completed_deliveries else 0.0
+        self.metrics_log.append({
+            'time': self.time,
+            'served': self.served_count,
+            'expired': self.expired_count,
+            'avg_wait': avg_wait,
+        })
 
     def get_snapshot(self) -> dict:
         """Return a state snapshot for the GUI."""
