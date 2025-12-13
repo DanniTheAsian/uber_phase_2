@@ -28,7 +28,8 @@ class DeliverySimulation:
         mutation_rule: MutationRule,
         timeout: int,
     ) -> None:
-        """Initialize a DeliverySimulation instance.
+        """
+        Initialize a DeliverySimulation instance.
 
         Args:
             drivers (list[Driver]): All drivers in the simulation.
@@ -92,7 +93,10 @@ class DeliverySimulation:
         self.time += 1
 
     def get_snapshot(self) -> dict:
-        """Return a state snapshot for the GUI."""
+        """
+        Return a state snapshot for the GUI.
+        """
+
         drivers_snapshot = []
         for d in self.drivers:
             pos = d.position
@@ -121,13 +125,22 @@ class DeliverySimulation:
         }
     
     def _generate_new_requests(self):
-        new_requests: List[Request] = self.request_generator.maybe_generate(self.time) or []
+        try:
+            new_requests: List[Request] = self.request_generator.maybe_generate(self.time) or []
+        except (AttributeError, TypeError, ValueError, ZeroDivisionError) as err:
+            print(f"Request generation error at time {self.time}: {err}")
+            new_requests = []
+
         if new_requests:
-            self.requests.extend(new_requests)
+            try:
+                self.requests.extend(new_requests)
+            except (AttributeError, TypeError, ValueError) as err:
+                print(f"Error adding new requests at time {self.time}: {err}")
 
 
     def _update_waiting_time(self) -> List[Request]:
-        """Update waiting times and return only WAITING requests that haven't expired.
+        """
+        Update waiting times and return only WAITING requests that haven't expired.
         
         This filters to only WAITING requests for assignment proposals.
         ASSIGNED/PICKED requests are handled separately by their drivers.
@@ -147,20 +160,32 @@ class DeliverySimulation:
     def _propose_assignments(self, active_requests: List[Request]) -> List[Tuple[Driver, Request]]:
         if self.dispatch_policy is None:
             return []
-
-        proposals = self.dispatch_policy.assign(
-        self.drivers, active_requests, self.time) or []
+        try:
+            proposals = self.dispatch_policy.assign(self.drivers, active_requests, self.time) or []
+        except (AttributeError, TypeError, ValueError) as err:
+            print(f"Dispatch policy error at time {self.time}: {err}")
+            proposals = []
         return proposals
 
 
     def _process_offers(self, proposals: List[Tuple[Driver, Request]]) -> List[Tuple[Driver, Request]]:
         accepted = []
         for driver, req in proposals:
-            dist = driver.position.distance_to(req.pickup)
-            est_time = dist / (driver.speed or 1)
-            offer = Offer(driver, req, est_time)
+            try:
+                dist = driver.position.distance_to(req.pickup)
+                est_time = dist / (driver.speed or 1)
+                offer = Offer(driver, req, est_time)
+            except (AttributeError, TypeError, ValueError, ZeroDivisionError) as err:
+                print(f"Offer creation error for driver/req at time {self.time}: {err}")
+                continue
 
-            if driver.behaviour.decide(driver, offer, self.time):
+            try:
+                decision = driver.behaviour.decide(driver, offer, self.time)
+            except (AttributeError, TypeError, ValueError) as err:
+                print(f"Behaviour decision error for driver/req at time {self.time}: {err}")
+                decision = False
+
+            if decision:
                 accepted.append((driver, req))
 
         return accepted
@@ -169,12 +194,14 @@ class DeliverySimulation:
         used_requests = set()
         used_drivers = set()
         for driver, req in accepted:
-            # Skip if request already assigned or driver already has an assignment
             if req in used_requests or driver in used_drivers or req.status == "ASSIGNED":
                 continue
-            driver.assign_request(req, self.time)
-            used_requests.add(req)
-            used_drivers.add(driver)
+            try:
+                driver.assign_request(req, self.time)
+                used_requests.add(req)
+                used_drivers.add(driver)
+            except (AttributeError, TypeError, ValueError) as err:
+                print(f"Error finalizing assignment at time {self.time}: {err}")
 
     def _move_drivers_and_handle_events(self) -> None:
         for driver in self.drivers:
