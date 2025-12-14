@@ -93,18 +93,20 @@ class DeliverySimulation:
                 except (AttributeError, TypeError, ValueError) as err:
                     print(f"Mutation error at time {self.time}: {err}")
             
-            # Del 2: Count behaviour
+            # Count behaviour
             if driver.behaviour is None:
                 behaviour_name = "no_behaviour"
             else:
                 behaviour_name = driver.behaviour.__class__.__name__
             
             if behaviour_name in behaviour_counts:
-                behaviour_counts[behaviour_name] += 1
+                current_count = behaviour_counts[behaviour_name]
+                new_count = current_count + 1
+                behaviour_counts[behaviour_name] = new_count
             else:
                 behaviour_counts[behaviour_name] = 1
             
-            # Del 3: Count active drivers
+            # Count active drivers
             if driver.status != "IDLE":
                 active_drivers += 1
 
