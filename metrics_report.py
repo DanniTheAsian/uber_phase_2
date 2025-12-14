@@ -16,16 +16,21 @@ def show_simulation_dashboard(simulation: Any, max_time: int = 600) -> None:
     plot_cumulative_requests_over_time(simulation, max_time)
     plot_average_wait_time(simulation, max_time)
 
+
 def plot_cumulative_requests_over_time(simulation: Any, max_time: int = 600) -> None:
     """
-    Plots cumulative served and expired requests over time.
+    Gets data for cumulative requests plot.
     
     Args:
         simulation: DeliverySimulation instance with metrics_log attribute
         max_time: Maximum time to display on x-axis (in ticks)
     
     Returns:
-        None: Displays a matplotlib plot
+        Tuple containing:
+        - times: List of time values, or None if error
+        - served: List of served counts, or None if error  
+        - expired: List of expired counts, or None if error
+        - error_message: String if error, None if success
     """
 
     # Step 1: Check if simulation has data
