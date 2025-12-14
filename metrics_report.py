@@ -46,15 +46,11 @@ def plot_cumulative_requests_over_time(simulation: Any, max_time: int = 600) -> 
         expired.append(entry['expired'])
     
     # Create plot
-    plt.figure(figsize=(10, 6))
+    create_base_plot("Cumulative Served and Expired Requests Over Time", "Time (ticks)", "Cumulative Requests")
+
     plt.plot(times, served, label="Served Requests", color="green", linewidth=2)
     plt.plot(times, expired, label="Expired Requests", color="red", linewidth=2)
-    plt.xlabel("Time (ticks)")
-    plt.ylabel("Cumulative Requests")
-    plt.title("Cumulative Served and Expired Requests Over Time")
     plt.legend()
-    plt.grid(True, alpha=0.3)
-    plt.tight_layout()
     plt.show()
 
 
@@ -94,23 +90,16 @@ def plot_average_wait_time(simulation: Any, max_time: int = 600) -> None:
         overall_average = total / len(avg_waits)
 
     # Create plot
-    plt.figure(figsize=(10, 6))
+    create_base_plot("Average Request Wait Time Over Time", "Time (ticks)", "Average Wait Time (ticks)")
 
     # Blue line for the average wait time over time
     plt.plot(times, avg_waits, label="Average Wait Time", color="blue", linewidth=2)
 
     # A horizontal red dashed line for the overall average
     if len(avg_waits) > 0:
-        plt.axhline(y = overall_average, color = "red", linestyle = "--",
-                    label = f"Overall Average: {overall_average:.1f} ticks")
+        plt.axhline(y = overall_average, color = "red", linestyle = "--", label = f"Overall Average: {overall_average:.1f} ticks")
 
-    # labels and title
-    plt.xlabel("Time (ticks)")
-    plt.ylabel("Average Wait Time (ticks)")
-    plt.title("Average Request Wait Time Over Time")
     plt.legend()
-    plt.grid(True, alpha=0.3)
-    plt.tight_layout()
     plt.show()
 
 
@@ -148,18 +137,13 @@ def plot_driver_utilization(simulation: Any, max_time: int = 600) -> None:
         idle_counts.append(idle)
     
     # Create plot
-    plt.figure(figsize=(10, 6))
+    create_base_plot("Driver Utilization Over Time", "Time (ticks)", "Number of Drivers")
     
     plt.stackplot(times, active_counts, idle_counts,
                   labels=['Active Drivers', 'Idle Drivers'],
-                  colors=['blue', 'orange'], alpha=0.7)
+                  colors=['blue', 'orange'], alpha = 0.7)
     
-    plt.xlabel("Time (ticks)")
-    plt.ylabel("Number of Drivers")
-    plt.title("Driver Utilization Over Time")
     plt.legend(loc='upper left')
-    plt.grid(True, alpha=0.3)
-    plt.tight_layout()
     plt.show()
 
 def check_simulation_has_data(simulation: Any) -> Tuple[bool, Optional[str]]:
