@@ -24,7 +24,8 @@ class Request:
         dropoff: Point,
         creation_time: int,
     ) -> None:
-        """Initialize a Request instance.
+        """
+        Initialize a Request instance.
 
         Args:
             id (int): Unique identifier for the request.
@@ -45,7 +46,8 @@ class Request:
         self.wait_time: int = 0
 
     def is_active(self) -> bool:
-        """Check if the request is in a known, normal state.
+        """
+        Check if the request is in a known, normal state.
 
         In this implementation a request is considered active as long as
         its status is one of the standard states in the request process
@@ -57,7 +59,8 @@ class Request:
         return self.status in ["WAITING", "ASSIGNED", "PICKED", "DELIVERED", "EXPIRED"]
 
     def mark_assigned(self, driver_id: int) -> None:
-        """Mark the request as assigned to a driver.
+        """
+        Mark the request as assigned to a driver.
 
         Updates the status to ASSIGNED and stores the id of the driver
         that has been chosen to handle this request.
@@ -68,11 +71,15 @@ class Request:
         Returns:
             None
         """
-        self.status = "ASSIGNED"
-        self.assigned_driver_id = driver_id
+        try:
+            self.status = "ASSIGNED"
+            self.assigned_driver_id = driver_id
+        except (AttributeError, TypeError, ValueError) as err:
+            print(f"Error in mark_assigned: {err}")
 
     def mark_picked(self, t: int) -> None:
-        """Mark the request as picked up by the driver.
+        """
+        Mark the request as picked up by the driver.
 
         Updates the status to PICKED and sets the waiting time to the
         time elapsed since creation.
@@ -83,11 +90,15 @@ class Request:
         Returns:
             None
         """
-        self.status = "PICKED"
-        self.wait_time = t - self.creation_time
+        try:
+            self.status = "PICKED"
+            self.wait_time = t - self.creation_time
+        except (AttributeError, TypeError, ValueError) as err:
+            print(f"Error in mark_picked: {err}")
 
     def mark_delivered(self, t: int) -> None:
-        """Mark the request as delivered to the customer.
+        """
+        Mark the request as delivered to the customer.
 
         Updates the status to DELIVERED and sets the waiting time to the
         total time from creation until delivery.
@@ -98,11 +109,15 @@ class Request:
         Returns:
             None
         """
-        self.status = "DELIVERED"
-        self.wait_time = t - self.creation_time
+        try:
+            self.status = "DELIVERED"
+            self.wait_time = t - self.creation_time
+        except (AttributeError, TypeError, ValueError) as err:
+            print(f"Error in mark_delivered: {err}")
 
     def mark_expired(self, t: int) -> None:
-        """Mark the request as expired.
+        """
+        Mark the request as expired.
 
         Used when the request has waited too long without being
         completed. Updates the status to EXPIRED and sets the
@@ -114,11 +129,15 @@ class Request:
         Returns:
             None
         """
-        self.status = "EXPIRED"
-        self.wait_time = t - self.creation_time
+        try:
+            self.status = "EXPIRED"
+            self.wait_time = t - self.creation_time
+        except (AttributeError, TypeError, ValueError) as err:
+            print(f"Error in mark_expired: {err}")
 
     def update_wait(self, current_time: int) -> None:
-        """Recalculate the waiting time based on the current simulation time.
+        """
+        Recalculate the waiting time based on the current simulation time.
 
         Args:
             current_time (int): Current simulation time tick.
@@ -126,4 +145,7 @@ class Request:
         Returns:
             None
         """
-        self.wait_time = current_time - self.creation_time
+        try:
+            self.wait_time = current_time - self.creation_time
+        except (AttributeError, TypeError, ValueError) as err:
+            print(f"Error updating wait_time: {err}")

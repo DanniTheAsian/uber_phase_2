@@ -17,7 +17,8 @@ class Offer:
                  request: 'Request',
                  estimated_travel_time: float,
                  estimated_reward: float | None = None) -> None:
-        """Initialize an Offer instance.
+        """
+        Initialize an Offer instance.
         
         Args:
             driver (Driver): The driver receiving the offer.

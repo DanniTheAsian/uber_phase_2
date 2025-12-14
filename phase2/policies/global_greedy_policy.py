@@ -36,7 +36,11 @@ class GlobalGreedyPolicy(DispatchPolicy):
         combos = []
         for driver in drivers:
             for request in requests:
-                distance = driver.position.distance_to(request.pickup)
+                try:
+                    distance = driver.position.distance_to(request.pickup)
+                except (AttributeError, TypeError, ValueError) as err:
+                    print(f"Skipping driver/request pair due to distance error: {err}")
+                    continue
                 combos.append((distance, driver, request))
 
         combos.sort()
