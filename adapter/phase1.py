@@ -1,10 +1,10 @@
 import random
 from typing import Dict, List
 
-from adapter.adapter import SimulationAdapter
+from adapter.adapter import Adapter
 
 
-ADAPTER = SimulationAdapter()
+ADAPTER = Adapter()
 
 
 
@@ -34,29 +34,24 @@ def generate_drivers(n, width, height):
 
 
 def generate_requests(start_t, out_list, rate, width, height):
-    # Use the adapter-held counter to avoid module-level globals
-    # ADAPTER.next_request_id will be incremented for each new request
     if rate <= 0:
         return
 
-    whole = int(rate)
-    fractional = rate - whole
-    count = whole
-    if random.random() < fractional:
+    count = int(rate)
+
+    if random.random() < (rate - count):
         count += 1
 
     for _ in range(count):
-        out_list.append(
-            {
-                "id": ADAPTER.next_request_id,
-                "px": random.uniform(0, width),
-                "py": random.uniform(0, height),
-                "dx": random.uniform(0, width),
-                "dy": random.uniform(0, height),
-                "t": start_t,
-                "status": "waiting",
-            }
-        )
+        out_list.append({
+            "id": ADAPTER.next_request_id,
+            "px": random.uniform(0, width),
+            "py": random.uniform(0, height),
+            "dx": random.uniform(0, width),
+            "dy": random.uniform(0, height),
+            "t": start_t,
+            "status": "waiting",
+        })
         ADAPTER.next_request_id += 1
 
 def init_state(drivers, requests, timeout, req_rate, width, height):

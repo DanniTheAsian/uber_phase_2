@@ -25,7 +25,7 @@ class DeliverySimulation:
         requests: List[Request],
         dispatch_policy: DispatchPolicy,
         request_generator: RequestGenerator,
-        mutation_rule: MutationRule,
+        mutation_rules: List[MutationRule],
         timeout: int,
     ) -> None:
         """
@@ -49,7 +49,7 @@ class DeliverySimulation:
         self.requests = requests
         self.dispatch_policy = dispatch_policy
         self.request_generator = request_generator
-        self.mutation_rule = mutation_rule
+        self.mutation_rules = mutation_rules
 
         self.served_count: int = 0
         self.expired_count: int = 0
@@ -87,12 +87,13 @@ class DeliverySimulation:
 
         self._move_drivers_and_handle_events()
 
-        # 7) Apply mutation_rule to each driver
+        # 7) Apply mutation rules to each driver
         for driver in self.drivers:
-            try:
-                self.mutation_rule.maybe_mutate(driver, self.time)
-            except (AttributeError, TypeError, ValueError) as err:
-                print(f"Mutation error at time {self.time}: {err}")
+            for rule in self.mutation_rules:
+                try:
+                    rule.maybe_mutate(driver, self.time)
+                except (AttributeError, TypeError, ValueError) as err:
+                    print(f"Mutation error at time {self.time}: {err}")
 
         # 8) Increment time
         self.time += 1

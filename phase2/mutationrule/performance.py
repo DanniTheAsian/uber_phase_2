@@ -55,12 +55,12 @@ class PerformanceBasedMutation(MutationRule):
         """
         if len(driver.history) < self.N:
             return
-        
-        served_history = driver.history[-self.N:]
 
-        served_counts = [entry["served"] for entry in served_history]
+        recent_history = driver.history[-self.N:]
 
-        avg_served = sum(served_counts) / len(served_counts)
+        activity_count = len(recent_history)
 
-        if avg_served < self.threshold:
+        avg_activity = activity_count / self.N
+
+        if avg_activity < self.threshold:
             driver.behaviour = GreedyDistanceBehaviour(max_distance=10)
