@@ -35,23 +35,8 @@ def plot_cumulative_requests_over_time(simulation: Any, max_time: int = 600) -> 
     """
 
     # Step 1: Check if simulation has data
-    has_data, error = check_simulation_has_data(simulation)
-    if not has_data:
-        print(f"Error: {error}")
-        return
-    
-    # Step 2: Filter by time
-    time_filtered = filter_by_time(simulation.metrics_log, max_time)
-    
-    if len(time_filtered) == 0:
-        print(f"No data within time 0-{max_time}")
-        return
-    
-    # Step 3: Filter by required keys
-    data = filter_by_keys(time_filtered, ['time', 'served', 'expired'])
-    
-    if len(data) == 0:
-        print("No entries have time, served, and expired keys")
+    data = get_plot_data(simulation, max_time, ['time', 'served', 'expired'])
+    if data is None:
         return
     
     # Step 4: Extract data for plotting
@@ -92,23 +77,8 @@ def plot_average_wait_time(simulation: Any, max_time: int = 600) -> None:
         None: Displays a matplotlib plot
     """
     # Step 1: Check if simulation has data
-    has_data, error = check_simulation_has_data(simulation)
-    if not has_data:
-        print(f"Error: {error}")
-        return
-
-    # Step 2: Filter by time
-    time_filtered = filter_by_time(simulation.metrics_log, max_time)
-
-    if len(time_filtered) == 0:
-        print(f"No data within time 0-{max_time}")
-        return
-
-    # Step 3: Filter by required keys - we need 'time' and 'avg_wait'
-    data = filter_by_keys(time_filtered, ['time', 'avg_wait'])
-
-    if len(data) == 0:
-        print("No entries have both time and avg_wait keys")
+    data = get_plot_data(simulation, max_time, ['time', 'avg_wait'])
+    if data is None:
         return
 
     # Step 4: Extract data for plotting
@@ -162,24 +132,8 @@ def plot_driver_utilization(simulation: Any, max_time: int = 600) -> None:
         None: Displays a matplotlib plot
     """
     # Step 1: Check if simulation has data
-    has_data, error = check_simulation_has_data(simulation)
-    if not has_data:
-        print(f"Error: {error}")
-        return
-    
-    # Step 2: Filter by time
-    time_filtered = filter_by_time(simulation.metrics_log, max_time)
-    
-    if len(time_filtered) == 0:
-        print(f"No data within time 0-{max_time}")
-        return
-    
-    # Step 3: Filter by required keys
-    data = filter_by_keys(time_filtered, ['time', 'active_drivers'])
-    
-    if len(data) == 0:
-        print("No entries have both time and active_drivers keys")
-        print("Make sure tick() saves 'active_drivers' in metrics_log")
+    data = get_plot_data(simulation, max_time, ['time', 'active_drivers'])
+    if data is None:
         return
     
     # Step 4: Extract data
@@ -211,6 +165,41 @@ def plot_driver_utilization(simulation: Any, max_time: int = 600) -> None:
     plt.grid(True, alpha=0.3)
     plt.tight_layout()
     plt.show()
+
+
+def get_plot_data(simulation, max_time, required_keys) -> Optional[List[Dict]]:
+    """
+    Get validated and filtered data for plotting.
+    Combines steps 1-3 from the original design.
+    
+    Args:
+        simulation: DeliverySimulation instance with metrics_log
+        max_time: Maximum time to include (in ticks)
+        required_keys: List of keys that must be present in each entry
+        
+    Returns:
+        Filtered list of metric entries, or None if validation fails
+    """
+
+    # Step 1
+    has_data, error = check_simulation_has_data(simulation)
+    if not has_data:
+        print(f"Error: {error}")
+        return None
+    
+    # Step 2
+    time_filtered = filter_by_time(simulation.metrics_log, max_time)
+    if len(time_filtered) == 0:
+        print(f"No data within time 0-{max_time}")
+        return None
+    
+    # Step 3
+    data = filter_by_keys(time_filtered, required_keys)
+    if len(data) == 0:
+        print(f"No entries have all required keys: {required_keys}")
+        return None
+    
+    return data
 
 def check_simulation_has_data(simulation: Any) -> Tuple[bool, Optional[str]]:
     """ 
