@@ -86,7 +86,6 @@ class DeliverySimulation:
         active_drivers = 0
         behaviour_counts = {}
 
-
         for driver in self.drivers:
             for rule in self.mutation_rules:
                 try:
