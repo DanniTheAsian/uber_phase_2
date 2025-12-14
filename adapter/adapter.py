@@ -1,11 +1,13 @@
 from typing import Dict, Tuple
 from phase2.delivery_simulation import DeliverySimulation
 from phase2.policies.nearest_neighbor_policy import NearestNeighborPolicy
-from phase2.mutationrule.exploration import ExplorationMutationRule
 from phase2.request_generator import RequestGenerator
 from phase2.driver import Driver
 from phase2.point import Point
 from phase2.request import Request
+
+from phase2.mutationrule.exploration import ExplorationMutationRule
+from phase2.mutationrule.performance import PerformanceBasedMutation
 
 from phase2.behaviour.lazy_behaviour import LazyBehaviour
 from phase2.behaviour.greedy_distance_behaviour import GreedyDistanceBehaviour
@@ -175,14 +177,17 @@ class Adapter:
         request_generator = RequestGenerator(rate=req_rate, width=width, height=height)
 
         dispatch_policy = NearestNeighborPolicy()
-        mutation_rule = ExplorationMutationRule(probability=0.01)
+        mutation_rules = [
+        ExplorationMutationRule(probability=0.01),
+        PerformanceBasedMutation(threshold=0.3, N=5),
+        ]
 
         self.simulation = DeliverySimulation(
             drivers= driver_objects,
             requests= request_objects,
             dispatch_policy=dispatch_policy,
             request_generator=request_generator,
-            mutation_rule= mutation_rule,
+            mutation_rules= mutation_rules,
             timeout=timeout,
         )
 
