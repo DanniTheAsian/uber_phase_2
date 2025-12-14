@@ -139,10 +139,7 @@ def plot_driver_utilization(simulation: Any, max_time: int = 600) -> None:
     # Create plot
     create_base_plot("Driver Utilization Over Time", "Time (ticks)", "Number of Drivers")
     
-    plt.stackplot(times, active_counts, idle_counts,
-                  labels=['Active Drivers', 'Idle Drivers'],
-                  colors=['blue', 'orange'], alpha = 0.7)
-    
+    plt.stackplot(times, active_counts, idle_counts, labels=['Active Drivers', 'Idle Drivers'], colors=['blue', 'orange'], alpha = 0.7)
     plt.legend(loc='upper left')
     plt.show()
 
@@ -214,7 +211,6 @@ def filter_by_keys(data: List[Dict], required_keys: List[str]) -> List[Dict]:
 def get_plot_data(simulation: Any, max_time: int, required_keys: List[str]) -> Optional[List[Dict]]:
     """
     Get validated and filtered data for plotting.
-    Combines steps 1-3 from the original design.
     
     Args:
         simulation: DeliverySimulation instance with metrics_log
