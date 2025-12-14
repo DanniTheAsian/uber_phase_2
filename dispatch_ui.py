@@ -119,12 +119,15 @@ if __name__ == "__main__":
     # plot cumulative requests if simulation exists
     try:
         from adapter.phase1 import ADAPTER
-        from metrics_report import plot_cumulative_requests_over_time
+        from metrics_report import show_simulation_dashboard
         if ADAPTER.sim is not None:
-            plot_cumulative_requests_over_time(ADAPTER.sim)
+            show_simulation_dashboard(ADAPTER.sim)
         else:
             print("No simulation being plotted.")
+
+    except ImportError as e:
+        print(f"Could not import metrics module: {e}")
     except Exception as e:
-        print(f"Plot could not display: {e}")
+        print(f"Error displaying plots: {e}")
 
 
