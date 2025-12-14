@@ -32,8 +32,8 @@ class RequestGenerator:
     def maybe_generate(self, time: int) -> list[Request]:
         """
         Generates zero or more new Request objects based on the given rate.
-        The rate is interpreted as requests per minute (60 ticks).
-        Each tick generates approximately rate/60 requests on average.
+        The rate is interpreted as requests per minute.
+        Since 1 simulation tick = 1 minute, we use rate directly.
         """
         new_requests: list[Request] = []
 
@@ -41,8 +41,7 @@ class RequestGenerator:
             if self.rate <= 0:
                 return new_requests
 
-            # Normalize rate to per-tick: rate/60 (since 1 minute = 60 ticks)
-            rate_per_tick = self.rate / 60.0
+            rate_per_tick = self.rate
 
             # Poisson-like: generate base_count requests + 1 more with probability extra_probability
             base_count = int(rate_per_tick)
