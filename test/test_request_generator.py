@@ -1,7 +1,7 @@
 import unittest
 from unittest.mock import patch
 from phase2.request import Request
-from phase2.request_generator import requestGenerator
+from phase2.request_generator import RequestGenerator
 
 
 class TestRequestGenerator(unittest.TestCase):
@@ -12,7 +12,7 @@ class TestRequestGenerator(unittest.TestCase):
         """
         Test that a request is generated when random.random() < rate.
         """
-        gen = requestGenerator(rate=0.5, width=100, height=100)
+        gen = RequestGenerator(rate=0.5, width=100, height=100)
         result = gen.maybe_generate(time=50)
 
         self.assertEqual(len(result), 1)
@@ -33,7 +33,7 @@ class TestRequestGenerator(unittest.TestCase):
         """
         Test that no request is generated when random.random() >= rate.
         """
-        gen = requestGenerator(rate=0.5, width=100, height=100)
+        gen = RequestGenerator(rate=0.5, width=100, height=100)
         result = gen.maybe_generate(time=10)
 
         self.assertEqual(result, [])
@@ -50,7 +50,7 @@ class TestRequestGenerator(unittest.TestCase):
         We cannot directly test the probability, but we can ensure that the method
         still generates requests and behaves consistently.
         """
-        gen = requestGenerator(rate=0.3, width=50, height=50)
+        gen = RequestGenerator(rate=0.3, width=50, height=50)
         result = gen.maybe_generate(time=250)  # inside rush hour window
 
         self.assertEqual(len(result), 1)
@@ -64,7 +64,7 @@ class TestRequestGenerator(unittest.TestCase):
         """
         Each generated request must receive a unique ID.
         """
-        gen = requestGenerator(rate=1.0, width=20, height=20)
+        gen = RequestGenerator(rate=1.0, width=20, height=20)
 
         r1 = gen.maybe_generate(time=1)
         r2 = gen.maybe_generate(time=2)
