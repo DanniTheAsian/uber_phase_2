@@ -34,11 +34,16 @@ def generate_drivers(n, width, height):
 
 
 def generate_requests(start_t, out_list, rate, width, height):
-    if random.random() >= rate:
+    if rate <= 0:
         return
 
-    out_list.append(
-        {
+    count = int(rate)
+
+    if random.random() < (rate - count):
+        count += 1
+
+    for _ in range(count):
+        out_list.append({
             "id": ADAPTER.next_request_id,
             "px": random.uniform(0, width),
             "py": random.uniform(0, height),
@@ -46,10 +51,8 @@ def generate_requests(start_t, out_list, rate, width, height):
             "dy": random.uniform(0, height),
             "t": start_t,
             "status": "waiting",
-        }
-    )
-
-    ADAPTER.next_request_id += 1
+        })
+        ADAPTER.next_request_id += 1
 
 def init_state(drivers, requests, timeout, req_rate, width, height):
     return ADAPTER.init_state(
