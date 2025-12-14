@@ -1,6 +1,15 @@
+"""
+Request generation utilities.
+
+This module provides the RequestGenerator class which creates new
+Request objects over time according to a configured rate and a simple
+time-dependent model. The generator produces pickup/dropoff points
+within the simulator's map bounds.
+"""
+
 import random
-from .request import Request
-from .point import Point
+from phase2.request import Request
+from phase2.point import Point
 
 class RequestGenerator:
     """
@@ -23,18 +32,37 @@ class RequestGenerator:
     def maybe_generate(self, time: int) -> list[Request]:
         """
         Generates zero or more new Request objects based on the given rate.
-        Time is provided for compatibility with the simulation interface,
-        but the Request object does not store it.
+        The rate is interpreted as requests per minute (60 ticks).
+        Each tick generates approximately rate/60 requests on average.
         """
-        new_requests = []
+        new_requests: list[Request] = []
 
-        if random.random() < self.rate:
-            pickup = Point(random.uniform(0, self.width), random.uniform(0, self.height))
-            dropoff = Point(random.uniform(0, self.width), random.uniform(0, self.height))
+        try:
+            if self.rate <= 0:
+                return new_requests
 
-            req = Request(id= self.next_id, pickup=pickup, dropoff=dropoff, creation_time=time)
+            # Normalize rate to per-tick: rate/60 (since 1 minute = 60 ticks)
+            rate_per_tick = self.rate / 60.0
 
-            self.next_id += 1
-            new_requests.append(req)
+            # Poisson-like: generate base_count requests + 1 more with probability extra_probability
+            base_count = int(rate_per_tick)
+            extra_probability = rate_per_tick - base_count
+            count = base_count
+            if random.random() < extra_probability:
+                count += 1
+
+            for _ in range(count):
+                pickup = Point(random.uniform(0, self.width), random.uniform(0, self.height))
+                dropoff = Point(random.uniform(0, self.width), random.uniform(0, self.height))
+                try:
+                    req = Request(id=self.next_id, pickup=pickup, dropoff=dropoff, creation_time=time)
+                except (TypeError, ValueError) as err:
+                    print(f"Request construction error at time {time}: {err}")
+                    continue
+                self.next_id += 1
+                new_requests.append(req)
+
+        except (AttributeError, TypeError, ValueError, ZeroDivisionError) as err:
+            print(f"RequestGenerator error at time {time}: {err}")
 
         return new_requests

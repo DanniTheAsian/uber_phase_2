@@ -17,7 +17,8 @@ class Offer:
                  request: 'Request',
                  estimated_travel_time: float,
                  estimated_reward: float | None = None) -> None:
-        """Initialize an Offer instance.
+        """
+        Initialize an Offer instance.
         
         Args:
             driver (Driver): The driver receiving the offer.
@@ -25,7 +26,14 @@ class Offer:
             estimated_travel_time (float): Estimated time it takes in simulation ticks.
             estimated_reward (float | None): Optional estimated reward for completing the request.
         """
-        self.driver = driver
-        self.request = request
-        self.estimated_travel_time = estimated_travel_time
-        self.estimated_reward = estimated_reward
+        try:
+            self.driver = driver
+            self.request = request
+            self.estimated_travel_time = float(estimated_travel_time)
+            self.estimated_reward = estimated_reward if estimated_reward is None else float(estimated_reward)
+        except (TypeError, ValueError) as err:
+            print(f"Offer initialization error: {err}")
+            self.driver = driver
+            self.request = request
+            self.estimated_travel_time = 0.0
+            self.estimated_reward = None

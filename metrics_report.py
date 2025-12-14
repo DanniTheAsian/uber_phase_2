@@ -1,0 +1,258 @@
+from typing import List, Dict, Optional, Tuple, Any
+import matplotlib.pyplot as plt
+
+
+def show_simulation_dashboard(simulation: Any, max_time: int = 600) -> None:
+    """
+    Displays the simulation dashboard with key metrics plots.
+
+    Args:
+        simulation: DeliverySimulation instance with metrics_log attribute
+        max_time: Maximum time to display on x-axis (in ticks)
+
+    Returns:
+        None: Displays matplotlib plots
+    """
+    plot_cumulative_requests_over_time(simulation, max_time)
+    plot_average_wait_time(simulation, max_time)
+    plot_driver_utilization(simulation, max_time)
+
+
+def plot_cumulative_requests_over_time(simulation: Any, max_time: int = 600) -> None:
+    """
+    Gets data for cumulative requests plot.
+    
+    Args:
+        simulation: DeliverySimulation instance with metrics_log attribute
+        max_time: Maximum time to display on x-axis (in ticks)
+    
+    Returns:
+        None
+    """
+
+    # Get valid data
+    data = get_plot_data(simulation, max_time, ['time', 'served', 'expired'])
+    if data is None:
+        return
+    
+    # Extract data
+    times = []
+    served = []
+    expired = []
+    
+    for entry in data:
+        times.append(entry['time'])
+        served.append(entry['served'])
+        expired.append(entry['expired'])
+    
+    # Create plot
+    create_base_plot("Cumulative Served and Expired Requests Over Time", "Time (ticks)", "Cumulative Requests")
+
+    plt.plot(times, served, label="Served Requests", color="green", linewidth=2)
+    plt.plot(times, expired, label="Expired Requests", color="red", linewidth=2)
+    plt.legend()
+    plt.show()
+
+
+
+def plot_average_wait_time(simulation: Any, max_time: int = 600) -> None:
+    """
+    Plots average wait time over time.
+
+    Shows how long requests typically wait before being served.
+
+    Args:
+        simulation: DeliverySimulation instance with metrics_log attribute
+        max_time: Maximum time to display on x-axis (in ticks)
+
+    Returns:
+        None: Displays a matplotlib plot
+    """
+    # Get valid data
+    data = get_plot_data(simulation, max_time, ['time', 'avg_wait'])
+    if data is None:
+        return
+
+    # Extract data
+    times = []
+    avg_waits = []
+
+    for entry in data:
+        times.append(entry['time'])
+        avg_waits.append(entry['avg_wait'])
+
+    # Calculate overall average (Red line)
+    overall_average = 0.0
+    if len(avg_waits) > 0:
+        total = 0.0
+        for wait_time in avg_waits:
+            total += wait_time
+        overall_average = total / len(avg_waits)
+
+    # Create plot
+    create_base_plot("Average Request Wait Time Over Time", "Time (ticks)", "Average Wait Time (ticks)")
+
+    # Blue line for the average wait time over time
+    plt.plot(times, avg_waits, label="Average Wait Time", color="blue", linewidth=2)
+
+    # A horizontal red dashed line for the overall average
+    if len(avg_waits) > 0:
+        plt.axhline(y = overall_average, color = "red", linestyle = "--", label = f"Overall Average: {overall_average:.1f} ticks")
+
+    plt.legend()
+    plt.show()
+
+
+def plot_driver_utilization(simulation: Any, max_time: int = 600) -> None:
+    """
+    Plots driver utilization over time (active vs idle drivers).
+    
+    Shows how many drivers are working vs idle over time.
+    
+    Args:
+        simulation: DeliverySimulation instance with metrics_log attribute
+        max_time: Maximum time to display on x-axis (in ticks)
+    
+    Returns:
+        None: Displays a matplotlib plot
+    """
+    # Get valid data
+    data = get_plot_data(simulation, max_time, ['time', 'active_drivers'])
+    if data is None:
+        return
+    
+    # Extract data
+    times = []
+    active_counts = []
+    
+    for entry in data:
+        times.append(entry['time'])
+        active_counts.append(entry['active_drivers'])
+    
+    # Calculate idle drivers
+    total_drivers = len(simulation.drivers)
+    idle_counts = []
+    for active in active_counts:
+        idle = total_drivers - active
+        idle_counts.append(idle)
+    
+    # Create plot
+    create_base_plot("Driver Utilization Over Time", "Time (ticks)", "Number of Drivers")
+    
+    plt.stackplot(times, active_counts, idle_counts, labels=['Active Drivers', 'Idle Drivers'], colors=['blue', 'orange'], alpha = 0.7)
+    plt.legend(loc='upper left')
+    plt.show()
+
+def check_simulation_has_data(simulation: Any) -> Tuple[bool, Optional[str]]:
+    """ 
+    Check if simulation has metrics data.
+    
+    Args:
+        simulation: DeliverySimulation instance
+
+    Returns:
+        Tuple of (has_data: bool, error_msg: Optional[str])
+    """
+    if not hasattr(simulation, 'metrics_log'):
+        return False, "Simulation has no metrics_log"
+    
+    if simulation.metrics_log is None or len(simulation.metrics_log) == 0:
+        return False, "Metrics log is empty"
+    
+    return True, None
+
+def filter_by_time(metrics_log: List[Dict], max_time: int) -> List[Dict]:
+    """
+    Filter metrics by time.
+    
+    Args:
+        metrics_log: List of metric entries (dictionaries)
+        max_time: Maximum time to include
+    
+    Returns:
+        List of entries where time <= max_time
+    """
+    filtered = []
+    for entry in metrics_log:
+        try:
+            if entry['time'] <= max_time:
+                filtered.append(entry)
+        except KeyError:
+            continue  # Skip entries without 'time' key
+    return filtered
+
+def filter_by_keys(data: List[Dict], required_keys: List[str]) -> List[Dict]:
+    """
+    Keep only entries that have all required keys.
+    
+    Args:
+        data: List of metric entries
+        required_keys: List of keys that must be present, or None for no filtering
+    
+    Returns:
+        Filtered list containing only entries with all required keys
+    """
+    if required_keys is None:
+        return data
+    
+    filtered = []
+    for entry in data:
+        has_all = True
+        for key in required_keys:
+            if key not in entry:
+                has_all = False
+                break
+        
+        if has_all:
+            filtered.append(entry)
+    
+    return filtered
+
+def get_plot_data(simulation: Any, max_time: int, required_keys: List[str]) -> Optional[List[Dict]]:
+    """
+    Get validated and filtered data for plotting.
+    
+    Args:
+        simulation: DeliverySimulation instance with metrics_log
+        max_time: Maximum time to include (in ticks)
+        required_keys: List of keys that must be present in each entry
+        
+    Returns:
+        Filtered list of metric entries, or None if validation fails
+    """
+
+    # Step 1
+    has_data, error = check_simulation_has_data(simulation)
+    if not has_data:
+        print(f"Error: {error}")
+        return None
+    
+    # Step 2
+    time_filtered = filter_by_time(simulation.metrics_log, max_time)
+    if len(time_filtered) == 0:
+        print(f"No data within time 0-{max_time}")
+        return None
+    
+    # Step 3
+    data = filter_by_keys(time_filtered, required_keys)
+    if len(data) == 0:
+        print(f"No entries have all required keys: {required_keys}")
+        return None
+    
+    return data
+
+def create_base_plot(title: str, xlabel: str, ylabel: str) -> None:
+    """
+    Create a base plot with consistent formatting.
+    
+    Args:
+        title: Plot title
+        xlabel: X-axis label
+        ylabel: Y-axis label
+    """
+    plt.figure(figsize=(10, 6))
+    plt.xlabel(xlabel)
+    plt.ylabel(ylabel)
+    plt.title(title)
+    plt.grid(True, alpha=0.3)
+    plt.tight_layout()

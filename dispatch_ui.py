@@ -115,3 +115,19 @@ if __name__ == "__main__":
     main(_backend)
 
     #additional code for the metrics' report
+
+    # plot cumulative requests if simulation exists
+    try:
+        from adapter.phase1 import ADAPTER
+        from metrics_report import show_simulation_dashboard
+        if ADAPTER.sim is not None:
+            show_simulation_dashboard(ADAPTER.sim)
+        else:
+            print("No simulation being plotted.")
+
+    except ImportError as e:
+        print(f"Could not import metrics module: {e}")
+    except Exception as e:
+        print(f"Error displaying plots: {e}")
+
+

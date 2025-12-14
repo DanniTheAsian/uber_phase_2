@@ -1,3 +1,10 @@
+"""
+Lazy driver behaviour.
+
+This behaviour accepts offers only if the request has waited at least a
+configured amount of time and the driver is currently idle.
+"""
+
 from .driver_behaviour import DriverBehaviour
 
 
@@ -12,9 +19,9 @@ class LazyBehaviour(DriverBehaviour):
         """
         Initialize the behaviour with a required minimum wait time.
 
-        Arguments:
+        Args:
             max_idle (int): The minimum wait_time a request must have
-                            before the driver accepts it.
+                before the driver accepts it.
 
         Example:
             >>> b = LazyBehaviour(10)
@@ -27,16 +34,18 @@ class LazyBehaviour(DriverBehaviour):
         """
         Decide whether the driver accepts the offer.
 
-        The driver accepts the request only if the request's wait_time
-        is equal to or greater than the configured threshold.
+        The driver accepts the request only if:
+        1. The driver is currently IDLE (not on a delivery)
+        2. The request's wait_time is equal to or greater than the configured threshold.
 
-        Arguments:
+        Args:
             driver (Driver): The driver making the decision.
             offer (Offer): Contains the request with its wait_time.
             time (int): Current simulation time (not used here).
 
         Returns:
-            bool: True if request.wait_time >= max_idle, otherwise False.
+            bool: True if driver is IDLE and request.wait_time >= max_idle, otherwise False.
         """
         
-        return offer.request.wait_time >= self.max_idle
+        # Only accept if driver is idle and request has waited long enough
+        return driver.status == "IDLE" and offer.request.wait_time >= self.max_idle

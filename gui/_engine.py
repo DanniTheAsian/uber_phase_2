@@ -228,7 +228,7 @@ def make_default_backend() -> BackendFns:
         generate_drivers=adapter.phase1.generate_drivers,
         generate_requests=adapter.phase1.generate_requests,
         init_state=adapter.phase1.init_state,
-        simulate_step=adapter.phase.simulate_step, 
+        simulate_step=adapter.phase1.simulate_step, 
     )
 
 # ---------------------------------------------------------------------------

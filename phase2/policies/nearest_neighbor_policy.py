@@ -1,3 +1,11 @@
+"""
+Nearest-neighbor dispatch policy.
+
+This module implements a greedy nearest-neighbor matching policy which
+repeatedly selects the closest (driver, request) pair among idle drivers
+and waiting requests until no candidates remain.
+"""
+
 from .dispatch_policy import DispatchPolicy
 from ..driver import Driver
 from ..request import Request
@@ -15,24 +23,21 @@ class NearestNeighborPolicy(DispatchPolicy):
     The process continues until either no idle drivers or no waiting requests
     remain.
 
-    Arguments:
-    drivers : list[Driver]
-        The list of available drivers at the current simulation step.
-    requests : list[Request]
-        The list of active requests waiting to be assigned.
-    time : int
-        The current simulation time. This policy does not use the time
-        parameter, but it is included to satisfy the DispatchPolicy interface.
+    Args:
+        drivers (list[Driver]): The list of available drivers at the current simulation step.
+        requests (list[Request]): The list of active requests waiting to be assigned.
+        time (int): The current simulation time. This policy does not use the time
+            parameter, but it is included to satisfy the DispatchPolicy interface.
 
-    Return:
-    list[tuple[Driver, Request]]
-        A list of (driver, request) pairs selected by the nearest-neighbor
-        matching process
+    Returns:
+        list[tuple[Driver, Request]]: A list of (driver, request) pairs selected by the nearest-neighbor
+            matching process
     """
     def assign(self, drivers: list[Driver], requests: list[Request], time: int) -> list[tuple[Driver, Request]]:
         matches = []
     
-        idle_drivers = drivers[:]
+        # Filter to only IDLE drivers available for new assignments
+        idle_drivers = [d for d in drivers if d.status == "IDLE"]
         waiting_requests = requests[:]
 
         while idle_drivers and waiting_requests:
@@ -41,7 +46,12 @@ class NearestNeighborPolicy(DispatchPolicy):
 
             for driver in idle_drivers:
                 for request in waiting_requests:
-                    distance = driver.position.distance_to(request.pickup)
+                    try:
+                        distance = driver.position.distance_to(request.pickup)
+                    except (AttributeError, TypeError, ValueError) as err:
+                        print(f"Skipping driver/request pair due to distance error: {err}")
+                        continue
+
                     if distance < best_distance:
                         best_distance = distance
                         best_pair = (driver, request)
