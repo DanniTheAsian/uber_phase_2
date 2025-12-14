@@ -3,8 +3,6 @@ import matplotlib.pyplot as plt
 from matplotlib.axes import Axes
 
 
-
-
 def show_simulation_dashboard(simulation: Any, max_time: int = 600) -> None:
     """
     Displays the simulation dashboard with key metrics plots.
@@ -16,11 +14,16 @@ def show_simulation_dashboard(simulation: Any, max_time: int = 600) -> None:
     Returns:
         None: Displays matplotlib plots
     """
-    show_all_plots_in_one(simulation, max_time)
+    # A figure with 3 subplots (vertical stack)
+    fig, axes = plt.subplots(3, 1, figsize=(12, 15), sharex=True)
     
-    #plot_cumulative_requests_over_time(simulation, max_time)
-    #plot_average_wait_time(simulation, max_time)
-    #plot_driver_utilization(simulation, max_time)
+    # Plot
+    plot_cumulative_requests_over_time(simulation, max_time, axes[0])
+    plot_average_wait_time(simulation, max_time, axes[1])
+    plot_driver_utilization(simulation, max_time, axes[2])
+    
+    plt.tight_layout()
+    plt.show()
 
 
 def plot_cumulative_requests_over_time(simulation: Any, max_time: int = 600, ax: Optional[Axes] = None) -> Optional[Axes]:
@@ -52,7 +55,7 @@ def plot_cumulative_requests_over_time(simulation: Any, max_time: int = 600, ax:
         expired.append(entry['expired'])
     
     # Create plot
-    ax = create_base_plot("Cumulative Served and Expired Requests Over Time", "Time (ticks)", "Cumulative Requests", ax)
+    ax = create_base_plot("Cumulative Served and Expired Requests Over Time", "", "Cumulative Requests", ax)
 
     ax.plot(times, served, label="Served Requests", color="green", linewidth=2)
     ax.plot(times, expired, label="Expired Requests", color="red", linewidth=2)
@@ -99,7 +102,7 @@ def plot_average_wait_time(simulation: Any, max_time: int = 600, ax: Optional[Ax
         overall_average = total / len(avg_waits)
 
     # Create plot
-    ax = create_base_plot("Average Request Wait Time Over Time", "Time (ticks)", "Average Wait Time (ticks)", ax)
+    ax = create_base_plot("Average Request Wait Time Over Time", "", "Average Wait Time (ticks)", ax)
 
     # Blue line for the average wait time over time
     ax.plot(times, avg_waits, label="Average Wait Time", color="blue", linewidth=2)
@@ -283,27 +286,3 @@ def create_base_plot(title: str, xlabel: str, ylabel: str, ax: Optional[Axes] = 
     
     return ax
 
-
-def show_all_plots_in_one(simulation: Any, max_time: int = 600) -> None:
-    """
-    Show all three plots in one window using subplots.
-    
-    Args:
-        simulation: DeliverySimulation instance with metrics_log attribute
-        max_time: Maximum time to display on x-axis (in ticks)
-    """
-    # Create a figure with 3 subplots (vertical stack)
-    fig, axes = plt.subplots(3, 1, figsize=(12, 15))
-    
-    # Plot 1: Cumulative requests (top)
-    plot_cumulative_requests_over_time(simulation, max_time, axes[0])
-    
-    # Plot 2: Average wait time (middle)
-    plot_average_wait_time(simulation, max_time, axes[1])
-    
-    # Plot 3: Driver utilization (bottom)
-    plot_driver_utilization(simulation, max_time, axes[2])
-    
-    # Adjust layout and show
-    plt.tight_layout()
-    plt.show()
