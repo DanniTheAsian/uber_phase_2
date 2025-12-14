@@ -261,4 +261,18 @@ def get_plot_data(simulation: Any, max_time: int, required_keys: List[str]) -> O
     
     return data
 
-
+def create_base_plot(title: str, xlabel: str, ylabel: str) -> None:
+    """
+    Create a base plot with consistent formatting.
+    
+    Args:
+        title: Plot title
+        xlabel: X-axis label
+        ylabel: Y-axis label
+    """
+    plt.figure(figsize=(10, 6))
+    plt.xlabel(xlabel)
+    plt.ylabel(ylabel)
+    plt.title(title)
+    plt.grid(True, alpha=0.3)
+    plt.tight_layout()
