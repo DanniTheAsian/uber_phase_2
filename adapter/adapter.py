@@ -244,6 +244,6 @@ class Adapter:
             "driver_positions": driver_positions,
             "driver_headings": driver_headings,
             "pickup_positions": pickup_positions,
-            "dropoff_posittions": dropoff_positions,
+            "dropoff_positions": dropoff_positions,
             "statistics": state.get("statistics", {}),
         }
