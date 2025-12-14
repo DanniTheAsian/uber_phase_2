@@ -33,7 +33,11 @@ class RequestGenerator:
         """
         Generates zero or more new Request objects based on the given rate.
         The rate is interpreted as requests per minute.
-        Since 1 simulation tick = 1 minute, we use rate directly.
+        Since one minute equals 60 ticks, the expected number of requests
+        Args:
+            time: Current simulation time in ticks
+        Returns:
+            List of newly generated Request objects
         """
         new_requests: list[Request] = []
 
@@ -41,7 +45,7 @@ class RequestGenerator:
             if self.rate <= 0:
                 return new_requests
 
-            rate_per_tick = self.rate
+            rate_per_tick = self.rate / 60.0
 
             # Poisson-like: generate base_count requests + 1 more with probability extra_probability
             base_count = int(rate_per_tick)
