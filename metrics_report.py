@@ -1,5 +1,6 @@
 from typing import List, Dict, Optional, Tuple, Any
 import matplotlib.pyplot as plt
+from matplotlib.axes import Axes
 
 
 def show_simulation_dashboard(simulation: Any, max_time: int = 600) -> None:
@@ -13,27 +14,35 @@ def show_simulation_dashboard(simulation: Any, max_time: int = 600) -> None:
     Returns:
         None: Displays matplotlib plots
     """
-    plot_cumulative_requests_over_time(simulation, max_time)
-    plot_average_wait_time(simulation, max_time)
-    plot_driver_utilization(simulation, max_time)
+    # A figure with 3 subplots (vertical stack)
+    fig, axes = plt.subplots(3, 1, figsize=(12, 15), sharex=True)
+    
+    # Plot
+    plot_cumulative_requests_over_time(simulation, max_time, axes[0])
+    plot_average_wait_time(simulation, max_time, axes[1])
+    plot_driver_utilization(simulation, max_time, axes[2])
+    
+    plt.tight_layout()
+    plt.show()
 
 
-def plot_cumulative_requests_over_time(simulation: Any, max_time: int = 600) -> None:
+def plot_cumulative_requests_over_time(simulation: Any, max_time: int = 600, ax: Optional[Axes] = None) -> Optional[Axes]:
     """
     Gets data for cumulative requests plot.
     
     Args:
         simulation: DeliverySimulation instance with metrics_log attribute
         max_time: Maximum time to display on x-axis (in ticks)
+        ax: Matplotlib axis to plot on. If None, creates new figure.
     
     Returns:
-        None
+        Axes or None: The axis object if plot was created, None if no data
     """
 
     # Get valid data
     data = get_plot_data(simulation, max_time, ['time', 'served', 'expired'])
     if data is None:
-        return
+        return None
     
     # Extract data
     times = []
@@ -46,32 +55,35 @@ def plot_cumulative_requests_over_time(simulation: Any, max_time: int = 600) -> 
         expired.append(entry['expired'])
     
     # Create plot
-    create_base_plot("Cumulative Served and Expired Requests Over Time", "Time (ticks)", "Cumulative Requests")
+    ax = create_base_plot("Cumulative Served and Expired Requests Over Time", "", "Cumulative Requests", ax)
 
-    plt.plot(times, served, label="Served Requests", color="green", linewidth=2)
-    plt.plot(times, expired, label="Expired Requests", color="red", linewidth=2)
-    plt.legend()
-    plt.show()
+    ax.plot(times, served, label="Served Requests", color="green", linewidth=2)
+    ax.plot(times, expired, label="Expired Requests", color="red", linewidth=2)
+    ax.legend()
+    if ax is None:
+        plt.tight_layout()
+        plt.show()
+    
+    return ax
 
 
 
-def plot_average_wait_time(simulation: Any, max_time: int = 600) -> None:
+def plot_average_wait_time(simulation: Any, max_time: int = 600, ax: Optional[Axes] = None) -> Optional[Axes]:
     """
     Plots average wait time over time.
-
-    Shows how long requests typically wait before being served.
-
+    
     Args:
         simulation: DeliverySimulation instance with metrics_log attribute
         max_time: Maximum time to display on x-axis (in ticks)
-
+        ax: Matplotlib axis to plot on. If None, creates new figure.
+    
     Returns:
-        None: Displays a matplotlib plot
+        Axes or None: The axis object if plot was created, None if no data
     """
     # Get valid data
     data = get_plot_data(simulation, max_time, ['time', 'avg_wait'])
     if data is None:
-        return
+        return None
 
     # Extract data
     times = []
@@ -90,20 +102,25 @@ def plot_average_wait_time(simulation: Any, max_time: int = 600) -> None:
         overall_average = total / len(avg_waits)
 
     # Create plot
-    create_base_plot("Average Request Wait Time Over Time", "Time (ticks)", "Average Wait Time (ticks)")
+    ax = create_base_plot("Average Request Wait Time Over Time", "", "Average Wait Time (ticks)", ax)
 
     # Blue line for the average wait time over time
-    plt.plot(times, avg_waits, label="Average Wait Time", color="blue", linewidth=2)
+    ax.plot(times, avg_waits, label="Average Wait Time", color="blue", linewidth=2)
 
     # A horizontal red dashed line for the overall average
     if len(avg_waits) > 0:
-        plt.axhline(y = overall_average, color = "red", linestyle = "--", label = f"Overall Average: {overall_average:.1f} ticks")
+        ax.axhline(y = overall_average, color = "red", linestyle = "--", label = f"Overall Average: {overall_average:.1f} ticks")
 
-    plt.legend()
-    plt.show()
+    ax.legend()
+
+    if ax is None:
+        plt.tight_layout()
+        plt.show()
+   
+    return ax
 
 
-def plot_driver_utilization(simulation: Any, max_time: int = 600) -> None:
+def plot_driver_utilization(simulation: Any, max_time: int = 600, ax: Optional[Axes] = None) -> Optional[Axes]:
     """
     Plots driver utilization over time (active vs idle drivers).
     
@@ -114,12 +131,12 @@ def plot_driver_utilization(simulation: Any, max_time: int = 600) -> None:
         max_time: Maximum time to display on x-axis (in ticks)
     
     Returns:
-        None: Displays a matplotlib plot
+        Axes or None: The axis object if plot was created, None if no data
     """
     # Get valid data
     data = get_plot_data(simulation, max_time, ['time', 'active_drivers'])
     if data is None:
-        return
+        return None
     
     # Extract data
     times = []
@@ -137,11 +154,15 @@ def plot_driver_utilization(simulation: Any, max_time: int = 600) -> None:
         idle_counts.append(idle)
     
     # Create plot
-    create_base_plot("Driver Utilization Over Time", "Time (ticks)", "Number of Drivers")
+    ax = create_base_plot("Driver Utilization Over Time", "Time (ticks)", "Number of Drivers", ax)
     
-    plt.stackplot(times, active_counts, idle_counts, labels=['Active Drivers', 'Idle Drivers'], colors=['blue', 'orange'], alpha = 0.7)
-    plt.legend(loc='upper left')
-    plt.show()
+    ax.stackplot(times, active_counts, idle_counts, labels=['Active Drivers', 'Idle Drivers'], colors=['blue', 'orange'], alpha = 0.7)
+    ax.legend(loc='upper left')
+    if ax is None:
+        plt.tight_layout()
+        plt.show()
+    
+    return ax
 
 def check_simulation_has_data(simulation: Any) -> Tuple[bool, Optional[str]]:
     """ 
@@ -241,7 +262,7 @@ def get_plot_data(simulation: Any, max_time: int, required_keys: List[str]) -> O
     
     return data
 
-def create_base_plot(title: str, xlabel: str, ylabel: str) -> None:
+def create_base_plot(title: str, xlabel: str, ylabel: str, ax: Optional[Axes] = None) -> Axes:
     """
     Create a base plot with consistent formatting.
     
@@ -249,10 +270,19 @@ def create_base_plot(title: str, xlabel: str, ylabel: str) -> None:
         title: Plot title
         xlabel: X-axis label
         ylabel: Y-axis label
+        ax: Matplotlib axis. If None, creates new figure.
+    
+    Returns:
+        Axes: The axis object to plot on
     """
-    plt.figure(figsize=(10, 6))
-    plt.xlabel(xlabel)
-    plt.ylabel(ylabel)
-    plt.title(title)
-    plt.grid(True, alpha=0.3)
-    plt.tight_layout()
+    if ax is None:
+        plt.figure(figsize=(10, 6))
+        ax = plt.gca()
+    
+    ax.set_xlabel(xlabel)
+    ax.set_ylabel(ylabel)
+    ax.set_title(title)
+    ax.grid(True, alpha=0.3)
+    
+    return ax
+
