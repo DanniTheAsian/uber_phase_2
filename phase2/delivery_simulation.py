@@ -98,16 +98,16 @@ class DeliverySimulation:
         self.time += 1
 
         # Log metrics for plotting
+        if self.completed_deliveries > 0:
+            avg_wait = self.total_wait_time / self.completed_deliveries
+        else:
+            avg_wait = 0.0
+
         active_drivers = 0
         for driver in self.drivers:
             if driver.status != "IDLE":
                 active_drivers += 1
 
-        if self.completed_deliveries > 0:
-            avg_wait = self.total_wait_time / self.completed_deliveries
-        else:
-            avg_wait = 0.0
-            
         self.metrics_log.append({
             'time': self.time,
             'served': self.served_count,

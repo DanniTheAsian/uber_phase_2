@@ -15,6 +15,7 @@ def show_simulation_dashboard(simulation: Any, max_time: int = 600) -> None:
     """
     plot_cumulative_requests_over_time(simulation, max_time)
     plot_average_wait_time(simulation, max_time)
+    plot_driver_utilization(simulation, max_time)
 
 
 def plot_cumulative_requests_over_time(simulation: Any, max_time: int = 600) -> None:
@@ -147,6 +148,95 @@ def plot_average_wait_time(simulation: Any, max_time: int = 600) -> None:
     plt.grid(True, alpha=0.3)
 
     # Adjust layout and show plot
+    plt.tight_layout()
+    plt.show()
+
+
+def plot_driver_utilization(simulation: Any, max_time: int = 600) -> None:
+    """
+    Plots driver utilization over time (active vs idle drivers).
+    
+    Shows how many drivers are working vs idle over time.
+    
+    Args:
+        simulation: DeliverySimulation instance with metrics_log attribute
+        max_time: Maximum time to display on x-axis (in ticks)
+    
+    Returns:
+        None: Displays a matplotlib plot
+    """
+    # Step 1: Check if simulation has data
+    has_data, error = check_simulation_has_data(simulation)
+    if not has_data:
+        print(f"Error: {error}")
+        return
+    
+    # Step 2: Filter by time
+    time_filtered = filter_by_time(simulation.metrics_log, max_time)
+    
+    if len(time_filtered) == 0:
+        print(f"No data within time 0-{max_time}")
+        return
+    
+    # Step 3: Filter by required keys
+    data = filter_by_keys(time_filtered, ['time', 'active_drivers'])
+    
+    if len(data) == 0:
+        print("No entries have both time and active_drivers keys")
+        print("Make sure tick() saves 'active_drivers' in metrics_log")
+        return
+    
+    # Step 4: Extract data
+    times = []
+    active_counts = []
+    
+    for entry in data:
+        times.append(entry['time'])
+        active_counts.append(entry['active_drivers'])
+    
+    # Step 5: Calculate idle drivers
+    total_drivers = len(simulation.drivers)
+    idle_counts = []
+    for active in active_counts:
+        idle = total_drivers - active
+        idle_counts.append(idle)
+    
+    # Step 6: Create the plot
+    plt.figure(figsize=(10, 6))
+    
+    # Plot active drivers (blue line)
+    plt.plot(times, active_counts, label="Active Drivers", color="blue", linewidth=2)
+    
+    # Plot idle drivers (orange line)
+    plt.plot(times, idle_counts, label="Idle Drivers", color="orange", linewidth=2)
+    
+    # Labels and title
+    plt.xlabel("Time (ticks)")
+    plt.ylabel("Number of Drivers")
+    plt.title(f"Driver Utilization (Total: {total_drivers} drivers)")
+    
+    # Add grid and legend
+    plt.legend()
+    plt.grid(True, alpha=0.3)
+    
+    # Add statistics text
+    if active_counts:
+        # Calculate average active drivers
+        total_active = 0
+        for count in active_counts:
+            total_active += count
+        avg_active = total_active / len(active_counts)
+        
+        # Calculate utilization percentage
+        if total_drivers > 0:
+            utilization = (avg_active / total_drivers) * 100
+            stats_text = f"Average: {avg_active:.1f} active drivers ({utilization:.1f}% utilization)"
+        else:
+            stats_text = f"Average: {avg_active:.1f} active drivers"
+        
+        plt.figtext(0.5, 0.02, stats_text, ha="center", fontsize=10,
+                   bbox={"facecolor": "lightblue", "alpha": 0.5, "pad": 5})
+    
     plt.tight_layout()
     plt.show()
 
