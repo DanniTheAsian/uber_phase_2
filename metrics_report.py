@@ -133,7 +133,7 @@ def plot_average_wait_time(simulation: Any, max_time: int = 600) -> None:
     # Plot the average wait time as a blue line
     plt.plot(times, avg_waits, label="Average Wait Time", color="blue", linewidth=2)
 
-    # Add a horizontal red dashed line for the overall average
+    # A horizontal red dashed line for the overall average
     if len(avg_waits) > 0:
         plt.axhline(y = overall_average, color = "red", linestyle = "--",
                     label = f"Overall Average: {overall_average:.1f} ticks")
@@ -142,12 +142,8 @@ def plot_average_wait_time(simulation: Any, max_time: int = 600) -> None:
     plt.xlabel("Time (ticks)")
     plt.ylabel("Average Wait Time (ticks)")
     plt.title("Average Request Wait Time Over Time")
-
-    # Add legend and grid
     plt.legend()
     plt.grid(True, alpha=0.3)
-
-    # Adjust layout and show plot
     plt.tight_layout()
     plt.show()
 
@@ -204,39 +200,15 @@ def plot_driver_utilization(simulation: Any, max_time: int = 600) -> None:
     # Step 6: Create the plot
     plt.figure(figsize=(10, 6))
     
-    # Plot active drivers (blue line)
-    plt.plot(times, active_counts, label="Active Drivers", color="blue", linewidth=2)
+    plt.stackplot(times, active_counts, idle_counts,
+                  labels=['Active Drivers', 'Idle Drivers'],
+                  colors=['blue', 'orange'], alpha=0.7)
     
-    # Plot idle drivers (orange line)
-    plt.plot(times, idle_counts, label="Idle Drivers", color="orange", linewidth=2)
-    
-    # Labels and title
     plt.xlabel("Time (ticks)")
     plt.ylabel("Number of Drivers")
-    plt.title(f"Driver Utilization (Total: {total_drivers} drivers)")
-    
-    # Add grid and legend
-    plt.legend()
+    plt.title("Driver Utilization Over Time")
+    plt.legend(loc='upper left')
     plt.grid(True, alpha=0.3)
-    
-    # Add statistics text
-    if active_counts:
-        # Calculate average active drivers
-        total_active = 0
-        for count in active_counts:
-            total_active += count
-        avg_active = total_active / len(active_counts)
-        
-        # Calculate utilization percentage
-        if total_drivers > 0:
-            utilization = (avg_active / total_drivers) * 100
-            stats_text = f"Average: {avg_active:.1f} active drivers ({utilization:.1f}% utilization)"
-        else:
-            stats_text = f"Average: {avg_active:.1f} active drivers"
-        
-        plt.figtext(0.5, 0.02, stats_text, ha="center", fontsize=10,
-                   bbox={"facecolor": "lightblue", "alpha": 0.5, "pad": 5})
-    
     plt.tight_layout()
     plt.show()
 
