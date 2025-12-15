@@ -1,4 +1,3 @@
-@ -1,58 +0,0 @@
 """
 Global greedy dispatch policy.
 
