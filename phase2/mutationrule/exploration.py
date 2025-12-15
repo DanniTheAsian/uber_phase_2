@@ -53,16 +53,14 @@ class ExplorationMutationRule(MutationRule):
             None
         """
 
-        effective_probability = self.probability * (1 + time * 0.0005)
-        effective_probability = min(1.0, effective_probability)
+        if random.random() >= self.probability:
+            return
 
-        if random.random() < effective_probability:
+        if isinstance(driver.behaviour, LazyBehaviour):
+            driver.behaviour = GreedyDistanceBehaviour(max_distance=10.0)
 
-            if isinstance(driver.behaviour, LazyBehaviour):
-                driver.behaviour = GreedyDistanceBehaviour(max_distance=10.0)
+        elif isinstance(driver.behaviour, GreedyDistanceBehaviour):
+            driver.behaviour = EarningMaxBehaviour(min_ratio=1.0)
 
-            elif isinstance(driver.behaviour, GreedyDistanceBehaviour):
-                driver.behaviour = EarningMaxBehaviour(min_ratio=1.0)
-
-            else:
-                driver.behaviour = LazyBehaviour(max_idle=5)
+        else:
+            driver.behaviour = LazyBehaviour(max_idle=5)
