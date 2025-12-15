@@ -15,12 +15,13 @@ def show_simulation_dashboard(simulation: Any, max_time: int = 600) -> None:
         None: Displays matplotlib plots
     """
     # A figure with 3 subplots (vertical stack)
-    fig, axes = plt.subplots(3, 1, figsize=(12, 15), sharex=True)
+    fig, axes = plt.subplots(2, 2, figsize=(14, 12), sharex=True)
     
     # Plot
     plot_cumulative_requests_over_time(simulation, max_time, axes[0])
     plot_average_wait_time(simulation, max_time, axes[1])
     plot_driver_utilization(simulation, max_time, axes[2])
+    plot_behaviour_evolution(simulation, max_time, axes[1, 1])
     
     plt.tight_layout()
     plt.show()
@@ -163,6 +164,70 @@ def plot_driver_utilization(simulation: Any, max_time: int = 600, ax: Optional[A
         plt.show()
     
     return ax
+
+
+def plot_behaviour_evolution(simulation: Any, max_time: int = 600, ax: Optional[Axes] = None) -> Optional[Axes]:
+    """
+    Plots how driver behaviours change over time.
+    
+    Shows how many drivers have each behaviour type at each time step.
+    """
+    # Get valid data
+    data = get_plot_data(simulation, max_time, ['time', 'behaviour_counts'])
+    if data is None:
+        return None
+    
+    # Find all different behaviour types that appear
+    all_behaviour_types = set()
+    for entry in data:
+        if 'behaviour_counts' in entry:
+            # Add all behaviour names from this time step
+            for behaviour_name in entry['behaviour_counts'].keys():
+                all_behaviour_types.add(behaviour_name)
+    
+    if not all_behaviour_types:
+        print("Warning: No behaviour data to plot")
+        return None
+    
+    # Prepare lists for plotting
+    times = []
+    # Create a dictionary to store counts for each behaviour type
+    behaviour_data = {}
+    for behaviour_name in all_behaviour_types:
+        behaviour_data[behaviour_name] = []
+    
+    # Fill the data
+    for entry in data:
+        times.append(entry['time'])
+        current_counts = entry.get('behaviour_counts', {})
+        
+        # For each behaviour type, add its count or 0
+        for behaviour_name in all_behaviour_types:
+            count = current_counts.get(behaviour_name, 0)
+            behaviour_data[behaviour_name].append(count)
+    
+    # Create the plot
+    ax = create_base_plot("Driver Behaviour Evolution", 
+                         "Time (ticks)", 
+                         "Number of Drivers", 
+                         ax)
+    
+    # Colors for different lines
+    colors = ['blue', 'green', 'red', 'orange', 'purple', 'brown']
+    
+    # Draw a line for each behaviour type
+    for i, (behaviour_name, counts) in enumerate(behaviour_data.items()):
+        color = colors[i % len(colors)]
+        ax.plot(times, counts, 
+                label=behaviour_name, 
+                color=color, 
+                linewidth=2)
+    
+    ax.legend(loc='best')  # Automatic best position for legend
+    ax.grid(True, alpha=0.3)
+    
+    return ax
+
 
 def check_simulation_has_data(simulation: Any) -> Tuple[bool, Optional[str]]:
     """ 

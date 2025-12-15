@@ -119,12 +119,6 @@ class DeliverySimulation:
         else:
             avg_wait = 0.0
 
-        
-        # active_drivers = 0
-        # for driver in self.drivers:
-          #  if driver.status != "IDLE":
-           #     active_drivers += 1
-
         self.metrics_log.append({
             'time': self.time,
             'served': self.served_count,
