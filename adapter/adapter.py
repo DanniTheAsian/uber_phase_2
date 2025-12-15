@@ -1,5 +1,6 @@
 from typing import Dict, Tuple
 from phase2.delivery_simulation import DeliverySimulation
+from phase2.policies.global_greedy_policy import GlobalGreedyPolicy
 from phase2.policies.nearest_neighbor_policy import NearestNeighborPolicy
 from phase2.request_generator import RequestGenerator
 from phase2.driver import Driver
@@ -211,6 +212,11 @@ class Adapter:
         if self.simulation is None:
             raise RuntimeError("Simulation is not initialized")
         
+
+        if self.simulation.expired_count > 50 and not isinstance(self.simulation.dispatch_policy, GlobalGreedyPolicy):
+            self.simulation.dispatch_policy = GlobalGreedyPolicy()
+
+
         self.simulation.tick()
         new_state = self._sim_to_state_dict()
         metrics= new_state.get("statistics", {"served": 0, "expired": 0, "avg_wait": 0})

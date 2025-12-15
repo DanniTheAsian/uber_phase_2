@@ -81,7 +81,7 @@ class DeliverySimulation:
         self._finalize_assigments(accepted)
         self._move_drivers_and_handle_events()
 
-        # 7) Apply mutation rules to each driver
+        # Apply mutation rules to each driver
         active_drivers = 0
         behaviour_counts = {}
 
