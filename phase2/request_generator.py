@@ -45,7 +45,7 @@ class RequestGenerator:
             if self.rate <= 0:
                 return new_requests
 
-            rate_per_tick = self.rate / 60.0
+            rate_per_tick = self.rate
 
             # Poisson-like: generate base_count requests + 1 more with probability extra_probability
             base_count = int(rate_per_tick)
