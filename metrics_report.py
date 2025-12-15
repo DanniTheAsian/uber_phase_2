@@ -181,7 +181,6 @@ def plot_behaviour_evolution(simulation: Any, max_time: int = 600, ax: Optional[
     all_behaviour_types = set()
     for entry in data:
         if 'behaviour_counts' in entry:
-            # Add all behaviour names from this time step
             for behaviour_name in entry['behaviour_counts'].keys():
                 all_behaviour_types.add(behaviour_name)
     
@@ -191,7 +190,6 @@ def plot_behaviour_evolution(simulation: Any, max_time: int = 600, ax: Optional[
     
     # Prepare lists for plotting
     times = []
-    # Create a dictionary to store counts for each behaviour type
     behaviour_data = {}
     for behaviour_name in all_behaviour_types:
         behaviour_data[behaviour_name] = []
@@ -201,26 +199,32 @@ def plot_behaviour_evolution(simulation: Any, max_time: int = 600, ax: Optional[
         times.append(entry['time'])
         current_counts = entry.get('behaviour_counts', {})
         
-        # For each behaviour type, add its count or 0
         for behaviour_name in all_behaviour_types:
             count = current_counts.get(behaviour_name, 0)
             behaviour_data[behaviour_name].append(count)
     
+    behaviour_style = {
+        "GreedyDistanceBehaviour": {"color": "green", "label": "Greedy"},
+        "EarningMaxBehaviour": {"color": "gold", "label": "Earning"},
+        "LazyBehaviour": {"color": "brown", "label": "Lazy"},
+        "no_behaviour": {"color": "gray", "label": "None"},
+    }
+
     # Create the plot
     ax = create_base_plot("Driver Behaviour Evolution", "Time (ticks)", "Number of Drivers", ax)
+
+    for behaviour_name, counts in behaviour_data.items():
+        if behaviour_name in behaviour_style:
+            style = behaviour_style[behaviour_name]
+            color = style["color"]
+            label = style["label"]
+        else:
+            color = "blue"
+            label = behaviour_name
+        
+        ax.plot(times, counts, label = label, color = color, linewidth = 2)
     
-    # Colors for different lines
-    colors = ['blue', 'green', 'red', 'orange', 'purple', 'brown']
-    
-    # Draw a line for each behaviour type
-    for i, (behaviour_name, counts) in enumerate(behaviour_data.items()):
-        color = colors[i % len(colors)]
-        ax.plot(times, counts, 
-                label=behaviour_name, 
-                color=color, 
-                linewidth=2)
-    
-    ax.legend(loc='best')  # Automatic best position for legend
+    ax.legend(loc='best')
     ax.grid(True, alpha=0.3)
     
     return ax
