@@ -1,11 +1,11 @@
 import unittest
 from unittest.mock import patch
 
+
 from phase2.mutationrule.exploration import ExplorationMutationRule
 from phase2.behaviour.lazy_behaviour import LazyBehaviour
 from phase2.behaviour.greedy_distance_behaviour import GreedyDistanceBehaviour
-from test.mock.mock_objects import MockDriver
-
+from .mock.mock_objects import MockDriver
 
 class TestExplorationMutationRule(unittest.TestCase):
     """

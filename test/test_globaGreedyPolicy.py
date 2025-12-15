@@ -1,7 +1,7 @@
 import unittest
 
-from test.mock.mock_objects import MockDriver, MockRequest, MockPoint
 from phase2.policies.global_greedy_policy import GlobalGreedyPolicy
+from .mock.mock_objects import MockDriver, MockRequest, MockPoint
 
 
 class TestGlobalGreedyPolicy(unittest.TestCase):
