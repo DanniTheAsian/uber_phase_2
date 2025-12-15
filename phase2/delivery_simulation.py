@@ -74,7 +74,6 @@ class DeliverySimulation:
         All core simulation logic happens here.
         """
 
-        # 1) Generate new requests
         self._generate_new_requests()
 
         active_requests = self._update_waiting_time()
@@ -87,7 +86,7 @@ class DeliverySimulation:
 
         self._move_drivers_and_handle_events()
 
-        # 7) Apply mutation rules to each driver
+        # Apply mutation rules to each driver
         for driver in self.drivers:
             for rule in self.mutation_rules:
                 try:
@@ -95,7 +94,7 @@ class DeliverySimulation:
                 except (AttributeError, TypeError, ValueError) as err:
                     print(f"Mutation error at time {self.time}: {err}")
 
-        # 8) Increment time
+        # Increment time
         self.time += 1
 
         # Log metrics for plotting
