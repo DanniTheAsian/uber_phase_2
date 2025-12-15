@@ -12,16 +12,17 @@ from ..driver import Driver
 
 class PerformanceBasedMutation(MutationRule):
     """
-    Mutation rule that adjusts a driver's behaviour based on how many requests
-    the driver has successfully served over the last N completed trips.
+    Mutation rule that adjusts a driver's behaviour based on recent activity.
 
-    The rule inspects the driver's trip history and extracts the number of
-    served requests from the most recent N trips. If the driver's average
-    performance (measured as served requests per trip) falls below a given
-    threshold, the driver mutates and adopts a more greedy behaviour.
+    The rule inspects the driver's trip history and evaluates how active the
+    driver has been over the most recent N completed trips. Activity is
+    measured as the proportion of completed trips within this window.
 
-    This models adaptive decision-making, where drivers who underperform become
-    less selective in order to increase their future opportunities.
+    If the driver's average activity level falls below a given threshold,
+    the driver mutates and adopts a more greedy distance-based behaviour.
+
+    This models adaptive decision-making, where underperforming drivers become
+    less selective in order to increase their chances of receiving future offers.
     """
    
     def __init__(self, threshold: float, N: int ) -> None:
@@ -39,19 +40,25 @@ class PerformanceBasedMutation(MutationRule):
 
     def maybe_mutate(self, driver: Driver, time: int) -> None:
         """
-        Evaluate whether the driver should mutate based on recent performance.
+        Evaluate whether the driver should mutate based on recent activity.
 
-        This method examines the last N trip records in the driver's history.
-        Each history entry is expected to contain a "served" field indicating
-        how many requests the driver served in that completed trip.
+        The method considers the last N entries in the driver's trip history.
+        If fewer than N trips have been completed, no evaluation is performed.
+
+        Activity is computed as:
+            activity = number of recent trips / N
+
+        If the computed activity level is below the configured threshold,
+        the driver's behaviour is replaced with a GreedyDistanceBehaviour.
 
         Args:
             driver (Driver): The driver whose behaviour may be mutated.
-            time (int): The current simulation time. Included to satisfy the MutationRule
-                interface; not directly used in this rule.
+            time (int): The current simulation time. Included to satisfy the
+                MutationRule interface; not used directly in this rule.
 
         Returns:
             None
+
         """
         if len(driver.history) < self.N:
             return
