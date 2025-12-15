@@ -34,14 +34,16 @@ class GlobalGreedyPolicy(DispatchPolicy):
             list[tuple[Driver, Request]]: A list of (driver, request) pairs representing the assignments made.
         """
         combos = []
-        for driver in drivers:
+        
+        for driver_index, driver in enumerate(drivers):
             for request in requests:
                 try:
                     distance = driver.position.distance_to(request.pickup)
                 except (AttributeError, TypeError, ValueError) as err:
                     print(f"Skipping driver/request pair due to distance error: {err}")
                     continue
-                combos.append((distance, driver, request))
+               
+                combos.append((distance, driver_index, driver, request))
 
         combos.sort()
 
@@ -49,7 +51,7 @@ class GlobalGreedyPolicy(DispatchPolicy):
         used_requests = set()
         matches = []
 
-        for distance, driver, request in combos:
+        for distance, _, driver, request in combos:
             if driver not in used_drivers and request not in used_requests:
                 matches.append((driver, request))
                 used_drivers.add(driver)
