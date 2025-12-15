@@ -14,7 +14,6 @@ def show_simulation_dashboard(simulation: Any, max_time: int = 600) -> None:
     Returns:
         None: Displays matplotlib plots
     """
-    # A figure with 3 subplots (vertical stack)
     fig, axes = plt.subplots(2, 2, figsize=(16, 8), sharex=True)
     
     # Plot
