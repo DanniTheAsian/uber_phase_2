@@ -75,18 +75,16 @@ class DeliverySimulation:
         """
 
         self._generate_new_requests()
-
         active_requests = self._update_waiting_time()
-
         proposals = self._propose_assignments(active_requests)
-
         accepted = self._process_offers(proposals)
-
         self._finalize_assigments(accepted)
-
         self._move_drivers_and_handle_events()
 
-        # Apply mutation rules to each driver
+        # 7) Apply mutation rules to each driver
+        active_drivers = 0
+        behaviour_counts = {}
+
         for driver in self.drivers:
             for rule in self.mutation_rules:
                 try:
@@ -94,7 +92,7 @@ class DeliverySimulation:
                 except (AttributeError, TypeError, ValueError) as err:
                     print(f"Mutation error at time {self.time}: {err}")
 
-        # Increment time
+        # 8) Increment time
         self.time += 1
 
         # Log metrics for plotting
@@ -103,17 +101,13 @@ class DeliverySimulation:
         else:
             avg_wait = 0.0
 
-        active_drivers = 0
-        for driver in self.drivers:
-            if driver.status != "IDLE":
-                active_drivers += 1
-
         self.metrics_log.append({
             'time': self.time,
             'served': self.served_count,
             'expired': self.expired_count,
             'avg_wait': avg_wait,
-            'active_drivers': active_drivers
+            'active_drivers': active_drivers,
+            'behaviour_counts': behaviour_counts
         })
 
     def get_snapshot(self) -> dict:

@@ -120,8 +120,8 @@ if __name__ == "__main__":
     try:
         from adapter.phase1 import ADAPTER
         from metrics_report import show_simulation_dashboard
-        if ADAPTER.sim is not None:
-            show_simulation_dashboard(ADAPTER.sim)
+        if ADAPTER.simulation is not None:
+            show_simulation_dashboard(ADAPTER.simulation)
         else:
             print("No simulation being plotted.")
 
