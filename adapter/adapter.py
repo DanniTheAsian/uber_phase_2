@@ -247,8 +247,8 @@ class Adapter:
                             ]
         return {
             "driver_positions": driver_positions,
-            "driver_headings": driver_headings,
             "pickup_positions": pickup_positions,
             "dropoff_positions": dropoff_positions,
+            "driver_headings": driver_headings,
             "statistics": state.get("statistics", {}),
         }
