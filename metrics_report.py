@@ -18,9 +18,9 @@ def show_simulation_dashboard(simulation: Any, max_time: int = 600) -> None:
     fig, axes = plt.subplots(2, 2, figsize=(14, 12), sharex=True)
     
     # Plot
-    plot_cumulative_requests_over_time(simulation, max_time, axes[0])
-    plot_average_wait_time(simulation, max_time, axes[1])
-    plot_driver_utilization(simulation, max_time, axes[2])
+    plot_cumulative_requests_over_time(simulation, max_time, axes[0, 0])
+    plot_average_wait_time(simulation, max_time, axes[0, 1])
+    plot_driver_utilization(simulation, max_time, axes[1, 0])
     plot_behaviour_evolution(simulation, max_time, axes[1, 1])
     
     plt.tight_layout()
@@ -207,10 +207,7 @@ def plot_behaviour_evolution(simulation: Any, max_time: int = 600, ax: Optional[
             behaviour_data[behaviour_name].append(count)
     
     # Create the plot
-    ax = create_base_plot("Driver Behaviour Evolution", 
-                         "Time (ticks)", 
-                         "Number of Drivers", 
-                         ax)
+    ax = create_base_plot("Driver Behaviour Evolution", "Time (ticks)", "Number of Drivers", ax)
     
     # Colors for different lines
     colors = ['blue', 'green', 'red', 'orange', 'purple', 'brown']
