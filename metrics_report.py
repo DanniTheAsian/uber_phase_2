@@ -15,7 +15,7 @@ def show_simulation_dashboard(simulation: Any, max_time: int = 600) -> None:
         None: Displays matplotlib plots
     """
     # A figure with 3 subplots (vertical stack)
-    fig, axes = plt.subplots(2, 2, figsize=(14, 12), sharex=True)
+    fig, axes = plt.subplots(2, 2, figsize=(16, 8), sharex=True)
     
     # Plot
     plot_cumulative_requests_over_time(simulation, max_time, axes[0, 0])
@@ -56,7 +56,7 @@ def plot_cumulative_requests_over_time(simulation: Any, max_time: int = 600, ax:
         expired.append(entry['expired'])
     
     # Create plot
-    ax = create_base_plot("Cumulative Served and Expired Requests Over Time", "", "Cumulative Requests", ax)
+    ax = create_base_plot("Total Served vs Expired Requests Over Time", "", "Number of Requests", ax)
 
     ax.plot(times, served, label="Served Requests", color="green", linewidth=2)
     ax.plot(times, expired, label="Expired Requests", color="red", linewidth=2)
@@ -103,7 +103,7 @@ def plot_average_wait_time(simulation: Any, max_time: int = 600, ax: Optional[Ax
         overall_average = total / len(avg_waits)
 
     # Create plot
-    ax = create_base_plot("Average Request Wait Time Over Time", "", "Average Wait Time (ticks)", ax)
+    ax = create_base_plot("Average Wait Time for Served Requests", "", "Average Wait Time (ticks)", ax)
 
     # Blue line for the average wait time over time
     ax.plot(times, avg_waits, label="Average Wait Time", color="blue", linewidth=2)
