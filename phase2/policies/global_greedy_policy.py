@@ -36,6 +36,8 @@ class GlobalGreedyPolicy(DispatchPolicy):
         combos = []
         
         for driver_index, driver in enumerate(drivers):
+            if driver.status != "IDLE":
+                continue
             for request in requests:
                 try:
                     distance = driver.position.distance_to(request.pickup)
