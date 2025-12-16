@@ -73,11 +73,17 @@ class DeliverySimulation:
         8. Increase the simulation time.
         All core simulation logic happens here.
         """
+        print(f"\n=== TICK {self.time} ===")
+        print(f"Før tick: {len(self.requests)} requests, {len([d for d in self.drivers if d.status != 'IDLE'])} aktive chauffører")
 
         self._generate_new_requests()
+        print(f"Efter request generation: {len(self.requests)} requests")
         active_requests = self._update_waiting_time()
+        print(f"Aktive requests (WAITING): {len(active_requests)}")
         proposals = self._propose_assignments(active_requests)
+        print(f"Forslag fra dispatch: {len(proposals)}")
         accepted = self._process_offers(proposals)
+        print(f"Accepterede tilbud: {len(accepted)}")
         self._finalize_assigments(accepted)
         self._move_drivers_and_handle_events()
 
@@ -205,23 +211,36 @@ class DeliverySimulation:
 
     def _process_offers(self, proposals: List[Tuple[Driver, Request]]) -> List[Tuple[Driver, Request]]:
         accepted = []
-        for driver, req in proposals:
+        for driver, request in proposals:
             try:
-                dist = driver.position.distance_to(req.pickup)
-                est_time = dist / (driver.speed or 1)
-                offer = Offer(driver, req, est_time)
+                distance_to_pickup = driver.position.distance_to(request.pickup)
+                estimated_travel_time = distance_to_pickup / max(driver.speed, 0.1)
+                distance_pickup_to_dropoff = request.pickup.distance_to(request.dropoff)
+                total_distance = distance_to_pickup + distance_pickup_to_dropoff
+
+                base_reward = 15.0
+                distance_bonus = 1.5 * total_distance
+                estimated_reward = base_reward + distance_bonus
+
+                offer = Offer(driver, request, estimated_travel_time, estimated_reward)
             except (AttributeError, TypeError, ValueError, ZeroDivisionError) as err:
                 print(f"Offer creation error for driver/req at time {self.time}: {err}")
                 continue
 
             try:
-                decision = driver.behaviour.decide(driver, offer, self.time)
+                if driver.behaviour is None:
+                    decision = False
+                    print(f"Driver {driver.id} has no behaviour!")
+                else:
+                    decision = driver.behaviour.decide(driver, offer, self.time)
+
             except (AttributeError, TypeError, ValueError) as err:
                 print(f"Behaviour decision error for driver/req at time {self.time}: {err}")
+                
                 decision = False
 
             if decision:
-                accepted.append((driver, req))
+                accepted.append((driver, request))
 
         return accepted
 
