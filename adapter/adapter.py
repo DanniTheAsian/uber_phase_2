@@ -179,7 +179,7 @@ class Adapter:
 
         dispatch_policy = NearestNeighborPolicy()
         mutation_rules = [
-        ExplorationMutationRule(probability=0.01),
+        ExplorationMutationRule(probability=0.5),
         PerformanceBasedMutation(threshold=0.3, N=5),
         ]
 
