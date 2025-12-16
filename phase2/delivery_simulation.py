@@ -57,6 +57,7 @@ class DeliverySimulation:
         self.completed_deliveries: int = 0
         # Log for metrics over time
         self.metrics_log = []
+        self.current_policy_name = dispatch_policy.__class__.__name__
 
     def tick(self) -> None:
         """
@@ -73,6 +74,9 @@ class DeliverySimulation:
         8. Increase the simulation time.
         All core simulation logic happens here.
         """
+        policy_name = self.dispatch_policy.__class__.__name__
+        print(f"Tick {self.time}: Kører med policy: {policy_name}")
+
         self._generate_new_requests()
         active_requests = self._update_waiting_time()
         proposals = self._propose_assignments(active_requests)
@@ -117,13 +121,16 @@ class DeliverySimulation:
         else:
             avg_wait = 0.0
 
+        current_policy_name = self.dispatch_policy.__class__.__name__
+
         self.metrics_log.append({
             'time': self.time,
             'served': self.served_count,
             'expired': self.expired_count,
             'avg_wait': avg_wait,
             'active_drivers': active_drivers,
-            'behaviour_counts': behaviour_counts
+            'behaviour_counts': behaviour_counts,
+            'policy': current_policy_name
         })
 
     def get_snapshot(self) -> dict:

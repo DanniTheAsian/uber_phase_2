@@ -81,17 +81,19 @@ def plot_average_wait_time(simulation: Any, max_time: int = 600, ax: Optional[Ax
         Axes or None: The axis object if plot was created, None if no data
     """
     # Get valid data
-    data = get_plot_data(simulation, max_time, ['time', 'avg_wait'])
+    data = get_plot_data(simulation, max_time, ['time', 'avg_wait', 'policy'])
     if data is None:
         return None
 
     # Extract data
     times = []
     avg_waits = []
+    policies = []
 
     for entry in data:
         times.append(entry['time'])
         avg_waits.append(entry['avg_wait'])
+        policies.append(entry['policy'])
 
     # Calculate overall average (Red line)
     overall_average = 0.0
@@ -102,7 +104,20 @@ def plot_average_wait_time(simulation: Any, max_time: int = 600, ax: Optional[Ax
         overall_average = total / len(avg_waits)
 
     # Create plot
-    ax = create_base_plot("Average Wait Time for Served Requests", "", "Average Wait Time (ticks)", ax)
+    ax = create_base_plot("Average Wait Time for Served Requests with Policy", "", "Average Wait Time (ticks)", ax)
+
+    current_policy = policies[0]
+    start_time = times[0]
+
+    for i in range(len(times)):
+        current_time = times[i]
+        current_policy_check = policies[i]
+        if current_policy_check != current_policy or i == len(times) - 1:
+            color = get_policy_color(current_policy)
+            
+            ax.axvspan(start_time, current_time, color = color, alpha = 0.3)
+            current_policy = current_policy_check
+            start_time = current_time
 
     # Blue line for the average wait time over time
     ax.plot(times, avg_waits, label="Average Wait Time", color="blue", linewidth=2)
@@ -111,11 +126,18 @@ def plot_average_wait_time(simulation: Any, max_time: int = 600, ax: Optional[Ax
     if len(avg_waits) > 0:
         ax.axhline(y = overall_average, color = "red", linestyle = "--", label = f"Overall Average: {overall_average:.1f} ticks")
 
-    ax.legend()
+    used_policies = []
+    for policy in policies:
+        if policy not in used_policies:
+            used_policies.append(policy)
 
-    if ax is None:
-        plt.tight_layout()
-        plt.show()
+
+    for policy in used_policies:
+        color = get_policy_color(policy)
+        
+        ax.plot([], [], color=color, linewidth=10, alpha=0.3, label=policy)
+        
+    ax.legend(loc="lower right", fontsize = 9)
    
     return ax
 
@@ -227,6 +249,16 @@ def plot_behaviour_evolution(simulation: Any, max_time: int = 600, ax: Optional[
     ax.grid(True, alpha=0.3)
     
     return ax
+
+
+def get_policy_color(policy_name: str) -> str:
+    """Return color for a policy name."""
+    if policy_name == 'NearestNeighborPolicy':
+        return 'lightblue'
+    elif policy_name == 'GlobalGreedyPolicy':
+        return 'lightcoral'
+    else:
+        return 'lightgray'
 
 
 def check_simulation_has_data(simulation: Any) -> Tuple[bool, Optional[str]]:
