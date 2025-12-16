@@ -139,17 +139,17 @@ class DeliverySimulation:
         """
 
         drivers_snapshot = []
-        for d in self.drivers:
-            pos = d.position
+        for driver in self.drivers:
+            pos = driver.position
             drivers_snapshot.append({
-                "id": d.id,
+                "id": driver.id,
                 "x": pos.x if pos else None,
                 "y": pos.y if pos else None,
-                "status": d.status,
+                "status": driver.status,
             })
 
-        pickups = [r.pickup for r in self.requests if r.status in ("WAITING", "ASSIGNED")]
-        dropoffs = [r.dropoff for r in self.requests if r.status == "PICKED"]
+        pickups = [request.pickup for request in self.requests if request.status in ("WAITING", "ASSIGNED")]
+        dropoffs = [request.dropoff for request in self.requests if request.status == "PICKED"]
 
         avg_wait = (self.total_wait_time / self.completed_deliveries) if self.completed_deliveries else 0.0
 
