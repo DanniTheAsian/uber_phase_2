@@ -10,14 +10,7 @@ from .driver_behaviour import DriverBehaviour
 
 class EarningMaxBehaviour(DriverBehaviour):
     """
-    A behaviour that accepts offers only if the reward-to-time ratio
-    is above a certain minimum.
-
-    The idea is that a driver will accept an offer only if the expected
-    earning per unit of travel time is high enough.
-
-    Attributes:
-        min_ratio (float): The minimum required reward/travel_time ratio
+    Decide whether the driver accepts the offer.
     """
     def __init__(self, min_ratio):
         """
@@ -35,15 +28,12 @@ class EarningMaxBehaviour(DriverBehaviour):
 
     def decide(self, driver: 'Driver', offer: 'Offer', time: int) -> bool:
         """
-        Decide whether the driver accepts the offer.
-
         The driver compares the earning-per-time ratio:
             ratio = reward / travel_time
 
-        As the simulation time increases, the driver becomes slightly more picky.
-        This is done by increasing the required threshold a little over time.
+        The driver accepts the offer if:
+            ratio >= min_ratio
 
-            effective_threshold = min_ratio * (1 + 0.0005 * time)
 
         Args:
             driver (Driver): The driver making the decision.
@@ -56,7 +46,7 @@ class EarningMaxBehaviour(DriverBehaviour):
         Note:
             - Returns False if estimated_reward is None
             - Returns False if travel_time is 0 (avoid division by zero)
-            - Uses time-adjusted threshold: min_ratio * (1 + 0.0005 * time)
+            - min_ratio is a fixed threshold in this implementation.
         """
 
         if offer.estimated_reward is None:
@@ -65,14 +55,8 @@ class EarningMaxBehaviour(DriverBehaviour):
         if offer.estimated_travel_time <= 0:
             return False
         
-        threshold = self.min_ratio * (1 + 0.0005 * time)
+        threshold = self.min_ratio
         
         ratio = offer.estimated_reward / offer.estimated_travel_time
         return ratio >= threshold
-
-    # for debugging
-    def __repr__(self) -> str:
-        """String representation of the behaviour."""
-
-        return f"EarningMaxBehaviour(min_ratio={self.min_ratio})"
     
