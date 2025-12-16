@@ -7,92 +7,76 @@ from test.mock.mock_objects import MockDriver
 
 class TestPerformanceBasedMutation(unittest.TestCase):
     """
-    Tests included:
-    1. test_mutation_occurs:
-       - Ensures that mutation happens when the driver's average served
-         value is below the threshold.
+    Tests for PerformanceBasedMutation.
 
-    2. test_no_mutation_when_high_performance:
-       - Ensures that no mutation happens when the driver's performance
-         meets or exceeds the threshold. The behaviour object must remain
-         identical.
-
-    3. test_not_enough_trips:
-       - Ensures that no mutation occurs when the driver has fewer than N
-         historical trip entries. The rule requires sufficient data to
-         calculate an average.
+    The mutation rule evaluates activity based on the number
+    of recent history entries relative to N.
     """
-    def test_mutation_occurs(self):
-        """
-        Mutation should occur when avg served < threshold.
-        """
-        print("\nRunning test_mutation_occurs...")
 
+    def test_mutates_when_activity_below_threshold(self):
+        """
+        Mutation should occur when avg_activity < threshold.
+
+        avg_activity = len(history) / N = 1.0
+        threshold > 1.0  -> mutation
+        """
         driver = MockDriver(
             behaviour=LazyBehaviour(None),
             history=[
-                {"served": 0}, {"served": 0}, {"served": 1}
+                {"served": 0},
+                {"served": 1},
+                {"served": 0},
+            ]
+        )
+
+        rule = PerformanceBasedMutation(threshold=1.1, N=3)
+        rule.maybe_mutate(driver, time=0)
+
+        self.assertIsInstance(
+            driver.behaviour,
+            GreedyDistanceBehaviour
+        )
+
+    def test_no_mutation_when_activity_meets_threshold(self):
+        """
+        No mutation should occur when avg_activity >= threshold.
+        """
+        original_behaviour = LazyBehaviour(None)
+
+        driver = MockDriver(
+            behaviour=original_behaviour,
+            history=[
+                {"served": 1},
+                {"served": 1},
+                {"served": 1},
             ]
         )
 
         rule = PerformanceBasedMutation(threshold=1.0, N=3)
         rule.maybe_mutate(driver, time=0)
 
-        try:
-            self.assertIsInstance(driver.behaviour, GreedyDistanceBehaviour)
-            print("test_mutation_occurs: SUCCESSFUL")
-        except AssertionError:
-            print("test_mutation_occurs: FAILED")
-            raise
+        self.assertIs(
+            driver.behaviour,
+            original_behaviour
+        )
 
-
-    def test_no_mutation_when_high_performance(self):
+    def test_no_mutation_when_not_enough_history(self):
         """
-        No mutation should occur when avg served >= threshold.
+        No mutation should occur if history contains fewer than N entries.
         """
-        print("\nRunning test_no_mutation_when_high_performance...")
-
         original_behaviour = LazyBehaviour(None)
 
         driver = MockDriver(
             behaviour=original_behaviour,
             history=[
-                {"served": 1}, {"served": 1}, {"served": 1}
+                {"served": 0},
             ]
         )
 
-        rule = PerformanceBasedMutation(threshold=0.5, N=3)
+        rule = PerformanceBasedMutation(threshold=1.5, N=3)
         rule.maybe_mutate(driver, time=0)
 
-        try:
-            self.assertIs(driver.behaviour, original_behaviour)
-            print("test_no_mutation_when_high_performance: SUCCESSFUL")
-        except AssertionError:
-            print("test_no_mutation_when_high_performance: FAILED")
-            raise
-
-
-    def test_not_enough_trips(self):
-        """
-        No mutation should occur if history contains fewer than N trips.
-        """
-        print("\nRunning test_not_enough_trips...")
-
-        original_behaviour = LazyBehaviour(None)
-
-        driver = MockDriver(
-            behaviour=original_behaviour,
-            history=[
-                {"served": 1}
-            ]
+        self.assertIs(
+            driver.behaviour,
+            original_behaviour
         )
-
-        rule = PerformanceBasedMutation(threshold=1.0, N=3)
-        rule.maybe_mutate(driver, time=0)
-
-        try:
-            self.assertIs(driver.behaviour, original_behaviour)
-            print("test_not_enough_trips: SUCCESSFUL")
-        except AssertionError:
-            print("test_not_enough_trips: FAILED")
-            raise
