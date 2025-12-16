@@ -39,6 +39,7 @@ class Driver:
         self.current_request = current_request
         self.position_at_assignment: Point | None = None
         self.assigned_reward: float = 0.0
+        self.assignment_time: int | None = None
 
         if not history:
             self.history = []
@@ -52,11 +53,11 @@ class Driver:
         Records position at assignment, sets current request and status to
         TO_PICKUP and marks the request as assigned.
         """
-        _ = current_time
         self.position_at_assignment = self.position
         self.current_request = request
         self.assigned_reward = 0.0
         self.status = "TO_PICKUP"
+        self.assignment_time = current_time
         try:
             request.mark_assigned(self.id)
         except (AttributeError, TypeError, ValueError) as err:
@@ -170,6 +171,7 @@ class Driver:
                 self.history.append({
                     "driver_id": self.id,
                     "request_id": self.current_request.id,
+                    "assignemnt_time": self.assignment_time,
                     "completion_time": time,
                     "earnings": earnings,
                     "total_distance": total_distance,
@@ -181,6 +183,7 @@ class Driver:
                 self.status = "IDLE"
                 self.position_at_assignment = None
                 self.assigned_reward = 0.0
+                self.assignment_time = None
 
     # Note: arrival detection is handled by DeliverySimulation by checking
     # the driver's position against the request pickup/dropoff points.
