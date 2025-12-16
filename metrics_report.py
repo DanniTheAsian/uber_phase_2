@@ -135,7 +135,7 @@ def plot_average_wait_time(simulation: Any, max_time: int = 600, ax: Optional[Ax
         
         ax.plot([], [], color=color, linewidth=10, alpha=0.3, label=policy)
         
-    ax.legend(loc="lower right", fontsize = 9, framealpha=0.9)
+    ax.legend(loc="lower right")
 
    
     return ax
