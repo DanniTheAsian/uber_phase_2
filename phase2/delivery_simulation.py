@@ -170,7 +170,7 @@ class DeliverySimulation:
         }
     
     def _generate_new_requests(self):
-         """Generate new requests using the request generator."""
+        """Generate new requests using the request generator."""
         try:
             new_requests: List[Request] = self.request_generator.maybe_generate(self.time)
             if new_requests is None:
