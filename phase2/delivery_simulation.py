@@ -243,12 +243,12 @@ class DeliverySimulation:
     def _finalize_assigments(self, accepted: List[Tuple[Driver, Request]]) -> None:
         used_requests = set()
         used_drivers = set()
-        for driver, req in accepted:
-            if req in used_requests or driver in used_drivers or req.status == "ASSIGNED":
+        for driver, request in accepted:
+            if request in used_requests or driver in used_drivers or request.status == "ASSIGNED":
                 continue
             try:
-                driver.assign_request(req, self.time)
-                used_requests.add(req)
+                driver.assign_request(request, self.time)
+                used_requests.add(request)
                 used_drivers.add(driver)
             except (AttributeError, TypeError, ValueError) as err:
                 print(f"Error finalizing assignment at time {self.time}: {err}")
@@ -265,12 +265,12 @@ class DeliverySimulation:
             if driver.current_request and driver.status == "TO_DROPOFF":
                 if driver.position.distance_to(driver.current_request.dropoff) < 1e-6:
                     # capture request reference before completion clears it
-                    req = driver.current_request
+                    request = driver.current_request
                     driver.complete_dropoff(self.time)
-                    if req:
+                    if request:
                         self.served_count += 1
                         self.completed_deliveries += 1
                         try:
-                            self.total_wait_time += req.wait_time
+                            self.total_wait_time += request.wait_time
                         except (AttributeError, TypeError):
                             pass
