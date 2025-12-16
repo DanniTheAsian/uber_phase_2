@@ -74,9 +74,6 @@ class DeliverySimulation:
         8. Increase the simulation time.
         All core simulation logic happens here.
         """
-        policy_name = self.dispatch_policy.__class__.__name__
-        print(f"Tick {self.time}: Kører med policy: {policy_name}")
-
         self._generate_new_requests()
         active_requests = self._update_waiting_time()
         proposals = self._propose_assignments(active_requests)
@@ -122,6 +119,9 @@ class DeliverySimulation:
             avg_wait = 0.0
 
         current_policy_name = self.dispatch_policy.__class__.__name__
+        if current_policy_name != self.current_policy_name:
+            self.current_policy_name = current_policy_name
+            print(f"Policy change to: {self.current_policy_name} at time {self.time}")
 
         self.metrics_log.append({
             'time': self.time,

@@ -119,10 +119,8 @@ def plot_average_wait_time(simulation: Any, max_time: int = 600, ax: Optional[Ax
             current_policy = current_policy_check
             start_time = current_time
 
-    # Blue line for the average wait time over time
     ax.plot(times, avg_waits, label="Average Wait Time", color="blue", linewidth=2)
 
-    # A horizontal red dashed line for the overall average
     if len(avg_waits) > 0:
         ax.axhline(y = overall_average, color = "red", linestyle = "--", label = f"Overall Average: {overall_average:.1f} ticks")
 
@@ -137,7 +135,8 @@ def plot_average_wait_time(simulation: Any, max_time: int = 600, ax: Optional[Ax
         
         ax.plot([], [], color=color, linewidth=10, alpha=0.3, label=policy)
         
-    ax.legend(loc="lower right", fontsize = 9)
+    ax.legend(loc="lower right", fontsize = 9, framealpha=0.9)
+
    
     return ax
 
