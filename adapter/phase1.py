@@ -17,7 +17,6 @@ def load_requests(_path):
 
 
 def generate_drivers(n, width, height):
-    print(f"🔄 MIN generate_drivers bliver kaldt! n={n}, width={width}, height={height}")
     drivers: List[Dict] = []
     for i in range(n):
         speed = random.uniform(0.5, 1.5)
@@ -35,7 +34,6 @@ def generate_drivers(n, width, height):
 
 
 def generate_requests(start_t, out_list, rate, width, height):
-    print(f"📨 MIN generate_requests bliver kaldt! start_t={start_t}, rate={rate}")
     if rate <= 0:
         return
 
@@ -57,7 +55,6 @@ def generate_requests(start_t, out_list, rate, width, height):
         ADAPTER.next_request_id += 1
 
 def init_state(drivers, requests, timeout, req_rate, width, height):
-    print(f"🎬 MIN init_state bliver kaldt! drivers={len(drivers)}, requests={len(requests)}, timeout={timeout}")
     return ADAPTER.init_state(
         drivers=list(drivers or []),
         requests=list(requests or []),
@@ -68,5 +65,4 @@ def init_state(drivers, requests, timeout, req_rate, width, height):
     )
 
 def simulate_step(state):
-    print(f"⏭️ MIN simulate_step bliver kaldt! t={state.get('t', '?')}")
     return ADAPTER.simulate_step(state)

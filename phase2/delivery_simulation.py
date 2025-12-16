@@ -73,17 +73,10 @@ class DeliverySimulation:
         8. Increase the simulation time.
         All core simulation logic happens here.
         """
-        print(f"\n=== TICK {self.time} ===")
-        print(f"Før tick: {len(self.requests)} requests, {len([driver for driver in self.drivers if driver.status != 'IDLE'])} aktive chauffører")
-
         self._generate_new_requests()
-        print(f"Efter request generation: {len(self.requests)} requests")
         active_requests = self._update_waiting_time()
-        print(f"Aktive requests (WAITING): {len(active_requests)}")
         proposals = self._propose_assignments(active_requests)
-        print(f"Forslag fra dispatch: {len(proposals)}")
         accepted = self._process_offers(proposals)
-        print(f"Accepterede tilbud: {len(accepted)}")
         self._finalize_assigments(accepted)
         self._move_drivers_and_handle_events()
 
