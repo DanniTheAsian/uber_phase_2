@@ -1,71 +1,68 @@
-"""
-Request generation utilities.
-
-This module provides the RequestGenerator class which creates new
-Request objects over time according to a configured rate and a simple
-time-dependent model. The generator produces pickup/dropoff points
-within the simulator's map bounds.
-"""
-
 import random
 from phase2.request import Request
 from phase2.point import Point
 
+
 class RequestGenerator:
     """
-    Generates zero or more new Request objects based on the generator's rate.
-    The simulation time is used to model time-dependent request rates,
-    enabling scenarios such as rush-hour effects.
+    Generates new Request objects over time.
 
-    For simplicity, the request rate is increased during a specific time
-    window (e.g., between ticks 200 and 300). Outside this window, the
-    normal rate applies.
+    The generator is called once per simulation tick and creates new
+    requests according to a fixed average rate. A random number is drawn
+    at each tick to determine whether a new request should be generated.
     """
 
-    def __init__(self, rate:float, width:int, height: int):
+    def __init__(self, rate: float, width: int, height: int):
+        """
+        Initialize the request generator.
 
+        Args:
+            rate (float): Expected number of new requests per tick.
+            width (int): Width of the map.
+            height (int): Height of the map.
+        """
         self.rate = rate
         self.width = width
         self.height = height
         self.next_id = 1
+ 
 
     def maybe_generate(self, time: int) -> list[Request]:
         """
-        Generates zero or more new Request objects based on the given rate.
-        The rate is interpreted as requests per minute.
-        Since one minute equals 60 ticks, the expected number of requests
+        Possibly generate a new request at the given simulation time.
+
+        This method is called once per tick. A random number is drawn and
+        compared to the configured rate. If the draw is below the rate,
+        a new Request object is created with valid pickup and dropoff
+        positions within the map.
+
         Args:
-            time: Current simulation time in ticks
+            time (int): Current simulation time (tick).
+
         Returns:
-            List of newly generated Request objects
+            list[Request]: A list containing zero or one newly generated
+            Request objects.
         """
-        new_requests: list[Request] = []
+        new_requests = []
 
-        try:
-            if self.rate <= 0:
-                return new_requests
+        if random.random() < self.rate:
+            pickup = Point(
+                random.uniform(0, self.width),
+                random.uniform(0, self.height),
+            )
+            dropoff = Point(
+                random.uniform(0, self.width),
+                random.uniform(0, self.height),
+            )
 
-            rate_per_tick = self.rate
-
-            # Poisson-like: generate base_count requests + 1 more with probability extra_probability
-            base_count = int(rate_per_tick)
-            extra_probability = rate_per_tick - base_count
-            count = base_count
-            if random.random() < extra_probability:
-                count += 1
-
-            for _ in range(count):
-                pickup = Point(random.uniform(0, self.width), random.uniform(0, self.height))
-                dropoff = Point(random.uniform(0, self.width), random.uniform(0, self.height))
-                try:
-                    req = Request(id=self.next_id, pickup=pickup, dropoff=dropoff, creation_time=time)
-                except (TypeError, ValueError) as err:
-                    print(f"Request construction error at time {time}: {err}")
-                    continue
-                self.next_id += 1
-                new_requests.append(req)
-
-        except (AttributeError, TypeError, ValueError, ZeroDivisionError) as err:
-            print(f"RequestGenerator error at time {time}: {err}")
+            new_requests.append(
+                Request(
+                    id=self.next_id,
+                    pickup=pickup,
+                    dropoff=dropoff,
+                    creation_time=time,
+                )
+            )
+            self.next_id += 1
 
         return new_requests
