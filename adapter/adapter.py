@@ -247,7 +247,7 @@ class Adapter:
                              ]
         driver_headings = [(driver['tx'] - driver['x'],
                             driver['ty'] - driver['y'])
-                            if driver.get("tx") is not None and driver.get["y"] is not None
+                            if driver.get("tx") is not None and driver.get("y") is not None
                             else (0.0, 0.0)
                             for driver in drivers
                             ]
