@@ -14,7 +14,7 @@ class Driver:
     accept or reject requests based on their behaviour policy,
     and maintain a history of completed trips for statistics.
     """
-    def __init__(self, id: int, position: Point, speed: float, behaviour: DriverBehaviour | None = None, status: str = "IDLE", current_request: Request | None = None, history: list | None = None) -> None:
+    def __init__(self, id: int, position: Point, speed: float, behaviour: DriverBehaviour, status: str = "IDLE", current_request: Request | None = None, history: list | None = None) -> None:
         """
         Initialize Driver instance.
 

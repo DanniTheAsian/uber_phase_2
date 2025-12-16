@@ -58,7 +58,7 @@ class Adapter:
             case "earn" | "earning" | "earning_max":
                 behaviour = EarningMaxBehaviour(min_ratio=0.1)
             case _:
-                behaviour = None
+                behaviour = LazyBehaviour(max_idle = 1)
 
         status = driver.get("status","idle").upper()
 

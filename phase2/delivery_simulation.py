@@ -228,14 +228,10 @@ class DeliverySimulation:
                 continue
 
             try:
-                if driver.behaviour is None:
-                    decision = False
-                    print(f"Driver {driver.id} has no behaviour!")
-                else:
-                    decision = driver.behaviour.decide(driver, offer, self.time)
+                decision = driver.behaviour.decide(driver, offer, self.time)
 
-            except (AttributeError, TypeError, ValueError) as err:
-                print(f"Behaviour decision error for driver/req at time {self.time}: {err}")
+            except (TypeError, ValueError) as err:
+                print(f"Behaviour decision error for driver {driver.id} and request {request.id} at time {self.time}: {err}")
                 
                 decision = False
 
