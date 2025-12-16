@@ -202,7 +202,9 @@ class DeliverySimulation:
         if self.dispatch_policy is None:
             return []
         try:
-            proposals = self.dispatch_policy.assign(self.drivers, active_requests, self.time) or []
+            proposals = self.dispatch_policy.assign(self.drivers, active_requests, self.time)
+            if proposals is None:
+                proposals = []
         except (AttributeError, TypeError, ValueError) as err:
             print(f"Dispatch policy error at time {self.time}: {err}")
             proposals = []
