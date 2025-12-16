@@ -189,14 +189,14 @@ class DeliverySimulation:
         ASSIGNED/PICKED requests are handled separately by their drivers.
         """
         waiting_requests: List[Request] = []
-        for req in self.requests:
-            if req.status == "WAITING":
-                req.update_wait(self.time)
-                if req.wait_time > self.timeout:
-                    req.mark_expired(self.time)
+        for request in self.requests:
+            if request.status == "WAITING":
+                request.update_wait(self.time)
+                if request.wait_time > self.timeout:
+                    request.mark_expired(self.time)
                     self.expired_count += 1
                 else:
-                    waiting_requests.append(req)
+                    waiting_requests.append(request)
         return waiting_requests
 
 
