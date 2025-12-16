@@ -18,7 +18,7 @@ def show_simulation_dashboard(simulation: Any, max_time: int = 600) -> None:
     
     # Plot
     plot_cumulative_requests_over_time(simulation, max_time, axes[0, 0])
-    plot_average_wait_time(simulation, max_time, axes[0, 1])
+    plot_average_wait_time_policy(simulation, max_time, axes[0, 1])
     plot_driver_utilization(simulation, max_time, axes[1, 0])
     plot_behaviour_evolution(simulation, max_time, axes[1, 1])
     
@@ -68,9 +68,9 @@ def plot_cumulative_requests_over_time(simulation: Any, max_time: int = 600, ax:
 
 
 
-def plot_average_wait_time(simulation: Any, max_time: int = 600, ax: Optional[Axes] = None) -> Optional[Axes]:
+def plot_average_wait_time_policy(simulation: Any, max_time: int = 600, ax: Optional[Axes] = None) -> Optional[Axes]:
     """
-    Plots average wait time over time.
+    Plots average wait time over time with policy changes indicated.
     
     Args:
         simulation: DeliverySimulation instance with metrics_log attribute
