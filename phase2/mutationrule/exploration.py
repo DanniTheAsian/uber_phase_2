@@ -1,11 +1,9 @@
 """
 Exploration-based mutation rule.
 
-This rule occasionally mutates a driver's behaviour at random, with a
-probability that increases slightly over simulation time to encourage
-late-stage exploration.
+This rule randomly mutates a driver's behaviour with a fixed probability
+in order to encourage exploration.
 """
-
 import random
 from .mutationrule import MutationRule
 from ..behaviour.greedy_distance_behaviour import GreedyDistanceBehaviour
@@ -15,9 +13,8 @@ from ..driver import Driver
 
 class ExplorationMutationRule(MutationRule):
     """
-    A mutation rule where a driver occasionally switches behaviour.
-    The probability increases slightly as the simulation time grows,
-    encouraging more exploration later in the simulation.
+    A mutation rule where a driver occasionally switches behaviour
+    at random to avoid static behaviour.
     """
 
     def __init__(self, probability: float):
@@ -36,12 +33,8 @@ class ExplorationMutationRule(MutationRule):
 
     def maybe_mutate(self, driver: "Driver", time: int) -> None:
         """
-        Mutate the driver's behaviour based on an exploration probability.
-
-        The effective mutation probability increases slowly over time:
-
-            effective_probability = min(1.0, probability * (1 + time * 0.0005))
-
+        Randomly mutate the driver's behaviour.
+        
         Behaviour transitions follow a simple cycle:
         - LazyBehaviour -> GreedyDistanceBehaviour
         - GreedyDistanceBehaviour -> EarningMaxBehaviour

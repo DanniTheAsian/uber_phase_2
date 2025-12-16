@@ -34,13 +34,15 @@ class DeliverySimulation:
         Args:
             drivers (list[Driver]): All drivers in the simulation.
             requests (list[Request]): Existing requests, both active and completed.
-            dispatch_policy (DispatchPolicy): Strategy for driver_request assignment.
+            dispatch_policy (DispatchPolicy): Strategy for driver–request assignment.
             request_generator (RequestGenerator): Generates new requests over time.
-            mutation_rule (MutationRule): Updates driver behaviour over time.
+            mutation_rules (list[MutationRule]): Rules that update driver behaviour over time.
             timeout (int): Maximum wait time before a request expires.
 
-        This constructor also initializes global statistics and the simulation clock.
+        This constructor also initializes simulation statistics and the
+        simulation clock.
         """
+
 
         self.time: int = 0
         self.timeout: int = timeout
@@ -63,17 +65,19 @@ class DeliverySimulation:
         """
         Advance the simulation by one time step.
 
-        This method performs the full 8-step simulation pipeline:
+        This method orchestrates the simulation pipeline by delegating
+        each step to dedicated helper methods. The main steps are:
+
         1. Generate new requests.
-        2. Update waiting times and mark expired requests.
-        3. Ask the dispatch policy for proposed assignments.
-        4. Convert proposals to offers and let drivers accept or reject them.
-        5. Resolve conflicts and finalize assignments.
-        6. Move drivers and handle pickup/dropoff events.
-        7. Apply driver mutation rules.
-        8. Increase the simulation time.
-        All core simulation logic happens here.
+        2. Update waiting times and expire overdue requests.
+        3. Propose driver–request assignments using the dispatch policy.
+        4. Convert proposals into offers and evaluate driver decisions.
+        5. Finalize accepted assignments.
+        6. Move drivers and handle pickup and dropoff events.
+        7. Apply mutation rules to drivers.
+        8. Update time and log simulation metrics.
         """
+
         self._generate_new_requests()
         active_requests = self._update_waiting_time()
         proposals = self._propose_assignments(active_requests)
@@ -166,6 +170,7 @@ class DeliverySimulation:
         }
     
     def _generate_new_requests(self):
+         """Generate new requests using the request generator."""
         try:
             new_requests: List[Request] = self.request_generator.maybe_generate(self.time)
             if new_requests is None:
@@ -201,6 +206,10 @@ class DeliverySimulation:
 
 
     def _propose_assignments(self, active_requests: List[Request]) -> List[Tuple[Driver, Request]]:
+        """
+        Ask the dispatch policy to propose driver–request assignments.
+        """
+
         if self.dispatch_policy is None:
             return []
         try:
@@ -214,6 +223,7 @@ class DeliverySimulation:
 
 
     def _process_offers(self, proposals: List[Tuple[Driver, Request]]) -> List[Tuple[Driver, Request]]:
+        """Create offers from proposals and collect accepted ones."""
         accepted = []
         for driver, request in proposals:
             try:
@@ -245,6 +255,7 @@ class DeliverySimulation:
         return accepted
 
     def _finalize_assigments(self, accepted: List[Tuple[Driver, Request]]) -> None:
+        """Finalize accepted assignments while avoiding conflicts."""
         used_requests = set()
         used_drivers = set()
         for driver, request in accepted:
@@ -258,6 +269,7 @@ class DeliverySimulation:
                 print(f"Error finalizing assignment at time {self.time}: {err}")
 
     def _move_drivers_and_handle_events(self) -> None:
+        """Move drivers and handle pickup and dropoff events."""
         for driver in self.drivers:
             driver.step(1.0)
 

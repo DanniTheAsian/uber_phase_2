@@ -7,9 +7,9 @@ class RequestGenerator:
     """
     Generates new Request objects over time.
 
-    The generator is called once per simulation tick and creates new
-    requests according to a fixed average rate. A random number is drawn
-    at each tick to determine whether a new request should be generated.
+    The generator is called once per simulation tick and may generate
+    at most one new request per tick. A random draw is used to decide
+    whether a request is created.
     """
 
     def __init__(self, rate: float, width: int, height: int):
@@ -17,7 +17,7 @@ class RequestGenerator:
         Initialize the request generator.
 
         Args:
-            rate (float): Expected number of new requests per tick.
+            rate (float): Probability of generating a request per tick (0–1).
             width (int): Width of the map.
             height (int): Height of the map.
         """
@@ -31,17 +31,15 @@ class RequestGenerator:
         """
         Possibly generate a new request at the given simulation time.
 
-        This method is called once per tick. A random number is drawn and
-        compared to the configured rate. If the draw is below the rate,
-        a new Request object is created with valid pickup and dropoff
-        positions within the map.
+        This method is called once per tick. With probability `rate`,
+        a single new Request is created with random pickup and dropoff
+        locations within the map boundaries.
 
         Args:
             time (int): Current simulation time (tick).
 
         Returns:
-            list[Request]: A list containing zero or one newly generated
-            Request objects.
+            list[Request]: A list containing zero or one newly generated request.
         """
         new_requests = []
 

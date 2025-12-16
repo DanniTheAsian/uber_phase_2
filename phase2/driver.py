@@ -1,7 +1,8 @@
-""" 
-This module contains the Driver class which represents 
+"""
+This module contains the Driver class which represents
 an autonomous driver agent in the simulation system.
 """
+
 
 from .behaviour.driver_behaviour import DriverBehaviour
 from .point import Point
@@ -9,27 +10,27 @@ from .request import Request
 
 class Driver:
     """
-    An autonomous driver agent in the system 
-    where each driver can move on the map,
-    accept or reject requests based on their behaviour policy,
-    and maintain a history of completed trips for statistics.
+    An autonomous driver agent in the simulation.
+
+    A driver can move on the map, accept or reject requests based on its
+    behaviour policy, and maintains a history of completed trips for
+    statistics and analysis.
     """
     def __init__(self, id: int, position: Point, speed: float, behaviour: DriverBehaviour, status: str = "IDLE", current_request: Request | None = None, history: list | None = None) -> None:
         """
-        Initialize Driver instance.
+        Initialize a Driver instance.
 
         Args:
             id (int): Unique identifier for the driver.
             position (Point): Starting position on the map.
             speed (float): Movement speed in units per simulation tick.
-            behaviour (DriverBehaviour): Decision Policy for accepting or rejecting requests.
-            status (str, optional): Initial status of the driver. Defaults to "IDLE".
-            current_request (Request | None, optional): Current assigned request. Defaults to None.
-            assigned_reward (float, optional): Reward associated with the assigned request. Defaults to 0.0.
-            history (list | None, optional): List of completed trips for statistics. Defaults to None which initializes an empty list.
-
-        Returns:
-            None
+            behaviour (DriverBehaviour): Behaviour policy used to evaluate offers.
+            status (str, optional): Initial driver status. Defaults to "IDLE".
+            current_request (Request | None, optional): Currently assigned request.
+                Defaults to None.
+            history (list | None, optional): List of completed trip records.
+                Each entry contains information such as request id, timing,
+                distance, and earnings. Defaults to an empty list.
         """
         self.id = id
         self.position = position
@@ -50,9 +51,11 @@ class Driver:
         """
         Assign a delivery request to the driver.
 
-        Records position at assignment, sets current request and status to
-        TO_PICKUP and marks the request as assigned.
+        Records the driver's position at assignment time, sets the current
+        request, updates the status to TO_PICKUP, and marks the request
+        as assigned.
         """
+
         self.position_at_assignment = self.position
         self.current_request = request
         self.assigned_reward = 0.0
@@ -170,7 +173,7 @@ class Driver:
                 self.history.append({
                     "driver_id": self.id,
                     "request_id": self.current_request.id,
-                    "assignemnt_time": self.assignment_time,
+                    "assignment_time": self.assignment_time,
                     "completion_time": time,
                     "earnings": earnings,
                     "total_distance": total_distance,

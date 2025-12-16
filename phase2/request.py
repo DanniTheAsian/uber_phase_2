@@ -47,11 +47,8 @@ class Request:
 
     def is_active(self) -> bool:
         """
-        Check if the request is in a known, normal state.
-
-        In this implementation a request is considered active as long as
-        its status is one of the standard states in the request process
-        (WAITING, ASSIGNED, PICKED, DELIVERED or EXPIRED).
+        
+        Check whether the request is in a valid lifecycle state.
 
         Returns:
             bool: True if the status is a known state, False otherwise.
