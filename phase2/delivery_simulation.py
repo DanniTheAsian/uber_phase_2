@@ -74,7 +74,7 @@ class DeliverySimulation:
         All core simulation logic happens here.
         """
         print(f"\n=== TICK {self.time} ===")
-        print(f"Før tick: {len(self.requests)} requests, {len([d for d in self.drivers if d.status != 'IDLE'])} aktive chauffører")
+        print(f"Før tick: {len(self.requests)} requests, {len([driver for driver in self.drivers if driver.status != 'IDLE'])} aktive chauffører")
 
         self._generate_new_requests()
         print(f"Efter request generation: {len(self.requests)} requests")
@@ -167,7 +167,9 @@ class DeliverySimulation:
     
     def _generate_new_requests(self):
         try:
-            new_requests: List[Request] = self.request_generator.maybe_generate(self.time) or []
+            new_requests: List[Request] = self.request_generator.maybe_generate(self.time)
+            if new_requests is None:
+                new_requests = []
         except (AttributeError, TypeError, ValueError, ZeroDivisionError) as err:
             print(f"Request generation error at time {self.time}: {err}")
             new_requests = []
