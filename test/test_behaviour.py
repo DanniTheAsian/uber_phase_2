@@ -72,13 +72,13 @@ class TestBehaviours(unittest.TestCase):
             raise
 
     def test_lazy_accept(self):
-        """LazyBehaviour should accept when request wait_time is greater than or equal to max_idle."""
+        """LazyBehaviour should accept when request wait_time is greater than or equal to min_wait_time."""
         print("\nRunning test_lazy_accept...")
         driver = MockDriver()
         req = MockRequest(1, wait_time=10)
         offer = MockOffer(driver, req, travel_time=5, reward=10)
 
-        behaviour = LazyBehaviour(max_idle=5)
+        behaviour = LazyBehaviour(min_wait_time=5)
 
         try:
             self.assertTrue(behaviour.decide(driver, offer, time=0))
@@ -88,13 +88,13 @@ class TestBehaviours(unittest.TestCase):
             raise
 
     def test_lazy_reject(self):
-        """LazyBehaviour should reject when request wait_time is below max_idle."""
+        """LazyBehaviour should reject when request wait_time is below min_wait_time."""
         print("\nRunning test_lazy_reject...")
         driver = MockDriver()
         req = MockRequest(1, wait_time=2)
         offer = MockOffer(driver, req, travel_time=5, reward=10)
 
-        behaviour = LazyBehaviour(max_idle=5)
+        behaviour = LazyBehaviour(min_wait_time=5)
 
         try:
             self.assertFalse(behaviour.decide(driver, offer, time=0))

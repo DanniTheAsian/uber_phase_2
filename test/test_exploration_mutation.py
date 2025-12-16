@@ -23,7 +23,7 @@ class TestExplorationMutationRule(unittest.TestCase):
         If the driver is LazyBehaviour and probability is triggered,
         behaviour should mutate into GreedyDistanceBehaviour.
         """
-        driver = MockDriver(behaviour=LazyBehaviour(max_idle=5))
+        driver = MockDriver(behaviour=LazyBehaviour(min_wait_time=5))
 
         rule = ExplorationMutationRule(probability=0.1)
         rule.maybe_mutate(driver, time=100)
@@ -51,7 +51,7 @@ class TestExplorationMutationRule(unittest.TestCase):
         No mutation should occur if random.random() >= effective probability.
         Behaviour must remain unchanged.
         """
-        original_behaviour = LazyBehaviour(max_idle=5)
+        original_behaviour = LazyBehaviour(min_wait_time==5)
         driver = MockDriver(behaviour=original_behaviour)
 
         rule = ExplorationMutationRule(probability=0.1)

@@ -1,9 +1,9 @@
 """
-Abstract base for dispatch policies.
+Abstract base class for dispatch policies.
 
-Subclasses implement strategies to propose driver-request assignments for
-each simulation tick. The interface expects an `assign` method that returns
-a list of (driver, request) pairs.
+A dispatch policy defines how drivers are matched with requests at each
+simulation tick. Concrete policies implement different strategies for
+selecting which driver should serve which request.
 """
 
 from abc import ABC,abstractmethod
@@ -15,24 +15,26 @@ class DispatchPolicy(ABC):
     """
     Abstract base class representing a dispatch strategy.
 
-    A dispatch policy is responsible for assigning available drivers to
-    active requests at each simulation tick. The policy receives the current
-    state (drivers, requests, and time) and returns a list of (driver, request)
-    assignments.
-
-    Subclasses must implement the `assign` method.
+    A dispatch policy is responsible for proposing assignments between
+    available drivers and active requests at a given simulation time.
+    The policy does not execute the assignment itself, but returns a list
+    of proposed (driver, request) pairs to be evaluated by the simulation.
     """
     @abstractmethod
     def assign(self, drivers: list[Driver], requests: list[Request], time: int) -> list[tuple[Driver, Request]]:
-        """Return proposed (driver, request) assignments for this tick.
+        """
+        Propose driver–request assignments for the current simulation tick.
+
+        The method receives the current list of drivers and pending requests
+        and returns a list of proposed (driver, request) pairs. Each driver
+        and request should appear at most once in the returned list.
 
         Args:
-            drivers (list[Driver]): The list of available drivers.
-            requests (list[Request]): The list of pending requests.
-            time (int): The current simulation time. Subclasses may use this to incorporate
-                temporal logic, such as prioritizing older requests or idle drivers.
+            drivers (list[Driver]): Available drivers at the current tick.
+            requests (list[Request]): Pending requests waiting to be assigned.
+            time (int): Current simulation time. Can be used to incorporate
+                time-dependent logic, such as prioritizing older requests.
 
         Returns:
-            list[tuple[Driver, Request]]: The assignments chosen by the policy for this tick.
+            list[tuple[Driver, Request]]: Proposed driver–request assignments.
         """
-            
