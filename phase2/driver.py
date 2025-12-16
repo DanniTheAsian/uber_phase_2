@@ -81,8 +81,7 @@ class Driver:
         if self.status == "TO_DROPOFF":
             return self.current_request.dropoff
         
-        return None # returns None for unexpected status.
-
+        return None
     def step(self, dt: float) -> None:
         """
         Move the driver towards its current target.
@@ -185,5 +184,3 @@ class Driver:
                 self.assigned_reward = 0.0
                 self.assignment_time = None
 
-    # Note: arrival detection is handled by DeliverySimulation by checking
-    # the driver's position against the request pickup/dropoff points.
