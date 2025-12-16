@@ -34,29 +34,25 @@ class PerformanceBasedMutation(MutationRule):
         """
         Evaluate recent trips and mutate behaviour if performance is low.
 
-        The method checks the driver's most recent N trips by iterating
-        backwards through the trip history. If the proportion of delivered
-        trips is below the configured threshold, the driver's behaviour
-        is changed.
+        The method checks the driver's most recent N trips. If the proportion
+        of delivered trips is below the configured threshold, the driver's
+        behaviour is changed.
         """
         # Not enough history yet
         if len(driver.history) < self.N:
             return
 
         delivered = 0
-        checked = 0
 
-        # Check the N most recent trips
-        for trip in reversed(driver.history):
-            if checked == self.N:
-                break
+        # Look at the last N trips (simple and explicit)
+        for i in range(self.N):
+            trip = driver.history[-1 - i]
 
             if trip.get("status") == "DELIVERED":
                 delivered += 1
-
-            checked += 1
 
         success_rate = delivered / self.N
 
         if success_rate < self.threshold:
             driver.behaviour = GreedyDistanceBehaviour(max_distance=10.0)
+
