@@ -15,20 +15,20 @@ class LazyBehaviour(DriverBehaviour):
     new requests unless they have already waited for a certain amount
     of time.
     """
-    def __init__(self, max_idle)-> None:
+    def __init__(self, min_wait_time)-> None:
         """
         Initialize the behaviour with a required minimum wait time.
 
         Args:
-            max_idle (int): The minimum wait_time a request must have
-                before the driver accepts it.
+            min_wait_time (int): The minimum time a request must have
+                waited before the driver accepts it.
 
         Example:
             >>> b = LazyBehaviour(10)
-            >>> b.max_idle
+            >>> b.min_wait_time
             10
         """
-        self.max_idle = max_idle
+        self.min_wait_time = min_wait_time
 
     def decide(self, driver: 'Driver', offer: 'Offer', time: int) -> bool:
         """
@@ -44,7 +44,7 @@ class LazyBehaviour(DriverBehaviour):
             time (int): Current simulation time (not used here).
 
         Returns:
-            bool: True if driver is IDLE and request.wait_time >= max_idle, otherwise False.
+            bool: True if driver is IDLE and request.wait_time >= min_wait_time, otherwise False.
         """
         
-        return driver.status == "IDLE" and offer.request.wait_time >= self.max_idle
+        return driver.status == "IDLE" and offer.request.wait_time >= self.min_wait_time

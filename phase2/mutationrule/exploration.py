@@ -25,7 +25,7 @@ class ExplorationMutationRule(MutationRule):
         Initialize the rule with a base mutation probability.
 
         Args:
-            probability (float): Base probability between 0 and 1.
+            probability (float): Base mutation probability between 0 and 1.
 
         Example:
             >>> rule = ExplorationMutationRule(0.1)
@@ -37,13 +37,15 @@ class ExplorationMutationRule(MutationRule):
     def maybe_mutate(self, driver: "Driver", time: int) -> None:
         """
         Mutate the driver's behaviour based on an exploration probability.
-        The probability slowly increases with time:
+
+        The effective mutation probability increases slowly over time:
 
             effective_probability = min(1.0, probability * (1 + time * 0.0005))
 
-        If the driver's behaviour is LazyBehaviour, it becomes GreedyDistanceBehaviour.
-        If it's GreedyDistanceBehaviour, it becomes EarningMaxBehaviour.
-        Otherwise, it becomes LazyBehaviour.
+        Behaviour transitions follow a simple cycle:
+        - LazyBehaviour -> GreedyDistanceBehaviour
+        - GreedyDistanceBehaviour -> EarningMaxBehaviour
+        - Otherwise -> LazyBehaviour
 
         Args:
             driver (Driver): The driver that may mutate.
@@ -63,4 +65,4 @@ class ExplorationMutationRule(MutationRule):
             driver.behaviour = EarningMaxBehaviour(min_ratio=1.0)
 
         else:
-            driver.behaviour = LazyBehaviour(max_idle=5)
+            driver.behaviour = LazyBehaviour(min_wait_time=5)
