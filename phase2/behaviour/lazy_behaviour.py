@@ -47,5 +47,4 @@ class LazyBehaviour(DriverBehaviour):
             bool: True if driver is IDLE and request.wait_time >= max_idle, otherwise False.
         """
         
-        # Only accept if driver is idle and request has waited long enough
         return driver.status == "IDLE" and offer.request.wait_time >= self.max_idle
