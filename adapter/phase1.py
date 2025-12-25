@@ -13,11 +13,10 @@ converted into domain objects inside the Adapter.
 import random
 from typing import Dict, List
 from adapter.adapter import Adapter
-
+from itertools import count
 
 ADAPTER = Adapter()
-
-
+_request_id_counter = count(start=1)
 
 def load_drivers(_path):
     return []
@@ -73,14 +72,14 @@ def generate_requests(start_t, out_list, rate, width, height):
     if rate <= 0:
         return
 
-    count = int(rate)
+    num_request = int(rate)
 
-    if random.random() < (rate - count):
-        count += 1
+    if random.random() < (rate - num_request):
+        num_request += 1
 
-    for _ in range(count):
+    for _ in range(num_request):
         out_list.append({
-            "id": ADAPTER.next_request_id,
+            "id": next(_request_id_counter),
             "px": random.uniform(0, width),
             "py": random.uniform(0, height),
             "dx": random.uniform(0, width),
@@ -88,7 +87,6 @@ def generate_requests(start_t, out_list, rate, width, height):
             "t": start_t,
             "status": "waiting",
         })
-        ADAPTER.next_request_id += 1
 
 def init_state(drivers, requests, timeout, req_rate, width, height):
     """

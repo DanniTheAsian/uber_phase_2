@@ -41,14 +41,14 @@ class GlobalGreedyPolicy(DispatchPolicy):
 
         combos.sort()
 
-        used_drivers = set()
-        used_requests = set()
+        used_drivers_ids= set()
+        used_requests_ids = set()
         matches = []
 
         for distance, _, driver, request in combos:
-            if driver not in used_drivers and request not in used_requests:
+            if driver.id not in used_drivers_ids or request.id not in used_requests_ids:
                 matches.append((driver, request))
-                used_drivers.add(driver)
-                used_requests.add(request)
+                used_drivers_ids.add(driver.id)
+                used_requests_ids.add(request.id)
 
         return matches

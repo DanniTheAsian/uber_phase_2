@@ -256,15 +256,21 @@ class DeliverySimulation:
 
     def _finalize_assigments(self, accepted: List[Tuple[Driver, Request]]) -> None:
         """Finalize accepted assignments while avoiding conflicts."""
-        used_requests = set()
-        used_drivers = set()
+        used_request_ids = set()
+        used_driver_ids = set()
+
         for driver, request in accepted:
-            if request in used_requests or driver in used_drivers or request.status == "ASSIGNED":
+            if (
+                request.id in used_request_ids
+                or driver.id in used_driver_ids
+                or request.status == "ASSIGNED"
+            ):
                 continue
+
             try:
                 driver.assign_request(request, self.time)
-                used_requests.add(request)
-                used_drivers.add(driver)
+                used_request_ids.add(request.id)
+                used_driver_ids.add(driver.id)
             except (AttributeError, TypeError, ValueError) as err:
                 print(f"Error finalizing assignment at time {self.time}: {err}")
 

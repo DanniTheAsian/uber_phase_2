@@ -4,8 +4,9 @@ a single customer order in the delivery simulation.
 """
 
 from .point import Point
+from dataclasses import dataclass
 
-
+@dataclass
 class Request:
     """
     Represents a single delivery request in the system.
@@ -16,34 +17,14 @@ class Request:
     which driver is assigned to it, and how long it
     has been waiting in total.
     """
+    id: int
+    pickup: Point
+    dropoff: Point
+    creation_time: int
 
-    def __init__(
-        self,
-        id: int,
-        pickup: Point,
-        dropoff: Point,
-        creation_time: int,
-    ) -> None:
-        """
-        Initialize a Request instance.
-
-        Args:
-            id (int): Unique identifier for the request.
-            pickup (Point): Pickup location on the map.
-            dropoff (Point): Dropoff location on the map.
-            creation_time (int): Simulation time tick when the request was created.
-
-        Returns:
-            None
-        """
-        self.id = id
-        self.pickup = pickup
-        self.dropoff = dropoff
-        self.creation_time = creation_time
-
-        self.status = "WAITING"
-        self.assigned_driver_id: int | None = None
-        self.wait_time: int = 0
+    status: str = "WAITING"
+    assigned_driver_id: int | None = None
+    wait_time: int = 0
 
     def is_active(self) -> bool:
         """
@@ -53,7 +34,7 @@ class Request:
         Returns:
             bool: True if the status is a known state, False otherwise.
         """
-        return self.status in ["WAITING", "ASSIGNED", "PICKED", "DELIVERED", "EXPIRED"]
+        return self.status in {"WAITING", "ASSIGNED", "PICKED", "DELIVERED", "EXPIRED"}
 
     def mark_assigned(self, driver_id: int) -> None:
         """
@@ -68,11 +49,8 @@ class Request:
         Returns:
             None
         """
-        try:
-            self.status = "ASSIGNED"
-            self.assigned_driver_id = driver_id
-        except (AttributeError, TypeError, ValueError) as err:
-            print(f"Error in mark_assigned: {err}")
+        self.status = "ASSIGNED"
+        self.assigned_driver_id = driver_id
 
     def mark_picked(self, t: int) -> None:
         """
@@ -87,11 +65,8 @@ class Request:
         Returns:
             None
         """
-        try:
-            self.status = "PICKED"
-            self.wait_time = t - self.creation_time
-        except (AttributeError, TypeError, ValueError) as err:
-            print(f"Error in mark_picked: {err}")
+        self.status = "PICKED"
+        self.wait_time = t - self.creation_time
 
     def mark_delivered(self, t: int) -> None:
         """
@@ -106,11 +81,8 @@ class Request:
         Returns:
             None
         """
-        try:
-            self.status = "DELIVERED"
-            self.wait_time = t - self.creation_time
-        except (AttributeError, TypeError, ValueError) as err:
-            print(f"Error in mark_delivered: {err}")
+        self.status = "DELIVERED"
+        self.wait_time = t - self.creation_time
 
     def mark_expired(self, t: int) -> None:
         """
@@ -126,11 +98,8 @@ class Request:
         Returns:
             None
         """
-        try:
-            self.status = "EXPIRED"
-            self.wait_time = t - self.creation_time
-        except (AttributeError, TypeError, ValueError) as err:
-            print(f"Error in mark_expired: {err}")
+        self.status = "EXPIRED"
+        self.wait_time = t - self.creation_time
 
     def update_wait(self, current_time: int) -> None:
         """
@@ -142,7 +111,4 @@ class Request:
         Returns:
             None
         """
-        try:
-            self.wait_time = current_time - self.creation_time
-        except (AttributeError, TypeError, ValueError) as err:
-            print(f"Error updating wait_time: {err}")
+        self.wait_time = current_time - self.creation_time

@@ -5,9 +5,10 @@ Modules:
 - Math
 
 """
+from dataclasses import dataclass
 from math import sqrt
 
-
+@dataclass
 class Point:
     """
     A point in 2D space
@@ -16,24 +17,8 @@ class Point:
     x (float): x-value
     y (float): y-value
     """
-    def __init__(self, x:float, y:float) -> None:
-        """
-        Initialize a Point.
-
-        Args:
-            x (float): x-coordinate.
-            y (float): y-coordinate.
-
-        Example:
-            >>> p = Point(2, 3)
-            >>> p.x, p.y
-            (2, 3)
-        """
-        try:
-            self.x = float(x)
-            self.y = float(y)
-        except (TypeError, ValueError) as err:
-            raise TypeError("Point coordinates must be numeric") from err
+    x: float
+    y: float
 
     def distance_to(self, other: "Point") -> float:
         """
