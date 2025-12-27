@@ -17,16 +17,36 @@ class Driver:
     behaviour policy, and maintains a history of completed trips for
     statistics and analysis.
     """
-    id: int
-    position: Point
-    speed: float
-    behaviour: DriverBehaviour
-    status: str = "IDLE"
-    current_request: Request | None = None
-    history: list = field(default_factory =list)
-    position_at_assignment: Point | None = None
-    assigned_reward: float = 0.0
-    assignment_time: int | None = None
+    def __init__(self, id: int, position: Point, speed: float, behaviour: DriverBehaviour, status: str = "IDLE", current_request: Request | None = None, history: list | None = None) -> None:
+        """
+        Initialize a Driver instance.
+
+        Args:
+            id (int): Unique identifier for the driver.
+            position (Point): Starting position on the map.
+            speed (float): Movement speed in units per simulation tick.
+            behaviour (DriverBehaviour): Behaviour policy used to evaluate offers.
+            status (str, optional): Initial driver status. Defaults to "IDLE".
+            current_request (Request | None, optional): Currently assigned request.
+                Defaults to None.
+            history (list | None, optional): List of completed trip records.
+                Each entry contains information such as request id, timing,
+                distance, and earnings. Defaults to an empty list.
+        """
+        self.id = id
+        self.position = position
+        self.speed = speed
+        self.behaviour = behaviour
+        self.status = status
+        self.current_request = current_request
+        self.position_at_assignment: Point | None = None
+        self.assigned_reward: float = 0.0
+        self.assignment_time: int | None = None
+
+        if not history:
+            self.history = []
+        else:
+            self.history = history
         
     def assign_request(self, request: Request, current_time: int) -> None:
         """
