@@ -46,7 +46,7 @@ class GlobalGreedyPolicy(DispatchPolicy):
         matches = []
 
         for distance, _, driver, request in combos:
-            if driver.id not in used_drivers_ids or request.id not in used_requests_ids:
+            if driver.id not in used_drivers_ids and request.id not in used_requests_ids:
                 matches.append((driver, request))
                 used_drivers_ids.add(driver.id)
                 used_requests_ids.add(request.id)
