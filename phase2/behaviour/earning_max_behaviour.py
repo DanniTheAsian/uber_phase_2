@@ -5,8 +5,9 @@ This behaviour accepts offers when the expected reward per unit of travel
 time exceeds a configurable threshold (optionally adjusted by time).
 """
 
+from phase2.driver import Driver
+from phase2.offer import Offer
 from .driver_behaviour import DriverBehaviour
-
 
 class EarningMaxBehaviour(DriverBehaviour):
     """

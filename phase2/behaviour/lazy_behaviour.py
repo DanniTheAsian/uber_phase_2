@@ -6,7 +6,8 @@ configured amount of time and the driver is currently idle.
 """
 
 from .driver_behaviour import DriverBehaviour
-
+from phase2.offer import Offer
+from phase2.driver import Driver
 
 class LazyBehaviour(DriverBehaviour):
     """
@@ -15,7 +16,7 @@ class LazyBehaviour(DriverBehaviour):
     new requests unless they have already waited for a certain amount
     of time.
     """
-    def __init__(self, min_wait_time)-> None:
+    def __init__(self, min_wait_time: int = 1)-> None:
         """
         Initialize the behaviour with a required minimum wait time.
 

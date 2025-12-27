@@ -6,7 +6,8 @@ location is within a configured maximum distance from their current position.
 """
 
 from .driver_behaviour import DriverBehaviour
-
+from phase2.driver import Driver
+from phase2.offer import Offer
 
 class GreedyDistanceBehaviour(DriverBehaviour):
     """

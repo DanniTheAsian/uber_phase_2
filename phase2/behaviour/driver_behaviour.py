@@ -8,7 +8,8 @@ their own decision logic.
 """
 
 from abc import ABC, abstractmethod
-
+from phase2.driver import Driver
+from phase2.offer import Offer
 class DriverBehaviour(ABC):
     """
     Abstract base class for all driver behaviour types.
