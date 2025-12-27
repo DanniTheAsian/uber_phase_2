@@ -19,7 +19,7 @@ class PerformanceBasedMutation(MutationRule):
     to a less selective behaviour.
     """
 
-    def __init__(self, threshold: float, N: int) -> None:
+    def __init__(self, min_avg_earnings: float, N: int) -> None:
         """
         Initialize the mutation rule.
 
@@ -27,7 +27,7 @@ class PerformanceBasedMutation(MutationRule):
             threshold (float): Minimum acceptable success rate (0–1).
             N (int): Number of recent trips used to evaluate performance.
         """
-        self.threshold = threshold
+        self.min_avg_earnings = min_avg_earnings
         self.N = N
 
     def maybe_mutate(self, driver: Driver, time: int) -> None:
@@ -42,17 +42,13 @@ class PerformanceBasedMutation(MutationRule):
         if len(driver.history) < self.N:
             return
 
-        delivered = 0
-
+        recent_trips = []
         # Look at the last N trips (simple and explicit)
         for i in range(self.N):
-            trip = driver.history[-1 - i]
+            recent_trips.append(driver.history[-1 - i])
 
-            if trip.get("status") == "DELIVERED":
-                delivered += 1
+        avg_earnings = sum(trip["earnings"] for trip in recent_trips) / self.N
 
-        success_rate = delivered / self.N
-
-        if success_rate < self.threshold:
+        if avg_earnings< self.min_avg_earnings:
             driver.behaviour = GreedyDistanceBehaviour(max_distance=10.0)
 
