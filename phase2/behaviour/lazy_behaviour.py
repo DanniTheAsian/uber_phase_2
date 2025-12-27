@@ -6,8 +6,6 @@ configured amount of time and the driver is currently idle.
 """
 
 from .driver_behaviour import DriverBehaviour
-from phase2.offer import Offer
-from phase2.driver import Driver
 
 class LazyBehaviour(DriverBehaviour):
     """

@@ -6,15 +6,14 @@ location is within a configured maximum distance from their current position.
 """
 
 from .driver_behaviour import DriverBehaviour
-from phase2.driver import Driver
-from phase2.offer import Offer
+
 
 class GreedyDistanceBehaviour(DriverBehaviour):
     """
     A behaviour where the driver accepts the offer if the pickup location
     is closer than a given maximum distance.
     """
-    def __init__(self, max_distance: float) -> None:
+    def __init__(self, max_distance: float = 5) -> None:
         """
         Initialize the behaviour with a maximum allowed pickup distance.
 

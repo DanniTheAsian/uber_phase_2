@@ -35,13 +35,13 @@ class Translator:
         
         match behaviour_type:
             case "lazy":
-                behaviour = LazyBehaviour(min_wait_time=1)
+                behaviour = LazyBehaviour()
             case "greedy" | "distance":
-                behaviour = GreedyDistanceBehaviour(max_distance=10)
+                behaviour = GreedyDistanceBehaviour()
             case "earn" | "earning" | "earning_max":
-                behaviour = EarningMaxBehaviour(min_ratio=0.1)
+                behaviour = EarningMaxBehaviour()
             case _:
-                behaviour = LazyBehaviour(min_wait_time = 1)
+                behaviour = LazyBehaviour()
 
         status = driver.get("status","idle").upper()
 

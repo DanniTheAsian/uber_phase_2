@@ -5,15 +5,14 @@ This behaviour accepts offers when the expected reward per unit of travel
 time exceeds a configurable threshold (optionally adjusted by time).
 """
 
-from phase2.driver import Driver
-from phase2.offer import Offer
+
 from .driver_behaviour import DriverBehaviour
 
 class EarningMaxBehaviour(DriverBehaviour):
     """
     Decide whether the driver accepts the offer.
     """
-    def __init__(self, min_ratio):
+    def __init__(self, min_ratio: float = 0.1):
         """
         Initialize the behaviour with a minimum ratio threshold.
 
