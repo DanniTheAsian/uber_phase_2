@@ -1,7 +1,7 @@
 import unittest
 
-from test.mock.mock_objects import MockDriver, MockRequest, MockPoint
 from phase2.policies.nearest_neighbor_policy import NearestNeighborPolicy
+from .mock.mock_objects import MockDriver, MockRequest, MockPoint
 
 
 class TestNearestNeighborPolicy(unittest.TestCase):
