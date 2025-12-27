@@ -2,11 +2,9 @@
 This module defines the offer class which represents
 a suggested assignment between a driver and a request
 """
-from dataclasses import dataclass
 from .driver import Driver
 from .request import Request
 
-@dataclass
 class Offer:
     """
     Represents an offer given to a driver to fulfill a request.
