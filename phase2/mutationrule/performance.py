@@ -1,9 +1,10 @@
 """
 Performance-based mutation rule.
 
-This mutation rule adjusts a driver's behaviour based on recent performance.
-If a driver delivers too few of its most recent trips, it becomes less
-selective in order to improve future performance.
+This mutation rule adjusts a driver's behaviour based on recent economic
+performance. If the average earning over the most recent trips falls below
+a specified threshold, the driver becomes less selective in order to
+improve future performance.
 """
 
 
@@ -13,18 +14,18 @@ from ..driver import Driver
 
 class PerformanceBasedMutation(MutationRule):
     """
-    Mutation rule that changes a driver's behaviour when recent performance is poor.
+    Mutation rule that changes a driver's behaviour when recent earnings
+    indicate poor performance.
 
-    If a driver delivers too few of its most recent trips, the driver switches
-    to a less selective behaviour.
+    If the average earning over the last N completed trips is below a
+    configurable threshold, the driver switches to a less selective behaviour.
     """
-
     def __init__(self, min_avg_earnings: float, N: int) -> None:
         """
         Initialize the mutation rule.
 
         Args:
-            threshold (float): Minimum acceptable success rate (0–1).
+            min_avg_earnings (float): Minimum acceptable average earning.
             N (int): Number of recent trips used to evaluate performance.
         """
         self.min_avg_earnings = min_avg_earnings
@@ -32,11 +33,11 @@ class PerformanceBasedMutation(MutationRule):
 
     def maybe_mutate(self, driver: Driver, time: int) -> None:
         """
-        Evaluate recent trips and mutate behaviour if performance is low.
+        Evaluate recent trips and mutate behaviour if performance is poor.
 
-        The method checks the driver's most recent N trips. If the proportion
-        of delivered trips is below the configured threshold, the driver's
-        behaviour is changed.
+        The method computes the average earning over the driver's most recent
+        N completed trips. If this average falls below the configured threshold,
+        the driver's behaviour is changed to a less selective strategy.
         """
         # Not enough history yet
         if len(driver.history) < self.N:

@@ -169,7 +169,9 @@ class Driver:
                 distance_from_pickup_to_dropoff = pickup_position.distance_to(dropoff_position)
 
                 total_distance = distance_to_pickup + distance_from_pickup_to_dropoff
-                earnings = self.assigned_reward
+
+                travel_time = max(time -(self.assignment_time or time), 1)
+                earnings = self.assigned_reward / travel_time
                 self.history.append({
                     "driver_id": self.id,
                     "request_id": self.current_request.id,

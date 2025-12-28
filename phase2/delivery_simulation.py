@@ -269,6 +269,12 @@ class DeliverySimulation:
 
             try:
                 driver.assign_request(request, self.time)
+
+                distance_to_pickup = driver.position.distance_to(request.pickup)
+                distance_pickup_to_dropoff = request.pickup.distance_to(request.dropoff)
+                total_distance = distance_to_pickup + distance_pickup_to_dropoff
+                driver.assigned_reward = 15.0 + 1.5 * total_distance
+                
                 used_request_ids.add(request.id)
                 used_driver_ids.add(driver.id)
             except (AttributeError, TypeError, ValueError) as err:

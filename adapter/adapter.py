@@ -58,7 +58,7 @@ class Adapter:
         dispatch_policy = NearestNeighborPolicy()
         mutation_rules = [
         ExplorationMutationRule(probability=0.1),
-        PerformanceBasedMutation(min_avg_earnings=0.3, N=5),
+        PerformanceBasedMutation(min_avg_earnings=1.2, N=5),
         ]
 
         self.simulation = DeliverySimulation(
@@ -126,7 +126,7 @@ class Adapter:
                              ]
         driver_headings = [(driver['tx'] - driver['x'],
                             driver['ty'] - driver['y'])
-                            if driver.get("tx") is not None and driver.get("y") is not None
+                            if driver.get("tx") is not None and driver.get("ty") is not None
                             else (0.0, 0.0)
                             for driver in drivers
                             ]

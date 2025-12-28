@@ -42,7 +42,7 @@ class RequestGenerator:
             list[Request]: A list containing zero or one newly generated request.
         """
         new_requests = []
-
+        #Return random number between 0.0 and 1.0:
         if random.random() < self.rate:
             pickup = Point(
                 random.uniform(0, self.width),
