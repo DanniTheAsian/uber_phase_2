@@ -58,7 +58,7 @@ class Adapter:
         dispatch_policy = NearestNeighborPolicy()
         mutation_rules = [
         ExplorationMutationRule(probability=0.1),
-        PerformanceBasedMutation(min_avg_earnings=1.2, N=5),
+        PerformanceBasedMutation(),
         ]
 
         self.simulation = DeliverySimulation(

@@ -20,7 +20,7 @@ class PerformanceBasedMutation(MutationRule):
     If the average earning over the last N completed trips is below a
     configurable threshold, the driver switches to a less selective behaviour.
     """
-    def __init__(self, min_avg_earnings: float, N: int) -> None:
+    def __init__(self, min_avg_earnings: float = 20.0, N: int = 5) -> None:
         """
         Initialize the mutation rule.
 
@@ -50,6 +50,6 @@ class PerformanceBasedMutation(MutationRule):
 
         avg_earnings = sum(trip["earnings"] for trip in recent_trips) / self.N
 
-        if avg_earnings< self.min_avg_earnings:
+        if avg_earnings < self.min_avg_earnings:
             driver.behaviour = GreedyDistanceBehaviour(max_distance=10.0)
 

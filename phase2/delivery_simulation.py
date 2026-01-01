@@ -90,12 +90,13 @@ class DeliverySimulation:
         behaviour_counts = {}
 
         for driver in self.drivers:
-            for rule in self.mutation_rules:
-                try:
-                    rule.maybe_mutate(driver, self.time)
-                except (AttributeError, TypeError, ValueError) as err:
-                    print(f"Mutation error at time {self.time}: {err}")
-            
+            if driver.status == "IDLE":
+                for rule in self.mutation_rules:
+                    try:
+                        rule.maybe_mutate(driver, self.time)
+                    except (AttributeError, TypeError, ValueError) as err:
+                        print(f"Mutation error at time {self.time}: {err}")
+                
             # Count behaviour
             if driver.behaviour is None:
                 behaviour_name = "no_behaviour"

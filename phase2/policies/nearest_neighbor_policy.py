@@ -33,6 +33,8 @@ class NearestNeighborPolicy(DispatchPolicy):
         list[tuple[Driver, Request]]: A list of (driver, request) pairs selected by the nearest-neighbor
             matching process
     """
+
+    #Kan optimeres. O(n^2 * m)
     def assign(self, drivers: list[Driver], requests: list[Request], time: int) -> list[tuple[Driver, Request]]:
         matches = []
     

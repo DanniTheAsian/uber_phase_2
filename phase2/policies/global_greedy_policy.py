@@ -17,6 +17,7 @@ class GlobalGreedyPolicy(DispatchPolicy):
     At each simulation tick, the policy matches idle drivers to active
     requests by greedily selecting the closest available pairs.
     """
+    
     def assign(self, drivers: list["Driver"], requests: list["Request"], time: int) -> list[tuple["Driver", "Request"]]:
         """
         Propose driver–request assignments for the current tick.
@@ -27,6 +28,7 @@ class GlobalGreedyPolicy(DispatchPolicy):
         """
         combos = []
         
+        #Langsom O (n * m log(n*m))
         for driver_index, driver in enumerate(drivers):
             if driver.status != "IDLE":
                 continue
