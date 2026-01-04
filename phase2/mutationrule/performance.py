@@ -50,12 +50,15 @@ class PerformanceBasedMutation(MutationRule):
 
         avg_earnings = sum(trip["earnings"] for trip in recent_trips) / self.N
 
-        print(
-            f"[MutationCheck] Driver {driver.id} | "
-            f"Avg earnings (last {self.N} trips): {avg_earnings:.2f} | "
-            f"Threshold: {self.min_avg_earnings}"
-        )
+
 
         if avg_earnings < self.min_avg_earnings:
             driver.behaviour = GreedyDistanceBehaviour(max_distance=10.0)
 
+
+
+        #print(
+        #    f"[MutationCheck] Driver {driver.id} | "
+        #    f"Avg earnings (last {self.N} trips): {avg_earnings:.2f} | "
+        #    f"Threshold: {self.min_avg_earnings}"
+        #)
