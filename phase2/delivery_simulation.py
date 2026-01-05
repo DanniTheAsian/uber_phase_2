@@ -222,7 +222,7 @@ class DeliverySimulation:
         return proposals
 
 
-    def _process_offers(self, proposals: List[Tuple[Driver, Request]]) -> List[Tuple[Driver, Request]]:
+    def _process_offers(self, proposals: List[Tuple[Driver, Request]]) -> List[Tuple[Driver, Request, float]]:
         """Create offers from proposals and collect accepted ones."""
         accepted = []
         for driver, request in proposals:
@@ -249,19 +249,19 @@ class DeliverySimulation:
                 decision = False
 
             if decision:
-                accepted.append((driver, request))
+                accepted.append((driver, request, estimated_reward))
 
         return accepted
 
-    def _finalize_assigments(self, accepted: List[Tuple[Driver, Request]]) -> None:
+    def _finalize_assigments(self, accepted: List[Tuple[Driver, Request, float]]) -> None:
         """Finalize accepted assignments while avoiding conflicts."""
         used_requests = set()
         used_drivers = set()
-        for driver, request in accepted:
+        for driver, request, reward in accepted:
             if request in used_requests or driver in used_drivers or request.status == "ASSIGNED":
                 continue
             try:
-                driver.assign_request(request, self.time)
+                driver.assign_request(request, self.time, reward)
                 used_requests.add(request)
                 used_drivers.add(driver)
             except (AttributeError, TypeError, ValueError) as err:
