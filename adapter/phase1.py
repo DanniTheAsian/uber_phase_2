@@ -19,12 +19,161 @@ ADAPTER = Adapter()
 
 
 
-def load_drivers(_path):
-    return []
+def load_drivers(path:str) -> list[dict]:
+    """
+    Load driver records from a CSV file containing x,y coordinates.
+    
+    Args:
+        path (str): Path to the CSV file with driver data
+        
+    Returns:
+        list[dict]: List of driver dictionaries
+    """
+    drivers = []
 
+    if not path.lower().endswith('.csv'):
+        print("File must be a CSV file")
+        return drivers
+    try:
+        with open(path,'r', encoding='utf-8') as file:
+            lines = file.readlines()
+    except FileNotFoundError:
+        print(f"Error: The file '{path}' was not found.")
+        return drivers
+    except OSError as e:
+        print(f"Error: Could not read the file '{path}': {e}")
+        return drivers
+    except Exception as e:
+        print(f"An unexpected error occurred while reading the file '{path}': {e}")
+        return drivers
 
-def load_requests(_path):
-    return []
+    data_line_count = 0
+
+    for line in lines:
+        line = line.strip()
+        if not line or line.startswith('#'):
+            continue
+
+        parts = line.split(',')
+        if len(parts) < 2:
+            continue
+
+        try:
+            x = float(parts[0])
+            y = float(parts[1])
+
+            # validate data ranges
+            if not 0 <= x <= 50 or not 0 <= y <= 30:
+                print(f"Warning: Skipping driver - Coordinate with out-of-bounds location: {line}")
+                continue  # Skip lines with out-of-bounds location
+
+            # only increment for valid data lines
+            data_line_count +=1
+
+            drivers.append({
+                'id': data_line_count,
+                'x': x,
+                'y': y,
+                'vx': 0.0,
+                'vy': 0.0,
+                'speed': random.uniform(0.5, 2.0), # Default speed between 0.5 and 2.0
+                'tx': None, # Default target position is current position
+                'ty': None, 
+                'target_id': None # No assigned request
+            })
+
+        except (ValueError, IndexError) as e:
+            # TESTING
+            print(f"Warning: Skipping invalid line {data_line_count}: {line} ({e})")
+            continue  # Skip invalid lines
+
+        # TESTING
+        print(f"Successfully loaded {len(drivers)} drivers from {path}")
+    return drivers
+
+def load_requests(path:str) -> list[dict]:
+    """
+    Loads request data from a CSV file and returns a list of dictionaries representing each request.
+    Args:
+        path (str): The file path to the CSV file containing request data.
+    Returns:
+        list[dict]: A list of dictionaries, each representing a request with column names as keys.
+
+    """
+    requests = []
+
+    if not path.lower().endswith('.csv'):
+        print("File must be a CSV file")
+        return requests
+    try:
+        with open(path ,'r', encoding="utf-8") as file:
+            lines = file.readlines()
+    except FileNotFoundError:
+        print(f"Error: The file '{path}' was not found.")
+        return requests
+    except OSError as e :
+        print(f"Error: Could not read the file '{path}': {e}")
+        return requests
+    except Exception as e:
+        print(f"An unexpected error occurred while reading the file '{path}': {e}")
+        return requests
+
+    data_line_count = 0
+
+    for line in lines:
+        line = line.strip()
+        if not line or line.startswith('#'):
+            continue  # Skip empty lines and comments
+
+        parts = line.split(',')
+        if len(parts) < 5:
+            continue  # Skip lines that don't have enough data
+
+        try:
+            # parse values
+            appearence_time = int(parts[0])
+            px = float(parts[1])
+            py = float(parts[2])
+            dx = float(parts[3])
+            dy = float(parts[4])
+
+            # validate data ranges
+            if appearence_time < 0:
+                print(f"Warning: Skipping line {data_line_count}"
+                        f"with negative appearance time: {line}"
+                        )
+                continue  # Skip lines with negative appearance time
+            if not 0 <= px <= 50 or not 0 <= py <= 30:
+                print(f"Warning: Skipping line {data_line_count}"
+                        f"with out-of-bounds pickup location: {line}")
+                continue  # Skip lines with out-of-bounds pickup location
+            if not 0 <= dx <= 50 or not 0 <= dy <= 30:
+                print(f"Warning: Skipping line {data_line_count}"
+                        f"with out-of-bounds dropoff location: {line}")
+                continue  # Skip lines with out-of-bounds dropoff location
+
+            # only increment for valid data lines
+            data_line_count +=1
+
+            requests.append({
+                'id': data_line_count,
+                'px': float(parts[1]), 'py': float(parts[2]),
+                'dx': float(parts[3]), 'dy': float(parts[4]),
+                't': int(parts[0]),
+                't_wait': 0,
+                'status': 'waiting',
+                'driver_id': None
+            })
+
+        except (ValueError, IndexError) as e:
+            # TESTING
+            print(f"Warning: Skipping invalid line {data_line_count}: {line} ({e})")
+            continue # Skip invalid lines
+
+        # TESTING
+        print(f"Successfully loaded {len(requests)} requests from {path}")
+
+    return requests
 
 
 def generate_drivers(n, width, height):
