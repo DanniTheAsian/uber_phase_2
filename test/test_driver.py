@@ -101,7 +101,7 @@ class TestDriverMovement(unittest.TestCase):
         )
 
         with patch.object(request, 'mark_assigned'):
-            self.driver.assign_request(request, reward = 15.0)
+            self.driver.assign_request(request, current_time = 0, reward = 15.0)
         
         self.driver.step(dt = 1.0)
         self.assertEqual(self.driver.position.x, 2.0)
