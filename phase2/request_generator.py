@@ -43,24 +43,36 @@ class RequestGenerator:
         """
         new_requests = []
 
-        if random.random() < self.rate:
-            pickup = Point(
-                random.uniform(0, self.width),
-                random.uniform(0, self.height),
-            )
-            dropoff = Point(
-                random.uniform(0, self.width),
-                random.uniform(0, self.height),
-            )
+        base = int(self.rate)
+        remainder = self.rate - base 
 
-            new_requests.append(
-                Request(
-                    id=self.next_id,
-                    pickup=pickup,
-                    dropoff=dropoff,
-                    creation_time=time,
-                )
-            )
-            self.next_id += 1
+        for _ in range(base):
+            new_requests.append(self._create_request(time))
 
+        if random.random() < remainder:
+            new_requests.append(self._create_request(time))
+       
         return new_requests
+
+
+    def _create_request(self, time: int) -> Request:
+        """
+        Create a single Request with random pickup and dropoff locations.
+        """
+        pickup = Point(
+            random.uniform(0, self.width),
+            random.uniform(0, self.height),
+        )
+        dropoff = Point(
+            random.uniform(0, self.width),
+            random.uniform(0, self.height),
+        )
+
+        request = Request(
+            id=self.next_id,
+            pickup=pickup,
+            dropoff=dropoff,
+            creation_time=time,
+        )
+        self.next_id += 1
+        return request
