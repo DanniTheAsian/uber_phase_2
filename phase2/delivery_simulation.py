@@ -232,9 +232,8 @@ class DeliverySimulation:
                 distance_pickup_to_dropoff = request.pickup.distance_to(request.dropoff)
                 total_distance = distance_to_pickup + distance_pickup_to_dropoff
 
-                base_reward = 15.0
-                distance_bonus = 1.5 * total_distance
-                estimated_reward = base_reward + distance_bonus
+                reward = 1.5 * total_distance - 0.8 * estimated_travel_time
+                estimated_reward = max(15.0, reward)
 
                 offer = Offer(driver, request, estimated_travel_time, estimated_reward)
             except (AttributeError, TypeError, ValueError, ZeroDivisionError) as err:
