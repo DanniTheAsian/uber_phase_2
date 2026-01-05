@@ -47,7 +47,7 @@ class Driver:
         else:
             self.history = history
     
-    def assign_request(self, request: Request, current_time: int) -> None:
+    def assign_request(self, request: Request, current_time: int, reward: float = 0.0) -> None:
         """
         Assign a delivery request to the driver.
 
@@ -58,7 +58,7 @@ class Driver:
 
         self.position_at_assignment = self.position
         self.current_request = request
-        self.assigned_reward = 0.0
+        self.assigned_reward = reward
         self.status = "TO_PICKUP"
         self.assignment_time = current_time
         try:
