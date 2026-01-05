@@ -132,7 +132,7 @@ class TestDriverStateTransitions(unittest.TestCase):
         mock_request.id = 101
         mock_request.mark_assigned = Mock()
         
-        self.driver.assign_request(mock_request, reward = 50.0)
+        self.driver.assign_request(mock_request, current_time = 0, reward = 50.0)
         
 
         self.assertEqual(self.driver.current_request, mock_request)
